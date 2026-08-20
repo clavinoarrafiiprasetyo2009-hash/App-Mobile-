@@ -39,7 +39,6 @@ export default function App() {
       if (error) {
         console.warn('Supabase fetch error, using local state:', error.message);
       } else if (data && data.length > 0) {
-        // Map database fields to application item schema
         const mappedItems = data.map(dbItem => ({
           id: dbItem.id,
           title: dbItem.title,
@@ -81,7 +80,6 @@ export default function App() {
   const handleUpdateProfile = async (updatedUser) => {
     setCurrentUser(updatedUser);
     try {
-      // Sync profile to Supabase
       await supabase.from('profiles').upsert([{
         id: updatedUser.id,
         name: updatedUser.name,
@@ -132,13 +130,15 @@ export default function App() {
   };
 
   const handleSendMessage = async (chatId, text) => {
+    const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     const newMsg = {
       id: 'm-' + Date.now(),
       sender: 'me',
       text,
-      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      time: timeNow
     };
 
+    // Update global chats array
     setChats(prevChats => prevChats.map(chat => {
       if (chat.id === chatId) {
         return {
@@ -149,8 +149,47 @@ export default function App() {
       return chat;
     }));
 
+    // Update active selectedChat directly for instant re-render!
+    setSelectedChat(prev => {
+      if (prev && prev.id === chatId) {
+        return {
+          ...prev,
+          messages: [...prev.messages, newMsg]
+        };
+      }
+      return prev;
+    });
+
+    // Auto-reply simulation for instant interactive chat feel
+    setTimeout(() => {
+      const replyMsg = {
+        id: 'm-reply-' + Date.now(),
+        sender: 'them',
+        text: 'Terima kasih informasinya! Nanti saya hubungi lagi pas jam istirahat sekolah ya. 👍',
+        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      };
+      setChats(prevChats => prevChats.map(chat => {
+        if (chat.id === chatId) {
+          return {
+            ...chat,
+            messages: [...chat.messages, replyMsg]
+          };
+        }
+        return chat;
+      }));
+      setSelectedChat(prev => {
+        if (prev && prev.id === chatId) {
+          return {
+            ...prev,
+            messages: [...prev.messages, replyMsg]
+          };
+        }
+        return prev;
+      });
+    }, 1200);
+
     try {
-      // Sync chat message to Supabase
+      // Sync message to Supabase Cloud
       await supabase.from('messages').insert([{
         chat_id: chatId,
         sender_id: currentUser?.name || 'Siswa',
@@ -176,7 +215,6 @@ export default function App() {
       }));
 
       try {
-        // Sync item status update to Supabase
         await supabase
           .from('items')
           .update({ status: 'selesai' })
@@ -194,7 +232,6 @@ export default function App() {
     setItems([newReport, ...items]);
 
     try {
-      // Insert new item report directly into Supabase items table
       const { error } = await supabase.from('items').insert([{
         title: newReport.title,
         category: newReport.category,
@@ -212,7 +249,6 @@ export default function App() {
       if (error) {
         console.warn('Supabase insert report error:', error.message);
       } else {
-        // Reload items from Supabase to refresh real-time IDs
         loadItemsFromSupabase();
       }
     } catch (err) {
