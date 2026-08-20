@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, Shield, UserCheck, AlertCircle, Phone } from 'lucide-react';
+import { LogIn, UserPlus, Shield, UserCheck, AlertCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 export default function Login({ onLogin }) {
@@ -14,6 +14,7 @@ export default function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const [userClass, setUserClass] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // PRIVATE GURU / ADMIN CREDENTIALS
   const ADMIN_CREDENTIALS = {
@@ -25,65 +26,111 @@ export default function Login({ onLogin }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setIsLoading(true);
 
-    // Check if logging in as Guru / Admin
-    if (role === 'guru') {
-      const isCorrectNik = identifier.trim() === ADMIN_CREDENTIALS.nik || identifier.trim() === 'admin';
-      const isCorrectEmail = email.trim().toLowerCase() === ADMIN_CREDENTIALS.email || email.trim().toLowerCase() === 'admin@smk.sch.id';
-      const isCorrectPass = password === ADMIN_CREDENTIALS.password || password === 'admin123';
+    try {
+      // Check if logging in as Guru / Admin
+      if (role === 'guru') {
+        const isCorrectNik = identifier.trim() === ADMIN_CREDENTIALS.nik || identifier.trim() === 'admin';
+        const isCorrectEmail = email.trim().toLowerCase() === ADMIN_CREDENTIALS.email || email.trim().toLowerCase() === 'admin@smk.sch.id';
+        const isCorrectPass = password === ADMIN_CREDENTIALS.password || password === 'admin123';
 
-      if (!isCorrectPass || (!isCorrectNik && !isCorrectEmail)) {
-        setErrorMessage('⚠️ Akses Gagal! NIK/Email atau Password khusus Guru BK salah.');
+        if (!isCorrectPass || (!isCorrectNik && !isCorrectEmail)) {
+          setErrorMessage('⚠️ Akses Gagal! NIK/Email atau Password khusus Guru BK salah.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch saved Guru profile if available
+        let savedAvatar = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200';
+        try {
+          const { data: existingGuru } = await supabase
+            .from('profiles')
+            .select('*')
+            .or(`email.eq.${ADMIN_CREDENTIALS.email},nisn_nik.eq.${ADMIN_CREDENTIALS.nik}`)
+            .single();
+
+          if (existingGuru && existingGuru.avatar_url) {
+            savedAvatar = existingGuru.avatar_url;
+          }
+        } catch (e) {
+          // fallback
+        }
+
+        const adminUser = {
+          id: 'admin-guru-1',
+          name: name || 'Ibu Rina, S.Pd. (Guru BK)',
+          role: 'guru',
+          nik: ADMIN_CREDENTIALS.nik,
+          email: ADMIN_CREDENTIALS.email,
+          phone: phone || '081299887766',
+          avatar: savedAvatar
+        };
+
+        onLogin(adminUser);
         return;
       }
 
-      const adminUser = {
-        id: 'admin-guru-1',
-        name: name || 'Ibu Rina, S.Pd. (Guru BK)',
-        role: 'guru',
-        nik: ADMIN_CREDENTIALS.nik,
-        email: ADMIN_CREDENTIALS.email,
-        phone: phone || '081299887766',
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200'
+      // Extract first part of email (e.g. ambon@smk.id -> Ambon)
+      const emailPrefix = email.split('@')[0] || 'Siswa';
+      const emailDerivedName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+      const finalName = name.trim() ? name.trim() : emailDerivedName;
+
+      // Fetch saved Siswa profile from Supabase to preserve custom uploaded avatar photo!
+      let savedAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
+      let savedName = finalName;
+      let savedClass = userClass || 'XII RPL 1';
+      let savedPhone = phone || '081234567890';
+
+      try {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .or(`email.eq.${email.trim()},nisn_nik.eq.${identifier.trim()}`)
+          .maybeSingle();
+
+        if (existingProfile) {
+          if (existingProfile.avatar_url) savedAvatar = existingProfile.avatar_url;
+          if (existingProfile.name) savedName = existingProfile.name;
+          if (existingProfile.class_name) savedClass = existingProfile.class_name;
+          if (existingProfile.phone) savedPhone = existingProfile.phone;
+        }
+      } catch (err) {
+        console.warn('Profile fetch check error:', err);
+      }
+
+      // Process Siswa Login / Registration
+      const siswaUser = {
+        id: 'siswa-' + (identifier || Date.now()),
+        name: savedName,
+        role: 'siswa',
+        nisn: identifier,
+        class: savedClass,
+        phone: savedPhone,
+        email: email,
+        avatar: savedAvatar
       };
 
-      onLogin(adminUser);
-      return;
+      // Save/Sync student login data to Supabase profiles table
+      try {
+        await supabase.from('profiles').upsert([{
+          id: siswaUser.id,
+          name: siswaUser.name,
+          role: 'siswa',
+          nisn_nik: identifier || '00000000',
+          class_name: savedClass,
+          phone: savedPhone,
+          email: email,
+          avatar_url: savedAvatar
+        }]);
+      } catch (err) {
+        console.warn('Supabase profile login sync:', err);
+      }
+
+      onLogin(siswaUser);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Extract first part of email (e.g. ambon@smk.id -> Ambon)
-    const emailPrefix = email.split('@')[0] || 'Siswa';
-    const emailDerivedName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
-    const finalName = name.trim() ? name.trim() : emailDerivedName;
-
-    // Process Siswa Login / Registration
-    const siswaUser = {
-      id: 'siswa-' + (identifier || Date.now()),
-      name: finalName,
-      role: 'siswa',
-      nisn: identifier,
-      class: userClass || 'XII RPL 1',
-      phone: phone || '081234567890',
-      email: email,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
-    };
-
-    // Save/Sync student login data including WhatsApp number directly to Supabase profiles table
-    try {
-      await supabase.from('profiles').upsert([{
-        id: siswaUser.id,
-        name: siswaUser.name,
-        role: 'siswa',
-        nisn_nik: identifier || '00000000',
-        class_name: userClass || 'Umum',
-        phone: phone || '081234567890',
-        email: email
-      }]);
-    } catch (err) {
-      console.warn('Supabase profile login sync:', err);
-    }
-
-    onLogin(siswaUser);
   };
 
   const isSiswa = role === 'siswa';
@@ -305,6 +352,7 @@ export default function Login({ onLogin }) {
           <button
             type="submit"
             className="btn-primary"
+            disabled={isLoading}
             style={{
               marginTop: '14px',
               background: isSiswa 
@@ -316,8 +364,8 @@ export default function Login({ onLogin }) {
               transition: 'all 0.3s ease'
             }}
           >
-            {isRegister ? <UserPlus size={18} /> : <LogIn size={18} />}
-            {isRegister ? 'Daftar Akun' : 'Mulai Sekarang →'}
+            {isLoading ? 'Memuat Profil...' : isRegister ? <UserPlus size={18} /> : <LogIn size={18} />}
+            {isLoading ? '' : isRegister ? 'Daftar Akun' : 'Mulai Sekarang →'}
           </button>
         </form>
 
