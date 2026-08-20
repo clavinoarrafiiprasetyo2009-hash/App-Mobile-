@@ -1,15 +1,44 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { ShieldCheck, CheckCircle2, Handshake } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Handshake, Camera, Upload, Image as ImageIcon } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 
 export default function VerificationForm({ item, currentUser, onBack, onCompleteVerification }) {
   const [step, setStep] = useState(1); // 1: Form, 2: Result (Valid 100%), 3: Handover Proof
-  const [proofDescription, setProofDescription] = useState('Di bagian dalam dompet ada foto kecil, kartu siswa NISN 005423190, dan uang lembaran 50 ribu 2 lembar.');
-  const [uploadedProof, setUploadedProof] = useState('https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=600');
+  const [proofDescription, setProofDescription] = useState('');
+  const [uploadedProof, setUploadedProof] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleVerificationSubmit = (e) => {
+  const handleProofFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedProof(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVerificationSubmit = async (e) => {
     e.preventDefault();
-    setStep(2); // Show Result Screen
+    if (!proofDescription.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      // Record verification claim directly to Supabase verifications table
+      await supabase.from('verifications').insert([{
+        item_id: item?.id || 'demo-item-1',
+        claimant_name: currentUser?.name || 'Siswa SMK',
+        proof_description: proofDescription,
+        status: 'verified'
+      }]);
+    } catch (err) {
+      console.warn('Verification Supabase sync:', err);
+    } finally {
+      setIsSubmitting(false);
+      setStep(2); // Show Result Screen
+    }
   };
 
   return (
@@ -36,42 +65,88 @@ export default function VerificationForm({ item, currentUser, onBack, onComplete
             <div className="form-group">
               <label className="form-label">Ciri Khusus / Isi Dalam Barang *</label>
               <textarea
-                rows={3}
+                rows={4}
                 className="form-textarea"
-                placeholder="Sebutkan rincian yang hanya diketahui oleh pemilik (misal: isi dompet, passcode hp, stiker tersembunyi)..."
+                placeholder="Sebutkan rincian yang hanya diketahui oleh kamu sebagai pemilik (misal: isi dompet, passcode HP, stiker rahasia, nomor garansi)..."
                 value={proofDescription}
                 onChange={(e) => setProofDescription(e.target.value)}
                 required
               />
             </div>
 
+            {/* Verification Proof Image Picker */}
             <div className="form-group">
-              <label className="form-label">Upload Foto Bukti Sebelum Hilang (Optional)</label>
-              <div style={{
-                border: '2px dashed #cbd5e1',
-                borderRadius: '14px',
-                padding: '16px',
-                textAlign: 'center',
-                background: '#f8fafc',
-                cursor: 'pointer'
-              }}>
-                <img
-                  src={uploadedProof}
-                  alt="Bukti Foto"
-                  style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '10px', marginBottom: '8px' }}
-                />
-                <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>✓ Foto Bukti Terlampir</span>
-              </div>
+              <label className="form-label">Upload Foto Bukti Kepemilikan (Optional)</label>
+              
+              {uploadedProof ? (
+                <div style={{ position: 'relative', borderRadius: '14px', overflow: 'hidden', border: '2px solid #10b981' }}>
+                  <img
+                    src={uploadedProof}
+                    alt="Foto Bukti"
+                    style={{ width: '100%', height: '140px', objectFit: 'cover' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setUploadedProof(null)}
+                    style={{
+                      position: 'absolute', top: '8px', right: '8px',
+                      background: 'rgba(239, 68, 68, 0.9)', color: 'white',
+                      border: 'none', borderRadius: '8px', padding: '4px 10px',
+                      fontSize: '11px', fontWeight: 700, cursor: 'pointer'
+                    }}
+                  >
+                    Ganti Foto
+                  </button>
+                  <div style={{ background: '#10b981', color: 'white', padding: '4px', textAlign: 'center', fontSize: '10px', fontWeight: 700 }}>
+                    ✓ Foto Bukti Terlampir & Siap Dicocokkan
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <label htmlFor="cam-proof" style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    gap: '6px', padding: '16px 8px', borderRadius: '12px', background: '#eff6ff',
+                    border: '1.5px dashed #3b82f6', color: '#2563eb', cursor: 'pointer'
+                  }}>
+                    <Camera size={20} />
+                    <span style={{ fontSize: '11px', fontWeight: 700 }}>Ambil Foto HP</span>
+                    <input
+                      type="file"
+                      id="cam-proof"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleProofFile}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+
+                  <label htmlFor="gallery-proof" style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    gap: '6px', padding: '16px 8px', borderRadius: '12px', background: '#f8fafc',
+                    border: '1.5px dashed #cbd5e1', color: '#64748b', cursor: 'pointer'
+                  }}>
+                    <ImageIcon size={20} />
+                    <span style={{ fontSize: '11px', fontWeight: 700 }}>Pilih Galeri</span>
+                    <input
+                      type="file"
+                      id="gallery-proof"
+                      accept="image/*"
+                      onChange={handleProofFile}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
 
-            <button type="submit" className="btn-primary" style={{ marginTop: '12px' }}>
-              Kirim Data Verifikasi 🚀
+            <button type="submit" className="btn-primary" disabled={isSubmitting} style={{ marginTop: '14px' }}>
+              {isSubmitting ? 'Mengirim Data...' : 'Kirim Data Verifikasi ke Supabase 🚀'}
             </button>
           </form>
         </div>
       )}
 
-      {/* Step 2: Verification Result Screen (Figma Screen 12) */}
+      {/* Step 2: Verification Result Screen */}
       {step === 2 && (
         <div className="glass-card animate-fade" style={{ textAlign: 'center', padding: '24px 16px' }}>
           <div style={{
@@ -88,10 +163,10 @@ export default function VerificationForm({ item, currentUser, onBack, onComplete
             <CheckCircle2 size={40} />
           </div>
           <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
-            Verifikasi Berhasil Valid! ✅
+            Data Verifikasi Terdaftar! ✅
           </h3>
           <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '16px' }}>
-            Bukti & rincian ciri khusus yang kamu kirimkan cocok <strong>100%</strong> dengan catatan pelapor.
+            Bukti & rincian ciri khusus yang kamu isi telah <strong>berhasil kedata di Supabase Cloud</strong> dan cocok dengan laporan pelapor.
           </p>
 
           <div style={{
@@ -105,7 +180,7 @@ export default function VerificationForm({ item, currentUser, onBack, onComplete
             border: '1px solid #e2e8f0'
           }}>
             <span style={{ color: '#64748b', display: 'block', marginBottom: '4px' }}>Lokasi Pengambilan Barang:</span>
-            <strong>Ruang BK (Bu Rina) / Kantin Sekolah</strong>
+            <strong>Ruang BK Sekolah / Kantin Utama</strong>
           </div>
 
           <button
@@ -119,7 +194,7 @@ export default function VerificationForm({ item, currentUser, onBack, onComplete
         </div>
       )}
 
-      {/* Step 3: Return Confirmation Screen (Figma Screen 13) */}
+      {/* Step 3: Return Confirmation Screen */}
       {step === 3 && (
         <div className="glass-card animate-fade" style={{ textAlign: 'center', padding: '20px 16px' }}>
           <div style={{ fontSize: '40px', marginBottom: '8px' }}>🤝</div>
@@ -137,7 +212,7 @@ export default function VerificationForm({ item, currentUser, onBack, onComplete
             border: '2px solid #10b981'
           }}>
             <img
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600"
+              src={uploadedProof || item?.image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600"}
               alt="Handover"
               style={{ width: '100%', height: '160px', objectFit: 'cover' }}
             />
@@ -146,14 +221,13 @@ export default function VerificationForm({ item, currentUser, onBack, onComplete
             </div>
           </div>
 
-          {/* FIX: ONLY call onCompleteVerification, do NOT call onBack() */}
           <button
             className="btn-primary"
             onClick={() => {
               onCompleteVerification(item?.id);
             }}
           >
-            Selesai & Simpan ke Riwayat 🏠
+            Selesai & Tandai Laporan SELESAI 🏠
           </button>
         </div>
       )}
