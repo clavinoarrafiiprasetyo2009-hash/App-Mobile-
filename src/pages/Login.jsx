@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, Shield, UserCheck, AlertCircle } from 'lucide-react';
+import { LogIn, UserPlus, Shield, UserCheck, AlertCircle, Phone } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 export default function Login({ onLogin }) {
@@ -9,6 +9,7 @@ export default function Login({ onLogin }) {
   // Form fields empty by default
   const [name, setName] = useState('');
   const [identifier, setIdentifier] = useState(''); // NISN / NIK
+  const [phone, setPhone] = useState(''); // Required WhatsApp Number
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userClass, setUserClass] = useState('');
@@ -42,7 +43,7 @@ export default function Login({ onLogin }) {
         role: 'guru',
         nik: ADMIN_CREDENTIALS.nik,
         email: ADMIN_CREDENTIALS.email,
-        phone: '081299887766',
+        phone: phone || '081299887766',
         avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200'
       };
 
@@ -57,12 +58,12 @@ export default function Login({ onLogin }) {
       role: 'siswa',
       nisn: identifier,
       class: userClass || 'XII RPL 1',
+      phone: phone || '081234567890',
       email: email,
-      phone: '08123456789',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
     };
 
-    // Save/Sync student login data directly to Supabase profiles table
+    // Save/Sync student login data including WhatsApp number directly to Supabase profiles table
     try {
       await supabase.from('profiles').upsert([{
         id: siswaUser.id,
@@ -70,8 +71,8 @@ export default function Login({ onLogin }) {
         role: 'siswa',
         nisn_nik: identifier || '00000000',
         class_name: userClass || 'Umum',
-        email: email,
-        phone: '08123456789'
+        phone: phone || '081234567890',
+        email: email
       }]);
     } catch (err) {
       console.warn('Supabase profile login sync:', err);
@@ -241,6 +242,19 @@ export default function Login({ onLogin }) {
               placeholder={isSiswa ? 'Ketik NISN kamu' : 'Ketik NIK khusus Admin BK'}
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Mandatory WhatsApp Number Field */}
+          <div className="form-group">
+            <label className="form-label">No. WhatsApp Aktif *</label>
+            <input
+              type="tel"
+              className="form-input"
+              placeholder="Contoh: 081234567890"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               required
             />
           </div>

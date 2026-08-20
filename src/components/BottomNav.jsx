@@ -1,13 +1,13 @@
 import React from 'react';
-import { Home, MessageSquare, Plus, User, ShieldCheck } from 'lucide-react';
+import { Home, Plus, User, ShieldCheck } from 'lucide-react';
 
-export default function BottomNav({ activeTab, setActiveTab, currentUser, unreadCount }) {
+export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
   const isGuru = currentUser?.role === 'guru';
 
   return (
     <div className="bottom-nav">
       {isGuru ? (
-        /* GURU / ADMIN BOTTOM NAV: 5 Centered Balanced Tabs with (+) in the Middle */
+        /* GURU / ADMIN BOTTOM NAV: 4 Balanced Tabs with (+) in the Middle */
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
           <button 
             className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
@@ -48,34 +48,6 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser, unread
           </button>
 
           <button 
-            className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`}
-            onClick={() => setActiveTab('chat')}
-            style={{ position: 'relative' }}
-          >
-            <MessageSquare size={22} />
-            <span>Pesan</span>
-            {unreadCount > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: '2px',
-                right: '12px',
-                background: '#ef4444',
-                color: 'white',
-                fontSize: '10px',
-                fontWeight: 800,
-                width: '16px',
-                height: '16px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                {unreadCount}
-              </span>
-            )}
-          </button>
-
-          <button 
             className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
           >
@@ -84,7 +56,7 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser, unread
           </button>
         </div>
       ) : (
-        /* SISWA BOTTOM NAV: 3 Left Tabs + Extra Large Floating Right (+) Lapor Button */
+        /* SISWA BOTTOM NAV: 2 Left Tabs + Floating Right (+) Lapor Button */
         <>
           <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
             <button 
@@ -93,34 +65,6 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser, unread
             >
               <Home size={22} />
               <span>Beranda</span>
-            </button>
-
-            <button 
-              className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`}
-              onClick={() => setActiveTab('chat')}
-              style={{ position: 'relative' }}
-            >
-              <MessageSquare size={22} />
-              <span>Pesan</span>
-              {unreadCount > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '2px',
-                  right: '12px',
-                  background: '#ef4444',
-                  color: 'white',
-                  fontSize: '10px',
-                  fontWeight: 800,
-                  width: '16px',
-                  height: '16px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {unreadCount}
-                </span>
-              )}
             </button>
 
             <button 

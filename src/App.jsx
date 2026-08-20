@@ -5,23 +5,17 @@ import Home from './pages/Home';
 import ItemDetail from './pages/ItemDetail';
 import ReportForm from './pages/ReportForm';
 import VerificationForm from './pages/VerificationForm';
-import ChatList from './pages/ChatList';
-import ChatRoom from './pages/ChatRoom';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
-import { INITIAL_ITEMS, INITIAL_CHATS } from './mockData';
+import { INITIAL_ITEMS } from './mockData';
 import { supabase } from './supabaseClient';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
-  
   const [items, setItems] = useState(INITIAL_ITEMS);
-  const [chats, setChats] = useState(INITIAL_CHATS);
-  
   const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedChat, setSelectedChat] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
   // Load items real-time from Supabase on mount
@@ -52,6 +46,7 @@ export default function App() {
           reporter: {
             name: dbItem.reporter_name || 'Siswa SMK',
             role: dbItem.reporter_role || 'Siswa',
+            phone: dbItem.reporter_phone || '081234567890',
             avatar: dbItem.reporter_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
           },
           image: dbItem.image_url || 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&q=80&w=600'
@@ -74,7 +69,6 @@ export default function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setSelectedItem(null);
-    setSelectedChat(null);
     setActiveTab('home');
   };
 
@@ -87,7 +81,7 @@ export default function App() {
         role: updatedUser.role,
         nisn_nik: updatedUser.nisn || updatedUser.nik || '',
         class_name: updatedUser.class || '',
-        phone: updatedUser.phone || '',
+        phone: updatedUser.phone || '081234567890',
         email: updatedUser.email || '',
         avatar_url: updatedUser.avatar || ''
       }]);
@@ -99,106 +93,6 @@ export default function App() {
   const handleSelectItem = (item) => {
     setSelectedItem(item);
     setActiveTab('item-detail');
-  };
-
-  const handleStartChat = (item) => {
-    let existingChat = chats.find(c => c.itemId === item.id);
-    if (!existingChat) {
-      existingChat = {
-        id: 'chat-' + Date.now(),
-        itemId: item.id,
-        itemTitle: item.title,
-        withUser: {
-          name: item.reporter.name,
-          role: item.reporter.role,
-          avatar: item.reporter.avatar,
-          online: true
-        },
-        unread: 0,
-        messages: [
-          {
-            id: 'm-init',
-            sender: 'them',
-            text: `Halo! Saya ingin bertanya terkait laporan "${item.title}". Apakah masih ada?`,
-            time: 'Baru saja'
-          }
-        ]
-      };
-      setChats([existingChat, ...chats]);
-    }
-    setSelectedChat(existingChat);
-    setActiveTab('chat-room');
-  };
-
-  const handleSendMessage = async (chatId, text) => {
-    const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    const newMsg = {
-      id: 'm-' + Date.now(),
-      sender: 'me',
-      text,
-      time: timeNow
-    };
-
-    // Update global chats array
-    setChats(prevChats => prevChats.map(chat => {
-      if (chat.id === chatId) {
-        return {
-          ...chat,
-          messages: [...chat.messages, newMsg]
-        };
-      }
-      return chat;
-    }));
-
-    // Update active selectedChat directly for instant re-render!
-    setSelectedChat(prev => {
-      if (prev && prev.id === chatId) {
-        return {
-          ...prev,
-          messages: [...prev.messages, newMsg]
-        };
-      }
-      return prev;
-    });
-
-    // Auto-reply simulation for instant interactive chat feel
-    setTimeout(() => {
-      const replyMsg = {
-        id: 'm-reply-' + Date.now(),
-        sender: 'them',
-        text: 'Terima kasih informasinya! Nanti saya hubungi lagi pas jam istirahat sekolah ya. 👍',
-        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-      };
-      setChats(prevChats => prevChats.map(chat => {
-        if (chat.id === chatId) {
-          return {
-            ...chat,
-            messages: [...chat.messages, replyMsg]
-          };
-        }
-        return chat;
-      }));
-      setSelectedChat(prev => {
-        if (prev && prev.id === chatId) {
-          return {
-            ...prev,
-            messages: [...prev.messages, replyMsg]
-          };
-        }
-        return prev;
-      });
-    }, 1200);
-
-    try {
-      // Sync message to Supabase Cloud
-      await supabase.from('messages').insert([{
-        chat_id: chatId,
-        sender_id: currentUser?.name || 'Siswa',
-        text: text
-      }]);
-    } catch (err) {
-      console.warn('Message sync error:', err);
-    }
   };
 
   const handleStartVerification = (item) => {
@@ -230,7 +124,14 @@ export default function App() {
   };
 
   const handleSubmitReport = async (newReport) => {
-    setItems([newReport, ...items]);
+    const reportWithPhone = {
+      ...newReport,
+      reporter: {
+        ...newReport.reporter,
+        phone: currentUser?.phone || '081234567890'
+      }
+    };
+    setItems([reportWithPhone, ...items]);
 
     try {
       const { error } = await supabase.from('items').insert([{
@@ -257,7 +158,6 @@ export default function App() {
     }
   };
 
-  const unreadCount = chats.reduce((acc, c) => acc + (c.unread || 0), 0);
   const isGuru = currentUser?.role === 'guru';
 
   return (
@@ -281,7 +181,6 @@ export default function App() {
               <ItemDetail
                 item={selectedItem}
                 onBack={() => setActiveTab('home')}
-                onStartChat={handleStartChat}
                 onStartVerification={handleStartVerification}
               />
             )}
@@ -301,25 +200,6 @@ export default function App() {
                 currentUser={currentUser}
                 onBack={() => setActiveTab('item-detail')}
                 onCompleteVerification={handleCompleteVerification}
-              />
-            )}
-
-            {activeTab === 'chat' && (
-              <ChatList
-                chats={chats}
-                onSelectChat={(chat) => {
-                  setSelectedChat(chat);
-                  setActiveTab('chat-room');
-                }}
-              />
-            )}
-
-            {activeTab === 'chat-room' && selectedChat && (
-              <ChatRoom
-                chat={selectedChat}
-                onBack={() => setActiveTab('chat')}
-                onSendMessage={handleSendMessage}
-                onStartVerification={handleStartVerification}
               />
             )}
 
@@ -377,7 +257,6 @@ export default function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           currentUser={currentUser}
-          unreadCount={unreadCount}
         />
       )}
     </div>
