@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dokumentasi Arsitektur Sistem SiTemu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0f172a;
+      line-height: 1.6;
+      background: #ffffff;
+      padding: 20px;
+    }
+    .header-banner {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      color: white;
+      padding: 24px 30px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+    .header-banner h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0 0 6px 0;
+      color: #38bdf8;
+    }
+    .header-banner p {
+      font-size: 13px;
+      margin: 0;
+      color: #94a3b8;
+    }
+    h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #1e293b;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2563eb;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+    p, li {
+      font-size: 12px;
+      color: #334155;
+    }
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px 0;
+      font-size: 12px;
+    }
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+    }
+    td {
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-blue { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .badge-green { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .badge-red { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .code-block {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .diagram-box {
+      background: #eff6ff;
+      border: 1.5px dashed #3b82f6;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      font-weight: 700;
+      color: #1e40af;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 11px;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-banner">
+    <h1>🏫 DOKUMENTASI ARSITEKTUR SISTEM SITEMU</h1>
+    <p>Aplikasi Smart Lost & Found Sekolah | Spesifikasi Terpadu Frontend, Backend, Database PostgreSQL & Deployment</p>
+  </div>
+
+  <h2>1. Gambaran Umum Alur Arsitektur System</h2>
+  <p>Aplikasi <strong>SiTemu</strong> dibangun menggunakan arsitektur <strong>Single Page Application (SPA)</strong> modern yang terhubung secara <em>real-time</em> ke <strong>Cloud Backend (Supabase BaaS)</strong>.</p>
+  
+  <div class="diagram-box">
+    📱 Frontend (React 18 + Vite) &nbsp; ➔ &nbsp; ☁️ Vercel CDN &nbsp; ➔ &nbsp; ⚡ Supabase Cloud API &nbsp; ➔ &nbsp; 🐘 Database PostgreSQL
+  </div>
+
+  <h2>2. Arsitektur Frontend (Client-Side)</h2>
+  <div class="card">
+    <h3>Core Technology Stack:</h3>
+    <ul>
+      <li><strong>Framework Utama:</strong> React 18 (Functional Components, Hooks: <code>useState</code>, <code>useEffect</code>, <code>useRef</code>)</li>
+      <li><strong>Build Tool:</strong> Vite 5.4 (Superfast HMR & Production Bundler)</li>
+      <li><strong>Icons & Design System:</strong> Lucide React + Vanilla CSS3 Design Tokens</li>
+      <li><strong>Mobile Frame Dimensions:</strong> Locked Shell <code>390px x 830px</code> (Responsif 100vw pada layar HP Android/iOS)</li>
+    </ul>
+  </div>
+
+  <h3>Fitur Unggulan Frontend:</h3>
+  <ol>
+    <li><strong>Fitur Akses Kamera HP (Native Camera API):</strong> Menggunakan <code>&lt;input capture="environment"&gt;</code> dan <code>FileReader API</code> untuk mengubah foto barang menjadi format Data URL / Base64 instan.</li>
+    <li><strong>Dynamic Ambient Status Glow:</strong> Warna aksen aplikasi berubah sesuai status barang (🔴 Merah = Hilang, 🟢 Hijau = Ditemukan, 🔵 Biru = Selesai).</li>
+    <li><strong>Optimasi Sentuhan Mobile:</strong> Dilengkapi aturan CSS <code>-webkit-tap-highlight-color: transparent</code> dan <code>user-select: none</code> untuk pengalaman layaknya aplikasi native.</li>
+  </ol>
+
+  <h2>3. Arsitektur Backend & Cloud Database (Supabase)</h2>
+  <div class="card">
+    <p>Backend menggunakan infrastruktur <strong>Supabase Cloud (PostgreSQL Engine)</strong> dengan konfigurasi:</p>
+    <ul>
+      <li><strong>Supabase URL:</strong> <code>https://mleglrbuyewdamygwatw.supabase.co</code></li>
+      <li><strong>Public Anon Key:</strong> <code>sb_publishable_bGqcn1mJyqNvDosFi_K5sg_jib9XqKv</code></li>
+      <li><strong>Client Library:</strong> <code>@supabase/supabase-js</code> terintegrasi pada <code>src/supabaseClient.js</code></li>
+    </ul>
+  </div>
+
+  <h2>4. Skema Tabel Database (PostgreSQL)</h2>
+  
+  <h3>Tabel 1: <code>items</code> (Data Laporan Barang)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Nama Kolom</th>
+        <th>Tipe Data</th>
+        <th>Keterangan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / Text</td><td>Primary Key Unik</td></tr>
+      <tr><td><code>title</code></td><td>VARCHAR(255)</td><td>Nama Barang</td></tr>
+      <tr><td><code>category</code></td><td>VARCHAR(50)</td><td>Kategori (hp, buku, kunci, dompet, dll.)</td></tr>
+      <tr><td><code>status</code></td><td>VARCHAR(20)</td><td>Status (hilang / ditemukan / selesai)</td></tr>
+      <tr><td><code>location</code></td><td>TEXT</td><td>Lokasi Barang Hilang/Ditemukan</td></tr>
+      <tr><td><code>description</code></td><td>TEXT</td><td>Deskripsi & Kronologi</td></tr>
+      <tr><td><code>special_notes</code></td><td>TEXT</td><td>Ciri Khusus / Bukti Rahasia</td></tr>
+      <tr><td><code>reporter_name</code></td><td>VARCHAR(100)</td><td>Nama Pelapor (Siswa/Guru)</td></tr>
+      <tr><td><code>image_url</code></td><td>TEXT</td><td>URL/Base64 Foto Bukti Barang</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Tabel 2: <code>profiles</code> (Data Pengguna)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Nama Kolom</th>
+        <th>Tipe Data</th>
+        <th>Keterangan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / Text</td><td>ID Pengguna</td></tr>
+      <tr><td><code>name</code></td><td>VARCHAR(100)</td><td>Nama Lengkap</td></tr>
+      <tr><td><code>role</code></td><td>VARCHAR(20)</td><td>Peran (siswa / guru)</td></tr>
+      <tr><td><code>nisn_nik</code></td><td>VARCHAR(50)</td><td>NISN Siswa / NIP Guru</td></tr>
+      <tr><td><code>class_name</code></td><td>VARCHAR(50)</td><td>Kelas (contoh: XII RPL 1)</td></tr>
+      <tr><td><code>phone</code></td><td>VARCHAR(20)</td><td>Nomor WhatsApp/Telepon</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Tabel 3: <code>verifications</code> & <code>messages</code></h3>
+  <p>Menyimpan data pengajuan klaim bukti barang untuk validasi Guru BK dan riwayat obrolan real-time antar pengguna.</p>
+
+  <h2>5. DevOps & Pipeline Deployment</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Version Control System:</strong> GitHub Repository <code>clavinoarrafiiprasetyo2009-hash/App-Mobile-</code> (Branch main).</li>
+      <li><strong>CI/CD Web Hosting:</strong> Vercel CDN dengan build command <code>npm run build</code> dan routing SPA rewrite <code>vercel.json</code>.</li>
+      <li><strong>Live Production URL:</strong> <code>https://app-mobile-lilac.vercel.app</code></li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Dokumentasi Resmi Projek Aplikasi SiTemu &copy; 2026 | Dibuat untuk Presentasi Kelompok & Laporan Tugas
+  </div>
+
+</body>
+</html>

@@ -11,6 +11,7 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import { INITIAL_ITEMS, INITIAL_CHATS } from './mockData';
 import { supabase } from './supabaseClient';
+import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -257,6 +258,7 @@ export default function App() {
   };
 
   const unreadCount = chats.reduce((acc, c) => acc + (c.unread || 0), 0);
+  const isGuru = currentUser?.role === 'guru';
 
   return (
     <div className="app-container">
@@ -331,11 +333,39 @@ export default function App() {
               />
             )}
 
+            {/* Admin Dashboard Protected View */}
             {activeTab === 'admin' && (
-              <AdminDashboard
-                items={items}
-                onSelectItem={handleSelectItem}
-              />
+              isGuru ? (
+                <AdminDashboard
+                  items={items}
+                  onSelectItem={handleSelectItem}
+                />
+              ) : (
+                <div className="animate-fade" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                  <div style={{
+                    width: '64px', height: '64px', borderRadius: '50%',
+                    background: '#fef2f2', border: '1px solid #fecaca',
+                    color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 16px'
+                  }}>
+                    <ShieldAlert size={32} />
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
+                    Akses Khusus Guru & Admin BK 🔒
+                  </h3>
+                  <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>
+                    Halaman ini dikunci khusus untuk Guru BK Sekolah. Akun Siswa tidak memiliki otoritas untuk mengelola verifikasi admin.
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('home')}
+                    className="btn-primary"
+                    style={{ padding: '12px 24px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    <ArrowLeft size={16} />
+                    Kembali ke Beranda
+                  </button>
+                </div>
+              )
             )}
           </>
         )}

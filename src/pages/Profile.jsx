@@ -1,17 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import { User, LogOut, History, ChevronRight, Edit3, Check, X, Camera, Phone, Upload } from 'lucide-react';
+import { User, LogOut, History, ChevronRight, Edit3, Check, X, Camera, Phone, Upload, CheckCircle2 } from 'lucide-react';
 
 export default function Profile({ currentUser, items, onLogout, onSelectItem, onUpdateProfile }) {
   const [activeHistoryTab, setActiveHistoryTab] = useState('hilang'); // 'hilang' | 'ditemukan' | 'selesai'
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // Edit form state
-  const [name, setName] = useState(currentUser?.name || '');
-  const [userClass, setUserClass] = useState(currentUser?.class || 'XII RPL 1');
-  const [email, setEmail] = useState(currentUser?.email || '');
-  const [phone, setPhone] = useState(currentUser?.phone || '081234567890');
-  const [avatar, setAvatar] = useState(currentUser?.avatar || '');
+  // Edit form state initialized from currentUser
+  const [name, setName] = useState('');
+  const [userClass, setUserClass] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [avatar, setAvatar] = useState('');
+
+  // Sync state whenever currentUser or modal opens
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.name || '');
+      setUserClass(currentUser.class || 'XII RPL 1');
+      setEmail(currentUser.email || '');
+      setPhone(currentUser.phone || '081234567890');
+      setAvatar(currentUser.avatar || '');
+    }
+  }, [currentUser, isEditModalOpen]);
 
   const userItems = items.filter(item => item.status === activeHistoryTab);
 
@@ -27,6 +39,12 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
     };
     onUpdateProfile(updatedUser);
     setIsEditModalOpen(false);
+    
+    // Trigger success toast
+    setShowSuccessToast(true);
+    setTimeout(() => {
+      setShowSuccessToast(false);
+    }, 3000);
   };
 
   const handleFileChange = (e) => {
@@ -43,6 +61,28 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
   return (
     <div className="animate-fade">
       <Header title="Profil Saya" />
+
+      {/* Instant Success Toast Notification */}
+      {showSuccessToast && (
+        <div style={{
+          background: '#ecfdf5',
+          border: '1px solid #a7f3d0',
+          color: '#065f46',
+          padding: '12px 16px',
+          borderRadius: '14px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '13px',
+          fontWeight: 700,
+          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)',
+          animation: 'fade 0.3s ease'
+        }}>
+          <CheckCircle2 size={18} color="#059669" />
+          <span>✅ Profil kamu berhasil diperbarui & tersimpan!</span>
+        </div>
+      )}
 
       {/* User Info Card */}
       <div className="glass-card" style={{ textAlign: 'center', padding: '20px', marginBottom: '18px' }}>
@@ -114,7 +154,7 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
         </div>
       </div>
 
-      {/* History Tabs Section with Subtle Ambient Status Tint */}
+      {/* History Tabs Section */}
       <div style={{ marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
           <History size={18} color="#2563eb" />
@@ -178,7 +218,7 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
           </button>
         </div>
 
-        {/* History Items List with Dynamic Border Tint */}
+        {/* History Items List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {userItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '24px 10px', color: '#64748b', fontSize: '12px' }}>
@@ -300,7 +340,7 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
                   />
                 </div>
                 <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: '6px' }}>
-                  Klik ikon kamera untuk unggah foto dari HP/Laptop
+                  Klik ikon kamera untuk unggah foto baru dari HP/Laptop
                 </span>
               </div>
 
@@ -329,7 +369,7 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
               )}
 
               <div className="form-group">
-                <label className="form-label">No. Telepon *</label>
+                <label className="form-label">No. Telepon / WhatsApp *</label>
                 <input
                   type="text"
                   className="form-input"
@@ -366,7 +406,7 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
                   style={{ flex: 1, padding: '12px' }}
                 >
                   <Check size={16} />
-                  Simpan
+                  Simpan Perubahan
                 </button>
               </div>
             </form>
