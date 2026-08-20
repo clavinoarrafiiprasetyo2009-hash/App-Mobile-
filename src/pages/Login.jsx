@@ -51,10 +51,15 @@ export default function Login({ onLogin }) {
       return;
     }
 
+    // Extract first part of email (e.g. ambon@smk.id -> Ambon)
+    const emailPrefix = email.split('@')[0] || 'Siswa';
+    const emailDerivedName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+    const finalName = name.trim() ? name.trim() : emailDerivedName;
+
     // Process Siswa Login / Registration
     const siswaUser = {
       id: 'siswa-' + (identifier || Date.now()),
-      name: name || (email.split('@')[0] ? email.split('@')[0].toUpperCase() : 'Siswa SMK'),
+      name: finalName,
       role: 'siswa',
       nisn: identifier,
       class: userClass || 'XII RPL 1',
@@ -196,7 +201,7 @@ export default function Login({ onLogin }) {
           {isRegister ? 'Buat Akun Siswa Baru 📝' : `Login ${isSiswa ? 'Siswa' : 'Guru / Admin BK'}`}
         </h3>
         <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '16px' }}>
-          {isRegister ? 'Lengkapi data diri kamu' : `Ketik data kamu untuk masuk sebagai ${isSiswa ? 'Siswa' : 'Guru BK'}.`}
+          {isRegister ? 'Lengkapi data diri kamu' : `Ketik email & data kamu untuk masuk sebagai ${isSiswa ? 'Siswa' : 'Guru BK'}.`}
         </p>
 
         {/* Error Alert Message */}
@@ -278,7 +283,7 @@ export default function Login({ onLogin }) {
             <input
               type="email"
               className="form-input"
-              placeholder={isSiswa ? 'nama@smk.sch.id' : 'admin.bk@smk.sch.id'}
+              placeholder={isSiswa ? 'ambon@smk.id' : 'admin.bk@smk.sch.id'}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
