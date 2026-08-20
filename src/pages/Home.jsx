@@ -33,7 +33,6 @@ export default function Home({ items, currentUser, onSelectItem, onNavigateRepor
     }
   };
 
-  // Subtle ambient status tint
   const getTabBg = () => {
     if (activeTab === 'hilang') return '#fff5f5';
     if (activeTab === 'ditemukan') return '#f0fdf4';
@@ -97,12 +96,20 @@ export default function Home({ items, currentUser, onSelectItem, onNavigateRepor
         </h3>
 
         {/* Input Search */}
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', width: '100%' }}>
           <Search size={18} style={{ position: 'absolute', left: '14px', top: '13px', color: '#94a3b8' }} />
           <input
             type="text"
             className="form-input"
-            style={{ paddingLeft: '42px', borderRadius: '14px', background: '#ffffff', color: '#0f172a', border: 'none' }}
+            style={{
+              paddingLeft: '42px',
+              borderRadius: '14px',
+              background: '#ffffff',
+              color: '#0f172a',
+              border: 'none',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
             placeholder="Ketik nama barang, lokasi..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -110,7 +117,7 @@ export default function Home({ items, currentUser, onSelectItem, onNavigateRepor
         </div>
       </div>
 
-      {/* Category Horizontal Scroll Fix */}
+      {/* Category Horizontal Scroll */}
       <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
           <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>Kategori Barang</span>
@@ -151,7 +158,7 @@ export default function Home({ items, currentUser, onSelectItem, onNavigateRepor
         </div>
       </div>
 
-      {/* Feed Tabs Filter (Semua, Hilang, Ditemukan) with Subtle Glow Tint */}
+      {/* Feed Tabs Filter (Semua, Hilang, Ditemukan) */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
         <button
           onClick={() => setActiveTab('all')}
@@ -224,7 +231,7 @@ export default function Home({ items, currentUser, onSelectItem, onNavigateRepor
               style={{
                 cursor: 'pointer',
                 display: 'flex',
-                gap: '14px',
+                gap: '12px',
                 padding: '12px',
                 borderColor: item.status === 'hilang' && activeTab === 'hilang'
                   ? '#fecaca' 
@@ -238,36 +245,48 @@ export default function Home({ items, currentUser, onSelectItem, onNavigateRepor
                 src={item.image}
                 alt={item.title}
                 style={{
-                  width: '88px',
-                  height: '88px',
+                  width: '84px',
+                  height: '84px',
                   borderRadius: '12px',
                   objectFit: 'cover',
                   flexShrink: 0
                 }}
               />
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <span className={`badge badge-${item.status}`}>
-                      {item.status === 'hilang' ? 'HILANG' : item.status === 'ditemukan' ? 'DITEMUKAN' : 'SELESAI'}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                    <span className={`badge badge-${item.status}`} style={{ flexShrink: 0 }}>
+                      {item.status === 'hilang' ? '🔴 HILANG' : item.status === 'ditemukan' ? '🟢 DITEMUKAN' : '🔵 SELESAI'}
                     </span>
-                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>{item.date.split(',')[0]}</span>
+                    <span style={{ fontSize: '11px', color: '#94a3b8', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                      {item.date.split(',')[0]}
+                    </span>
                   </div>
-                  <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginTop: '6px' }}>
+                  <h4 style={{
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    marginTop: '2px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
                     {item.title}
                   </h4>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#64748b' }}>
-                    <MapPin size={13} color="#2563eb" />
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
+                    <MapPin size={13} color="#2563eb" style={{ flexShrink: 0 }} />
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.location}
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>Pelapor: {item.reporter.name}</span>
-                    <ChevronRight size={16} color="#2563eb" />
+                    <span style={{ fontSize: '11px', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Pelapor: {item.reporter.name}
+                    </span>
+                    <ChevronRight size={16} color="#2563eb" style={{ flexShrink: 0 }} />
                   </div>
                 </div>
               </div>

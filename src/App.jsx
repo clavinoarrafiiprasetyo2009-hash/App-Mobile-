@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import StatusBar from './components/StatusBar';
 import BottomNav from './components/BottomNav';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -10,7 +9,7 @@ import ChatList from './pages/ChatList';
 import ChatRoom from './pages/ChatRoom';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
-import { INITIAL_USERS, INITIAL_ITEMS, INITIAL_CHATS } from './mockData';
+import { INITIAL_ITEMS, INITIAL_CHATS } from './mockData';
 import { supabase } from './supabaseClient';
 
 export default function App() {
@@ -225,9 +224,6 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Device Status Bar */}
-      <StatusBar />
-
       {/* Main App Content View */}
       <div className="main-content">
         {!currentUser ? (

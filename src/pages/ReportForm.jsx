@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Header from '../components/Header';
-import { Camera, CheckCircle2, UploadCloud, AlertTriangle, FilePlus } from 'lucide-react';
+import { Camera, CheckCircle2, UploadCloud, Image, RefreshCw } from 'lucide-react';
 import { CATEGORIES } from '../mockData';
 
 export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHome }) {
@@ -10,13 +10,31 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [specialNotes, setSpecialNotes] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=600');
+  const [photoUrl, setPhotoUrl] = useState('');
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   const isHilang = reportType === 'hilang';
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const finalPhoto = photoUrl || (isHilang 
+      ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=600'
+      : 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600');
+
     const newReport = {
       id: 'item-' + Date.now(),
       title,
@@ -31,7 +49,7 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
         role: currentUser?.role === 'guru' ? 'Guru BK' : `Siswa (${currentUser?.class || 'XII RPL 1'})`,
         avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
       },
-      image: photoUrl
+      image: finalPhoto
     };
 
     onSubmitReport(newReport);
@@ -47,7 +65,7 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
     }}>
       <Header title="Buat Laporan Baru" onBack={onBack} />
 
-      {/* Toggle Laporan Type with Dynamic Glow Tint */}
+      {/* Toggle Laporan Type */}
       <div style={{
         display: 'flex',
         background: isHilang ? '#fee2e2' : '#dcfce7',
@@ -97,7 +115,7 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
         </button>
       </div>
 
-      {/* Form Container with Ambient Border & Glow Tint */}
+      {/* Form Container */}
       <form onSubmit={handleSubmit} className="glass-card" style={{
         borderColor: isHilang ? '#fecaca' : '#a7f3d0',
         boxShadow: isHilang 
@@ -167,16 +185,33 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
           />
         </div>
 
-        {/* Photo Upload Simulation */}
+        {/* Camera & Photo Access for Mobile */}
         <div className="form-group">
-          <label className="form-label">Foto Barang *</label>
+          <label className="form-label">Foto Bukti Barang *</label>
+
+          {/* Hidden HTML5 File Inputs */}
+          <input
+            type="file"
+            ref={cameraInputRef}
+            accept="image/*"
+            capture="environment"
+            style={{ display: 'none' }}
+            onChange={handleImageUpload}
+          />
+          <input
+            type="file"
+            ref={galleryInputRef}
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleImageUpload}
+          />
+
           <div style={{
             border: isHilang ? '2px dashed #fca5a5' : '2px dashed #6ee7b7',
             borderRadius: '14px',
             padding: '14px',
             textAlign: 'center',
             background: isHilang ? '#fff5f5' : '#f0fdf4',
-            cursor: 'pointer',
             transition: 'all 0.35s ease'
           }}>
             {photoUrl ? (
@@ -184,16 +219,97 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
                 <img
                   src={photoUrl}
                   alt="Preview"
-                  style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '10px' }}
+                  style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '10px', marginBottom: '8px' }}
                 />
-                <span style={{ fontSize: '11px', color: isHilang ? '#dc2626' : '#059669', display: 'block', marginTop: '6px', fontWeight: 700 }}>
-                  ✓ Foto Terpilih (Simulasi Upload)
-                </span>
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: '#0f172a',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <RefreshCw size={12} /> Ambil Ulang Kamera
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPhotoUrl('')}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #fecaca',
+                      background: '#fef2f2',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: '#dc2626',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Hapus
+                  </button>
+                </div>
               </div>
             ) : (
               <div>
-                <Camera size={30} color={isHilang ? '#ef4444' : '#10b981'} style={{ marginBottom: '6px' }} />
-                <p style={{ fontSize: '12px', color: '#64748b' }}>Klik untuk mengambil/unggah foto barang</p>
+                <p style={{ fontSize: '12px', color: '#475569', fontWeight: 700, marginBottom: '10px' }}>
+                  Ambil foto barang langsung via Kamera HP atau dari Galeri:
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    style={{
+                      flex: 1,
+                      padding: '10px 8px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: isHilang ? '#ef4444' : '#10b981',
+                      color: 'white',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <Camera size={16} /> Kamera HP
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    style={{
+                      flex: 1,
+                      padding: '10px 8px',
+                      borderRadius: '10px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#0f172a',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Image size={16} /> Pilih Galeri
+                  </button>
+                </div>
               </div>
             )}
           </div>
