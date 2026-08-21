@@ -7,7 +7,6 @@ import ReportForm from './pages/ReportForm';
 import VerificationForm from './pages/VerificationForm';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
-import { INITIAL_ITEMS } from './mockData';
 import { supabase } from './supabaseClient';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
@@ -33,9 +32,18 @@ export default function App() {
     return 'home';
   });
 
-  const [items, setItems] = useState(INITIAL_ITEMS);
+  // Initialize items from localStorage cache first to avoid ANY mock data flash!
+  const [items, setItems] = useState(() => {
+    try {
+      const cached = localStorage.getItem('sitemu_items_cache');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   const [selectedItem, setSelectedItem] = useState(null);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(true);
 
   // Load items real-time from Supabase on mount
   useEffect(() => {
@@ -51,8 +59,8 @@ export default function App() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.warn('Supabase fetch error, using local state:', error.message);
-      } else if (data && data.length > 0) {
+        console.warn('Supabase fetch error:', error.message);
+      } else if (data) {
         const mappedItems = data.map(dbItem => ({
           id: dbItem.id,
           title: dbItem.title,
@@ -71,6 +79,10 @@ export default function App() {
           image: dbItem.image_url || 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&q=80&w=600'
         }));
         setItems(mappedItems);
+        // Cache to localStorage to avoid flash on refresh
+        try {
+          localStorage.setItem('sitemu_items_cache', JSON.stringify(mappedItems));
+        } catch (e) {}
       }
     } catch (err) {
       console.warn('Supabase integration offline fallback:', err);
@@ -105,7 +117,7 @@ export default function App() {
 
     try {
       await supabase.from('profiles').upsert([{
-        id: updatedUser.id,
+        id: updatedUser.id || 'siswa-' + (updatedUser.email ? updatedUser.email.split('@')[0] : Date.now()),
         name: updatedUser.name,
         role: updatedUser.role,
         nisn_nik: updatedUser.nisn || updatedUser.nik || '',
@@ -131,12 +143,18 @@ export default function App() {
 
   const handleCompleteVerification = async (itemId) => {
     if (itemId) {
-      setItems(prevItems => prevItems.map(item => {
-        if (item.id === itemId) {
-          return { ...item, status: 'selesai' };
-        }
-        return item;
-      }));
+      setItems(prevItems => {
+        const nextItems = prevItems.map(item => {
+          if (item.id === itemId) {
+            return { ...item, status: 'selesai' };
+          }
+          return item;
+        });
+        try {
+          localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
+        } catch (e) {}
+        return nextItems;
+      });
 
       try {
         await supabase
@@ -160,7 +178,7 @@ export default function App() {
         phone: currentUser?.phone || '081234567890'
       }
     };
-    setItems([reportWithPhone, ...items]);
+    setItems(prev => [reportWithPhone, ...prev]);
 
     try {
       const { error } = await supabase.from('items').insert([{
@@ -201,6 +219,7 @@ export default function App() {
               <Home
                 items={items}
                 currentUser={currentUser}
+                isSyncing={isSyncing}
                 onSelectItem={handleSelectItem}
                 onNavigateReport={() => setActiveTab('report-form')}
               />

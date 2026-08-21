@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Search, Sparkles, Smartphone, BookOpen, Coffee, Briefcase, Glasses, Key, MapPin, ChevronRight, Shirt, CreditCard, Package } from 'lucide-react';
+import { Search, Sparkles, Smartphone, BookOpen, Coffee, Briefcase, Glasses, Key, MapPin, ChevronRight, Shirt, CreditCard, Package, Loader2 } from 'lucide-react';
 import { CATEGORIES } from '../mockData';
 
-export default function Home({ items, currentUser, onSelectItem, onNavigateReport }) {
+export default function Home({ items, currentUser, isSyncing, onSelectItem, onNavigateReport }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'hilang' | 'ditemukan'
@@ -49,9 +49,9 @@ export default function Home({ items, currentUser, onSelectItem, onNavigateRepor
       {/* Top Welcome Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <div>
-          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Selamat Pagi ☀️</span>
+          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Selamat Datang ☀️</span>
           <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>
-            Halo, {currentUser?.name?.split(' ')[0] || 'User'}!
+            Halo, {currentUser?.name?.split(' ')[0] || 'Siswa'}! 👋
           </h2>
         </div>
         <img
@@ -217,7 +217,12 @@ export default function Home({ items, currentUser, onSelectItem, onNavigateRepor
 
       {/* Feed Items List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {filteredItems.length === 0 ? (
+        {isSyncing && items.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
+            <Loader2 size={24} className="spin" style={{ margin: '0 auto 8px', color: '#2563eb' }} />
+            <p style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>Mengambil Data Supabase...</p>
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
             <p style={{ fontSize: '14px', fontWeight: 600 }}>Tidak ada laporan barang 🔍</p>
             <p style={{ fontSize: '12px', marginTop: '4px' }}>Coba ubah kata kunci atau kategori pencarian.</p>
