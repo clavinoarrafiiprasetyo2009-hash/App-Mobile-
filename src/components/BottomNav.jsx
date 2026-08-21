@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Plus, User, ShieldCheck } from 'lucide-react';
+import { Home, Plus, User, ShieldCheck, Gavel } from 'lucide-react';
 
 export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
   const isGuru = currentUser?.role === 'guru';
@@ -7,14 +7,14 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
   return (
     <div className="bottom-nav" style={{ padding: '6px 12px' }}>
       {isGuru ? (
-        /* GURU / ADMIN BOTTOM NAV: 3 Left Tabs + Enriched Floating Right (+) Lapor Button */
+        /* GURU / ADMIN BOTTOM NAV: 4 Left Tabs + Enriched Floating Right (+) Lapor Button */
         <>
           <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
             <button 
               className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
               onClick={() => setActiveTab('home')}
             >
-              <Home size={22} />
+              <Home size={20} />
               <span>Beranda</span>
             </button>
 
@@ -22,15 +22,23 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
               className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`}
               onClick={() => setActiveTab('admin')}
             >
-              <ShieldCheck size={22} />
+              <ShieldCheck size={20} />
               <span>Dashboard</span>
+            </button>
+
+            <button 
+              className={`nav-item ${activeTab === 'auction' ? 'active' : ''}`}
+              onClick={() => setActiveTab('auction')}
+            >
+              <Gavel size={20} />
+              <span>Lelang</span>
             </button>
 
             <button 
               className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
               onClick={() => setActiveTab('profile')}
             >
-              <User size={22} />
+              <User size={20} />
               <span>Profil</span>
             </button>
           </div>
@@ -41,50 +49,49 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '12px 20px',
-              borderRadius: '22px',
+              gap: '6px',
+              padding: '10px 16px',
+              borderRadius: '20px',
               background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
               color: 'white',
               border: 'none',
-              boxShadow: '0 8px 25px rgba(124, 58, 237, 0.45)',
+              boxShadow: '0 6px 20px rgba(124, 58, 237, 0.45)',
               cursor: 'pointer',
               flexShrink: 0,
-              marginLeft: '6px',
-              marginRight: '4px',
-              transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+              marginLeft: '4px',
+              transition: 'transform 0.15s ease'
             }}
             className="lapor-floating-btn"
             title="Buat Laporan Baru"
           >
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Plus size={22} strokeWidth={3} />
-            </div>
-            <span style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '0.4px' }}>Lapor</span>
+            <Plus size={20} strokeWidth={3} />
+            <span style={{ fontSize: '13px', fontWeight: 800 }}>Lapor</span>
           </button>
         </>
       ) : (
-        /* SISWA BOTTOM NAV: 3 Balanced Centered Tabs with Large Glowing Center (+) Lapor Button */
+        /* SISWA BOTTOM NAV: 3 Main Tabs (Beranda, Lelang, Profil) with Large Center (+) Lapor Button */
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
-          {/* 1. Beranda (Left) */}
+          {/* 1. Beranda */}
           <button 
             className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
             onClick={() => setActiveTab('home')}
             style={{ flex: 1 }}
           >
-            <Home size={24} />
+            <Home size={22} />
             <span>Beranda</span>
           </button>
 
-          {/* 2. Large Enriched (+) Lapor Button (Center) */}
+          {/* 2. Lelang */}
+          <button 
+            className={`nav-item ${activeTab === 'auction' ? 'active' : ''}`}
+            onClick={() => setActiveTab('auction')}
+            style={{ flex: 1 }}
+          >
+            <Gavel size={22} />
+            <span>Lelang</span>
+          </button>
+
+          {/* 3. Large Enriched (+) Lapor Button (Center) */}
           <button 
             onClick={() => setActiveTab('report-form')}
             style={{
@@ -101,8 +108,8 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
             title="Buat Laporan Baru"
           >
             <div style={{
-              width: '54px',
-              height: '54px',
+              width: '52px',
+              height: '52px',
               borderRadius: '20px',
               background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
               color: 'white',
@@ -115,26 +122,25 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
             }}
             className="lapor-floating-btn"
             >
-              <Plus size={30} strokeWidth={3} />
+              <Plus size={28} strokeWidth={3} />
             </div>
             <span style={{
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 800,
               color: activeTab === 'report-form' ? '#2563eb' : '#64748b',
-              marginTop: '4px',
-              letterSpacing: '0.3px'
+              marginTop: '4px'
             }}>
               Lapor
             </span>
           </button>
 
-          {/* 3. Profil (Right) */}
+          {/* 4. Profil */}
           <button 
             className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
             style={{ flex: 1 }}
           >
-            <User size={24} />
+            <User size={22} />
             <span>Profil</span>
           </button>
         </div>

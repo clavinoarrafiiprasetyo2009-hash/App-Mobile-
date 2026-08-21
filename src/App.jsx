@@ -7,6 +7,7 @@ import ReportForm from './pages/ReportForm';
 import VerificationForm from './pages/VerificationForm';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import Auction from './pages/Auction';
 import { supabase } from './supabaseClient';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
@@ -61,23 +62,34 @@ export default function App() {
       if (error) {
         console.warn('Supabase fetch error:', error.message);
       } else if (data) {
-        const mappedItems = data.map(dbItem => ({
-          id: dbItem.id,
-          title: dbItem.title,
-          category: dbItem.category,
-          status: dbItem.status,
-          location: dbItem.location,
-          date: dbItem.date_reported || 'Baru saja',
-          description: dbItem.description,
-          specialNotes: dbItem.special_notes || '',
-          reporter: {
-            name: dbItem.reporter_name || 'Siswa SMK',
-            role: dbItem.reporter_role || 'Siswa',
-            phone: dbItem.reporter_phone || '081234567890',
-            avatar: dbItem.reporter_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
-          },
-          image: dbItem.image_url || 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&q=80&w=600'
-        }));
+        const mappedItems = data.map(dbItem => {
+          // Parse price from special_notes if available
+          let price = null;
+          if (dbItem.special_notes && dbItem.special_notes.includes('Harga Lelang:')) {
+            const rawPrice = dbItem.special_notes.replace(/[^0-9]/g, '');
+            if (rawPrice) price = parseInt(rawPrice, 10);
+          }
+
+          return {
+            id: dbItem.id,
+            title: dbItem.title,
+            category: dbItem.category,
+            status: dbItem.status,
+            location: dbItem.location,
+            date: dbItem.date_reported || 'Baru saja',
+            description: dbItem.description,
+            specialNotes: dbItem.special_notes || '',
+            auctionPrice: price || 15000,
+            isAuction: dbItem.status === 'lelang',
+            reporter: {
+              name: dbItem.reporter_name || 'Siswa SMK',
+              role: dbItem.reporter_role || 'Siswa',
+              phone: dbItem.reporter_phone || '081234567890',
+              avatar: dbItem.reporter_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
+            },
+            image: dbItem.image_url || 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&q=80&w=600'
+          };
+        });
         setItems(mappedItems);
         // Cache to localStorage to avoid flash on refresh
         try {
@@ -131,6 +143,38 @@ export default function App() {
     }
   };
 
+  const handleUpdateItemStatus = async (itemId, newStatus, price) => {
+    setItems(prevItems => {
+      const nextItems = prevItems.map(item => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            status: newStatus,
+            auctionPrice: price || item.auctionPrice || 15000,
+            isAuction: newStatus === 'lelang'
+          };
+        }
+        return item;
+      });
+      try {
+        localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
+      } catch (e) {}
+      return nextItems;
+    });
+
+    try {
+      await supabase
+        .from('items')
+        .update({
+          status: newStatus,
+          special_notes: price ? `Harga Lelang: Rp ${Number(price).toLocaleString('id-ID')}` : undefined
+        })
+        .eq('id', itemId);
+    } catch (err) {
+      console.warn('Update item status error:', err);
+    }
+  };
+
   const handleSelectItem = (item) => {
     setSelectedItem(item);
     setActiveTab('item-detail');
@@ -143,29 +187,8 @@ export default function App() {
 
   const handleCompleteVerification = async (itemId) => {
     if (itemId) {
-      setItems(prevItems => {
-        const nextItems = prevItems.map(item => {
-          if (item.id === itemId) {
-            return { ...item, status: 'selesai' };
-          }
-          return item;
-        });
-        try {
-          localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
-        } catch (e) {}
-        return nextItems;
-      });
-
-      try {
-        await supabase
-          .from('items')
-          .update({ status: 'selesai' })
-          .eq('id', itemId);
-      } catch (err) {
-        console.warn('Verification sync error:', err);
-      }
+      handleUpdateItemStatus(itemId, 'selesai');
     }
-
     setSelectedItem(null);
     setActiveTab('home');
   };
@@ -225,6 +248,14 @@ export default function App() {
               />
             )}
 
+            {activeTab === 'auction' && (
+              <Auction
+                items={items}
+                currentUser={currentUser}
+                onSelectItem={handleSelectItem}
+              />
+            )}
+
             {activeTab === 'item-detail' && selectedItem && (
               <ItemDetail
                 item={selectedItem}
@@ -267,6 +298,7 @@ export default function App() {
                 <AdminDashboard
                   items={items}
                   onSelectItem={handleSelectItem}
+                  onUpdateItemStatus={handleUpdateItemStatus}
                 />
               ) : (
                 <div className="animate-fade" style={{ textAlign: 'center', padding: '40px 20px' }}>
