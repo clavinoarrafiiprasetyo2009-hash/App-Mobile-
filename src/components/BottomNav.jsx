@@ -7,54 +7,70 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
   return (
     <div className="bottom-nav" style={{ padding: '6px 12px' }}>
       {isGuru ? (
-        /* GURU / ADMIN BOTTOM NAV: 4 Balanced Tabs with (+) in the Middle */
-        <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
-          <button 
-            className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
-            onClick={() => setActiveTab('home')}
-          >
-            <Home size={22} />
-            <span>Beranda</span>
-          </button>
+        /* GURU / ADMIN BOTTOM NAV: 3 Left Tabs + Enriched Floating Right (+) Lapor Button */
+        <>
+          <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
+            <button 
+              className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
+              onClick={() => setActiveTab('home')}
+            >
+              <Home size={22} />
+              <span>Beranda</span>
+            </button>
 
-          <button 
-            className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`}
-            onClick={() => setActiveTab('admin')}
-          >
-            <ShieldCheck size={22} />
-            <span>Dashboard</span>
-          </button>
+            <button 
+              className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admin')}
+            >
+              <ShieldCheck size={22} />
+              <span>Dashboard</span>
+            </button>
 
-          {/* Center (+) Button for Guru */}
+            <button 
+              className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              <User size={22} />
+              <span>Profil</span>
+            </button>
+          </div>
+
+          {/* Floating Right (+) Lapor Button for Guru / Admin */}
           <button 
-            className={`nav-item ${activeTab === 'report-form' ? 'active' : ''}`}
             onClick={() => setActiveTab('report-form')}
-          >
-            <div style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '16px',
-              background: activeTab === 'report-form' ? '#1d4ed8' : '#2563eb',
-              color: 'white',
+            style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
-              transition: 'all 0.15s'
-            }}>
-              <Plus size={26} strokeWidth={2.8} />
-            </div>
-            <span style={{ marginTop: '2px', fontWeight: 700 }}>Lapor</span>
-          </button>
-
-          <button 
-            className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
+              gap: '8px',
+              padding: '12px 20px',
+              borderRadius: '22px',
+              background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+              color: 'white',
+              border: 'none',
+              boxShadow: '0 8px 25px rgba(124, 58, 237, 0.45)',
+              cursor: 'pointer',
+              flexShrink: 0,
+              marginLeft: '6px',
+              marginRight: '4px',
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+            }}
+            className="lapor-floating-btn"
+            title="Buat Laporan Baru"
           >
-            <User size={22} />
-            <span>Profil</span>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Plus size={22} strokeWidth={3} />
+            </div>
+            <span style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '0.4px' }}>Lapor</span>
           </button>
-        </div>
+        </>
       ) : (
         /* SISWA BOTTOM NAV: 3 Balanced Centered Tabs with Large Glowing Center (+) Lapor Button */
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>

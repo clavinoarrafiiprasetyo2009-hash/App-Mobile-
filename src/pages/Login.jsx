@@ -41,21 +41,19 @@ export default function Login({ onLogin }) {
           return;
         }
 
-        // Fetch saved Guru profile if available
-        let savedAvatar = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200';
+        // Fetch saved Guru profile if available from Supabase
+        let savedGuruAvatar = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200';
         try {
           const { data: existingGuru } = await supabase
             .from('profiles')
             .select('*')
-            .or(`email.eq.${ADMIN_CREDENTIALS.email},nisn_nik.eq.${ADMIN_CREDENTIALS.nik}`)
-            .single();
+            .eq('email', ADMIN_CREDENTIALS.email)
+            .maybeSingle();
 
           if (existingGuru && existingGuru.avatar_url) {
-            savedAvatar = existingGuru.avatar_url;
+            savedGuruAvatar = existingGuru.avatar_url;
           }
-        } catch (e) {
-          // fallback
-        }
+        } catch (e) {}
 
         const adminUser = {
           id: 'admin-guru-1',
@@ -64,14 +62,14 @@ export default function Login({ onLogin }) {
           nik: ADMIN_CREDENTIALS.nik,
           email: ADMIN_CREDENTIALS.email,
           phone: phone || '081299887766',
-          avatar: savedAvatar
+          avatar: savedGuruAvatar
         };
 
         onLogin(adminUser);
         return;
       }
 
-      // Extract first part of email (e.g. ambon@smk.id -> Ambon)
+      // Extract first part of email (e.g. vino@smk.id -> Vino)
       const emailPrefix = email.split('@')[0] || 'Siswa';
       const emailDerivedName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
       const finalName = name.trim() ? name.trim() : emailDerivedName;
@@ -86,14 +84,14 @@ export default function Login({ onLogin }) {
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('*')
-          .or(`email.eq.${email.trim()},nisn_nik.eq.${identifier.trim()}`)
+          .eq('email', email.trim().toLowerCase())
           .maybeSingle();
 
         if (existingProfile) {
           if (existingProfile.avatar_url) savedAvatar = existingProfile.avatar_url;
-          if (existingProfile.name) savedName = existingProfile.name;
-          if (existingProfile.class_name) savedClass = existingProfile.class_name;
-          if (existingProfile.phone) savedPhone = existingProfile.phone;
+          if (existingProfile.name && !name.trim()) savedName = existingProfile.name;
+          if (existingProfile.class_name && !userClass) savedClass = existingProfile.class_name;
+          if (existingProfile.phone && !phone) savedPhone = existingProfile.phone;
         }
       } catch (err) {
         console.warn('Profile fetch check error:', err);
@@ -101,13 +99,13 @@ export default function Login({ onLogin }) {
 
       // Process Siswa Login / Registration
       const siswaUser = {
-        id: 'siswa-' + (identifier || Date.now()),
+        id: 'siswa-' + (identifier || email.split('@')[0] || Date.now()),
         name: savedName,
         role: 'siswa',
         nisn: identifier,
         class: savedClass,
         phone: savedPhone,
-        email: email,
+        email: email.trim().toLowerCase(),
         avatar: savedAvatar
       };
 
@@ -120,7 +118,7 @@ export default function Login({ onLogin }) {
           nisn_nik: identifier || '00000000',
           class_name: savedClass,
           phone: savedPhone,
-          email: email,
+          email: email.trim().toLowerCase(),
           avatar_url: savedAvatar
         }]);
       } catch (err) {
@@ -330,7 +328,7 @@ export default function Login({ onLogin }) {
             <input
               type="email"
               className="form-input"
-              placeholder={isSiswa ? 'ambon@smk.id' : 'admin.bk@smk.sch.id'}
+              placeholder={isSiswa ? 'vino@smk.id' : 'admin.bk@smk.sch.id'}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

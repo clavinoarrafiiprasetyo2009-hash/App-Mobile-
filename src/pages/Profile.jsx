@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import { User, LogOut, History, ChevronRight, Edit3, Check, X, Camera, Phone, Upload, CheckCircle2 } from 'lucide-react';
+import { User, LogOut, History, ChevronRight, Edit3, Check, X, Camera, Phone, Upload, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export default function Profile({ currentUser, items, onLogout, onSelectItem, onUpdateProfile }) {
   const [activeHistoryTab, setActiveHistoryTab] = useState('hilang'); // 'hilang' | 'ditemukan' | 'selesai'
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Edit form state initialized from currentUser
@@ -52,7 +53,18 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatar(reader.result);
+        const newAvatar = reader.result;
+        setAvatar(newAvatar);
+        // Automatically save avatar change to profile state
+        const updatedUser = {
+          ...currentUser,
+          name: name || currentUser.name,
+          class: currentUser?.role === 'siswa' ? (userClass || currentUser.class) : undefined,
+          email: email || currentUser.email,
+          phone: phone || currentUser.phone,
+          avatar: newAvatar
+        };
+        onUpdateProfile(updatedUser);
       };
       reader.readAsDataURL(file);
     }
@@ -130,7 +142,7 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
         {currentUser?.phone && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '11px', color: '#2563eb', marginTop: '6px', fontWeight: 700 }}>
             <Phone size={12} />
-            <span>No. Telp: {currentUser.phone}</span>
+            <span>No. Telp / WA: {currentUser.phone}</span>
           </div>
         )}
 
@@ -143,8 +155,10 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
             <Edit3 size={15} />
             Edit Profil Saya
           </button>
+          
+          {/* Logout Button triggers Confirmation Modal */}
           <button
-            onClick={onLogout}
+            onClick={() => setIsLogoutModalOpen(true)}
             className="btn-secondary"
             style={{ flex: 1, padding: '10px 12px', fontSize: '12px', color: '#ef4444', borderColor: '#fecaca', background: '#fef2f2' }}
           >
@@ -259,6 +273,64 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
           )}
         </div>
       </div>
+
+      {/* Log Out Confirmation Modal */}
+      {isLogoutModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          zIndex: 110
+        }}>
+          <div className="glass-card animate-fade" style={{
+            maxWidth: '320px',
+            width: '100%',
+            padding: '20px 18px',
+            textAlign: 'center',
+            borderRadius: '20px',
+            background: '#ffffff'
+          }}>
+            <div style={{
+              width: '54px', height: '54px', borderRadius: '50%',
+              background: '#fef2f2', border: '1px solid #fecaca',
+              color: '#dc2626', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: '12px'
+            }}>
+              <AlertTriangle size={28} />
+            </div>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
+              Konfirmasi Keluar
+            </h3>
+            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '18px' }}>
+              Apakah kamu yakin ingin keluar dari akun SiTemu ini?
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setIsLogoutModalOpen(false)}
+                className="btn-secondary"
+                style={{ flex: 1, padding: '10px' }}
+              >
+                Tidak, Batal
+              </button>
+              <button
+                onClick={() => {
+                  setIsLogoutModalOpen(false);
+                  onLogout();
+                }}
+                className="btn-primary"
+                style={{ flex: 1, padding: '10px', background: '#ef4444', borderColor: '#dc2626' }}
+              >
+                Ya, Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
