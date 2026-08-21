@@ -12,8 +12,27 @@ import { supabase } from './supabaseClient';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('home');
+  // Session Persistence: restore logged-in user from localStorage if not logged out
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sitemu_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sitemu_user');
+      if (saved) {
+        const u = JSON.parse(saved);
+        return u.role === 'guru' ? 'admin' : 'home';
+      }
+    } catch (e) {}
+    return 'home';
+  });
+
   const [items, setItems] = useState(INITIAL_ITEMS);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -60,20 +79,30 @@ export default function App() {
     }
   };
 
-  // Handlers
+  // Handlers with LocalStorage Persistence
   const handleLogin = (user) => {
     setCurrentUser(user);
+    try {
+      localStorage.setItem('sitemu_user', JSON.stringify(user));
+    } catch (e) {}
     setActiveTab(user.role === 'guru' ? 'admin' : 'home');
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
     setSelectedItem(null);
+    try {
+      localStorage.removeItem('sitemu_user');
+    } catch (e) {}
     setActiveTab('home');
   };
 
   const handleUpdateProfile = async (updatedUser) => {
     setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('sitemu_user', JSON.stringify(updatedUser));
+    } catch (e) {}
+
     try {
       await supabase.from('profiles').upsert([{
         id: updatedUser.id,
