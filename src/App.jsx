@@ -34,7 +34,7 @@ export default function App() {
     return 'home';
   });
 
-  // Initialize items from localStorage cache first; fallback to INITIAL_ITEMS
+  // Initialize items from localStorage cache first; return [] if empty (never fallback to dummy INITIAL_ITEMS to avoid mock data flash)
   const [items, setItems] = useState(() => {
     try {
       const cached = localStorage.getItem('sitemu_items_cache');
@@ -46,7 +46,7 @@ export default function App() {
         }
       }
     } catch (e) {}
-    return INITIAL_ITEMS;
+    return [];
   });
 
   const [selectedItem, setSelectedItem] = useState(null);

@@ -233,7 +233,23 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
 
       {/* Feed Items List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {filteredItems.length === 0 ? (
+        {isSyncing && items.length === 0 ? (
+          /* Shimmer Skeleton Placeholder Cards during first-time loading */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="glass-card animate-pulse" style={{ display: 'flex', gap: '12px', padding: '12px', background: '#ffffff', borderColor: '#e2e8f0' }}>
+                <div style={{ width: '84px', height: '84px', borderRadius: '12px', background: '#e2e8f0' }}></div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ width: '70px', height: '14px', borderRadius: '6px', background: '#e2e8f0', marginBottom: '8px' }}></div>
+                    <div style={{ width: '150px', height: '16px', borderRadius: '6px', background: '#cbd5e1' }}></div>
+                  </div>
+                  <div style={{ width: '110px', height: '12px', borderRadius: '6px', background: '#e2e8f0' }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
             <p style={{ fontSize: '14px', fontWeight: 600 }}>Tidak ada laporan barang 🔍</p>
             <p style={{ fontSize: '12px', marginTop: '4px' }}>Coba ubah kata kunci atau kategori pencarian.</p>
