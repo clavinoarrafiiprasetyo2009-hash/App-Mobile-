@@ -94,7 +94,7 @@ export default function App() {
             description: dbItem.description,
             specialNotes: dbItem.special_notes || '',
             auctionPrice: price || 15000,
-            isAuction: dbItem.status === 'lelang',
+            isAuction: dbItem.status === 'lelang' || (dbItem.special_notes && dbItem.special_notes.includes('Harga Lelang:')),
             reporter: {
               name: dbItem.reporter_name || 'Siswa SMK',
               role: dbItem.reporter_role || 'Siswa',
