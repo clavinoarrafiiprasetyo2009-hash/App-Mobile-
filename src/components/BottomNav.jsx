@@ -1,34 +1,50 @@
 import React from 'react';
-import { Home, Folder, LayoutGrid, User, ShieldCheck, Gavel, Camera } from 'lucide-react';
+import { Home, User, ShieldCheck, Gavel, Camera, ArrowLeft } from 'lucide-react';
 
 export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
   const isGuru = currentUser?.role === 'guru';
+  const isReportPage = activeTab === 'report-form';
+
+  const handleLaporClick = () => {
+    if (isReportPage) {
+      // Jika sedang di halaman laporan, berfungsi sebagai tombol Kembali (Back) ke Beranda
+      setActiveTab('home');
+    } else {
+      // Jika di halaman lain, buka form Laporan Baru
+      setActiveTab('report-form');
+    }
+  };
 
   return (
     <>
-      {/* Floating Circular Lapor Camera Action Button (Bottom Right Corner ala Canva) */}
+      {/* Floating Circular Lapor Action Button (Toggle: Camera <-> Back Arrow) */}
       <button
-        onClick={() => setActiveTab('report-form')}
+        onClick={handleLaporClick}
         className="floating-fab lapor-floating-btn"
-        title="Buat Laporan Baru"
+        title={isReportPage ? 'Kembali ke Beranda' : 'Buat Laporan Baru'}
         style={{
           width: '58px',
           height: '58px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+          background: isReportPage 
+            ? 'linear-gradient(135deg, #ef4444, #dc2626)' 
+            : 'linear-gradient(135deg, #a855f7, #7c3aed)',
           color: 'white',
           border: 'none',
-          boxShadow: '0 8px 24px rgba(168, 85, 247, 0.5), 0 0 0 3px #ffffff',
+          boxShadow: isReportPage
+            ? '0 8px 24px rgba(239, 68, 68, 0.45), 0 0 0 3px #ffffff'
+            : '0 8px 24px rgba(168, 85, 247, 0.45), 0 0 0 3px #ffffff',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          transition: 'all 0.25s ease'
         }}
       >
-        <Camera size={26} />
+        {isReportPage ? <ArrowLeft size={26} strokeWidth={2.5} /> : <Camera size={26} />}
       </button>
 
-      {/* Canva Style 4-Tab Bottom Navigation Bar */}
+      {/* Bottom Navigation Bar */}
       <div className="bottom-nav" style={{ padding: '4px 8px' }}>
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
           {/* 1. Beranda */}
@@ -41,8 +57,8 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
             <span>Beranda</span>
           </button>
 
-          {/* 2. Dashboard (Guru) atau Laporan Saya (Siswa) */}
-          {isGuru ? (
+          {/* 2. Dashboard BK (Hanya untuk Guru / Admin) */}
+          {isGuru && (
             <button 
               className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`}
               onClick={() => setActiveTab('admin')}
@@ -50,15 +66,6 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
             >
               <ShieldCheck size={20} />
               <span>Dashboard</span>
-            </button>
-          ) : (
-            <button 
-              className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-              onClick={() => setActiveTab('profile')}
-              style={{ flex: 1 }}
-            >
-              <Folder size={20} />
-              <span>Laporan Anda</span>
             </button>
           )}
 
