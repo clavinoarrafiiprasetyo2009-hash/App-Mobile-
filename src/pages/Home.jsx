@@ -117,6 +117,231 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
         </div>
       </div>
 
+      {/* Canva Style "Pilih cara memulai" Grid Section */}
+      <div style={{ marginBottom: '22px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.2px' }}>
+            Pilih cara memulai
+          </h3>
+          <span style={{ fontSize: '11px', color: '#2563eb', fontWeight: 700 }}>8 Fitur ➔</span>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '14px 10px',
+          textAlign: 'center'
+        }}>
+          {/* 1. Lapor Hilang (Pink Circle + "Baru" Badge) */}
+          <div
+            onClick={onNavigateReport}
+            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{ position: 'relative', marginBottom: '6px' }}>
+              <span style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-6px',
+                background: '#ec4899',
+                color: 'white',
+                fontSize: '9px',
+                fontWeight: 800,
+                padding: '1px 6px',
+                borderRadius: '10px',
+                boxShadow: '0 2px 6px rgba(236, 72, 153, 0.4)',
+                zIndex: 2
+              }}>
+                Baru
+              </span>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #ec4899, #db2777)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                boxShadow: '0 8px 18px rgba(236, 72, 153, 0.35)'
+              }}>
+                <BookOpen size={22} />
+              </div>
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', lineHeight: '1.2' }}>
+              Lapor<br />Hilang
+            </span>
+          </div>
+
+          {/* 2. Ikut Lelang (Orange Circle) */}
+          <div
+            onClick={() => setActiveTab('ditemukan')}
+            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #f97316, #ea580c)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              marginBottom: '6px',
+              boxShadow: '0 8px 18px rgba(249, 115, 22, 0.35)'
+            }}>
+              <Sparkles size={22} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', lineHeight: '1.2' }}>
+              Fitur<br />Lelang
+            </span>
+          </div>
+
+          {/* 3. Lapor Temuan (Red Circle) */}
+          <div
+            onClick={onNavigateReport}
+            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              marginBottom: '6px',
+              boxShadow: '0 8px 18px rgba(239, 68, 68, 0.35)'
+            }}>
+              <Package size={22} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', lineHeight: '1.2' }}>
+              Lapor<br />Temuan
+            </span>
+          </div>
+
+          {/* 4. HP & Gadget (Purple Circle) */}
+          <div
+            onClick={() => setSelectedCategory('hp')}
+            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              marginBottom: '6px',
+              boxShadow: '0 8px 18px rgba(139, 92, 246, 0.35)'
+            }}>
+              <Smartphone size={22} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', lineHeight: '1.2' }}>
+              HP &amp;<br />Gadget
+            </span>
+          </div>
+
+          {/* 5. Dompet & Tas (Cyan Circle) */}
+          <div
+            onClick={() => setSelectedCategory('dompet')}
+            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              marginBottom: '6px',
+              boxShadow: '0 8px 18px rgba(6, 182, 212, 0.35)'
+            }}>
+              <Briefcase size={22} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', lineHeight: '1.2' }}>
+              Dompet<br />&amp; Tas
+            </span>
+          </div>
+
+          {/* 6. Buku & Alat (Green Circle) */}
+          <div
+            onClick={() => setSelectedCategory('buku')}
+            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              marginBottom: '6px',
+              boxShadow: '0 8px 18px rgba(16, 185, 129, 0.35)'
+            }}>
+              <BookOpen size={22} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', lineHeight: '1.2' }}>
+              Buku &amp;<br />Alat Tulis
+            </span>
+          </div>
+
+          {/* 7. Kunci & Kartu (Magenta Circle) */}
+          <div
+            onClick={() => setSelectedCategory('kunci')}
+            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #d946ef, #c026d3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              marginBottom: '6px',
+              boxShadow: '0 8px 18px rgba(217, 70, 239, 0.35)'
+            }}>
+              <Key size={22} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', lineHeight: '1.2' }}>
+              Kunci &amp;<br />Aksesori
+            </span>
+          </div>
+
+          {/* 8. Semua Kategori (Blue Circle) */}
+          <div
+            onClick={() => setSelectedCategory('all')}
+            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              marginBottom: '6px',
+              boxShadow: '0 8px 18px rgba(59, 130, 246, 0.35)'
+            }}>
+              <Sparkles size={22} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', lineHeight: '1.2' }}>
+              Semua<br />Barang
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Category Horizontal Scroll */}
       <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
