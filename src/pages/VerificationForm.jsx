@@ -52,13 +52,14 @@ export default function VerificationForm({ item, currentUser, onBack, onComplete
 
     setIsSubmitting(true);
     try {
-      // Record verification claim directly to Supabase verifications table
-      await supabase.from('verifications').insert([{
-        item_id: item?.id || 'demo-item-1',
-        claimant_name: currentUser?.name || 'Siswa SMK',
-        proof_description: proofDescription,
-        status: 'verified'
-      }]);
+      // Update status barang langsung ke 'selesai' di tabel items Supabase
+      try {
+        if (item?.id) {
+          await supabase.from('items').update({ status: 'selesai' }).eq('id', item.id);
+        }
+      } catch (err) {
+        console.warn('Verification status update:', err);
+      }
     } catch (err) {
       console.warn('Verification Supabase sync:', err);
     } finally {
