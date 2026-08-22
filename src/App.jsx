@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Auction from './pages/Auction';
 import { supabase } from './supabaseClient';
+import { INITIAL_ITEMS } from './mockData';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 export default function App() {
@@ -33,14 +34,16 @@ export default function App() {
     return 'home';
   });
 
-  // Initialize items from localStorage cache first to avoid ANY mock data flash!
+  // Initialize items from localStorage cache or fallback to INITIAL_ITEMS so it's NEVER blank!
   const [items, setItems] = useState(() => {
     try {
       const cached = localStorage.getItem('sitemu_items_cache');
-      return cached ? JSON.parse(cached) : [];
-    } catch (e) {
-      return [];
-    }
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return INITIAL_ITEMS;
   });
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -55,31 +58,17 @@ export default function App() {
     try {
       setIsSyncing(true);
 
-      // Opsi B: Batasi pengambilan data ke 30 item terbaru agar fetching super cepat (< 1 detik)
-      const fetchPromise = supabase
+      // Ambil 50 item terbaru dari Supabase tanpa timeout buatan yang mematikan request di mobile 4G
+      const { data, error } = await supabase
         .from('items')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(30);
-
-      // Guard Timeout 4 Detik agar pengguna tidak pernah menunggu 18 detik jika Supabase Cold Start
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout 4s')), 4000)
-      );
-
-      const res = await Promise.race([fetchPromise, timeoutPromise]).catch(err => {
-        console.warn('Supabase fetch timeout or error:', err);
-        return { data: null, error: err };
-      });
-
-      const data = res?.data;
-      const error = res?.error;
+        .limit(50);
 
       if (error) {
         console.warn('Supabase fetch status:', error.message || error);
       } else if (data && data.length > 0) {
         const mappedItems = data.map(dbItem => {
-          // Parse price from special_notes if available
           let price = null;
           if (dbItem.special_notes && dbItem.special_notes.includes('Harga Lelang:')) {
             const rawPrice = dbItem.special_notes.replace(/[^0-9]/g, '');
@@ -106,8 +95,9 @@ export default function App() {
             image: dbItem.image_url || 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&q=80&w=600'
           };
         });
+
         setItems(mappedItems);
-        // Cache to localStorage
+        // Cache data Supabase terbaru ke localStorage
         try {
           localStorage.setItem('sitemu_items_cache', JSON.stringify(mappedItems));
         } catch (e) {}
