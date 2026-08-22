@@ -190,6 +190,45 @@ export default function App() {
     }
   };
 
+  const handleUpdateItemDetails = async (itemId, updatedData) => {
+    setItems(prevItems => {
+      const nextItems = prevItems.map(item => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            ...updatedData,
+            auctionPrice: updatedData.auctionPrice || item.auctionPrice || 15000,
+            isAuction: updatedData.status === 'lelang' || Boolean(updatedData.auctionPrice)
+          };
+        }
+        return item;
+      });
+      try {
+        localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
+      } catch (e) {}
+      return nextItems;
+    });
+
+    try {
+      const updatePayload = {
+        title: updatedData.title,
+        category: updatedData.category,
+        status: updatedData.status,
+        location: updatedData.location,
+        description: updatedData.description
+      };
+      if (updatedData.auctionPrice) {
+        updatePayload.special_notes = `Harga Lelang: Rp ${Number(updatedData.auctionPrice).toLocaleString('id-ID')}`;
+      }
+      await supabase
+        .from('items')
+        .update(updatePayload)
+        .eq('id', itemId);
+    } catch (err) {
+      console.warn('Update item details error:', err);
+    }
+  };
+
   const handleSelectItem = (item) => {
     setSelectedItem(item);
     setActiveTab('item-detail');
@@ -338,6 +377,7 @@ export default function App() {
                   items={items}
                   onSelectItem={handleSelectItem}
                   onUpdateItemStatus={handleUpdateItemStatus}
+                  onUpdateItemDetails={handleUpdateItemDetails}
                 />
               ) : (
                 <div className="animate-fade" style={{ textAlign: 'center', padding: '40px 20px' }}>

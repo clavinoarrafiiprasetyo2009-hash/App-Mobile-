@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight } from 'lucide-react';
+import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight, Edit3, Save, X, Tag } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
-export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus }) {
+export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus, onUpdateItemDetails }) {
   const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'reports' | 'pending' | 'auction-manage'
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -11,6 +11,9 @@ export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus
   // Price state for each item being set for auction
   const [auctionPrices, setAuctionPrices] = useState({});
   const [toastMessage, setToastMessage] = useState('');
+
+  // Edit Item Modal State (Admin edit nama, harga, jenis/kategori, status, lokasi)
+  const [editingItem, setEditingItem] = useState(null);
 
   const totalHilang = items.filter(i => i.status === 'hilang').length;
   const totalDitemukan = items.filter(i => i.status === 'ditemukan').length;
@@ -46,6 +49,42 @@ export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus
 
     setToastMessage(`✅ "${item.title}" berhasil dipindahkan ke Fitur Lelang dengan harga Rp ${Number(price).toLocaleString('id-ID')}!`);
     setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editingItem) return;
+
+    if (onUpdateItemDetails) {
+      onUpdateItemDetails(editingItem.id, {
+        title: editingItem.title,
+        category: editingItem.category,
+        status: editingItem.status,
+        location: editingItem.location,
+        description: editingItem.description,
+        auctionPrice: editingItem.auctionPrice
+      });
+    } else {
+      try {
+        await supabase
+          .from('items')
+          .update({
+            title: editingItem.title,
+            category: editingItem.category,
+            status: editingItem.status,
+            location: editingItem.location,
+            description: editingItem.description,
+            special_notes: editingItem.auctionPrice ? `Harga Lelang: Rp ${Number(editingItem.auctionPrice).toLocaleString('id-ID')}` : undefined
+          })
+          .eq('id', editingItem.id);
+      } catch (err) {
+        console.warn('Edit item save error:', err);
+      }
+    }
+
+    setToastMessage(`✅ Data barang "${editingItem.title}" berhasil diperbarui!`);
+    setTimeout(() => setToastMessage(''), 3500);
+    setEditingItem(null);
   };
 
   return (
@@ -331,11 +370,18 @@ export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus
               <div
                 key={item.id}
                 className="glass-card"
-                onClick={() => onSelectItem(item)}
-                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px' }}
               >
-                <img src={item.image} alt={item.title} style={{ width: '46px', height: '46px', borderRadius: '10px', objectFit: 'cover' }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  onClick={() => onSelectItem(item)}
+                  style={{ width: '46px', height: '46px', borderRadius: '10px', objectFit: 'cover', cursor: 'pointer' }}
+                />
+                <div
+                  onClick={() => onSelectItem(item)}
+                  style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span className={`badge badge-${item.status}`} style={{ fontSize: '9px', padding: '2px 6px' }}>
                       {item.status.toUpperCase()}
@@ -348,11 +394,223 @@ export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus
                     Pelapor: {item.reporter.name} ({item.reporter.role})
                   </span>
                 </div>
-                <ChevronRight size={16} color="#94a3b8" />
+
+                {/* Tombol Edit Barang khusus Admin BK */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingItem({
+                      ...item,
+                      auctionPrice: item.auctionPrice || 15000
+                    });
+                  }}
+                  style={{
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    color: '#2563eb',
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    flexShrink: 0
+                  }}
+                >
+                  <Edit3 size={13} />
+                  Edit
+                </button>
               </div>
             ))}
           </div>
         </>
+      )}
+
+      {/* EDIT ITEM MODAL FOR ADMIN BK */}
+      {editingItem && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+          padding: '16px'
+        }}>
+          <div className="animate-fade" style={{
+            background: '#ffffff',
+            borderRadius: '20px',
+            padding: '20px',
+            width: '100%',
+            maxWidth: '420px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Edit3 size={18} color="#2563eb" />
+                Edit Data Barang (Admin BK)
+              </h3>
+              <button
+                onClick={() => setEditingItem(null)}
+                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Nama Barang */}
+              <div>
+                <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                  Nama / Judul Barang:
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  required
+                  value={editingItem.title || ''}
+                  onChange={(e) => setEditingItem({ ...editingItem, title: e.target.value })}
+                  placeholder="Nama barang..."
+                  style={{ fontSize: '13px', marginTop: '4px' }}
+                />
+              </div>
+
+              {/* Kategori / Jenis */}
+              <div>
+                <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                  Kategori / Jenis Barang:
+                </label>
+                <select
+                  className="form-input"
+                  value={editingItem.category || 'lainnya'}
+                  onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
+                  style={{ fontSize: '13px', marginTop: '4px', background: '#ffffff' }}
+                >
+                  <option value="hp">📱 HP / Gadget</option>
+                  <option value="buku">📚 Buku & Alat Tulis</option>
+                  <option value="botol">🥤 Botol & Tempat Makan</option>
+                  <option value="dompet">💼 Dompet & Tas</option>
+                  <option value="aksesori">👓 Kacamata & Jam</option>
+                  <option value="kunci">🔑 Kunci Motor & Loker</option>
+                  <option value="pakaian">👕 Pakaian & Sepatu</option>
+                  <option value="kartu">💳 Kartu & Uang</option>
+                  <option value="lainnya">📦 Lain-lain</option>
+                </select>
+              </div>
+
+              {/* Status Barang */}
+              <div>
+                <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                  Status Laporan:
+                </label>
+                <select
+                  className="form-input"
+                  value={editingItem.status || 'hilang'}
+                  onChange={(e) => setEditingItem({ ...editingItem, status: e.target.value })}
+                  style={{ fontSize: '13px', marginTop: '4px', background: '#ffffff' }}
+                >
+                  <option value="hilang">🔴 Hilang</option>
+                  <option value="ditemukan">🟢 Ditemukan</option>
+                  <option value="lelang">🔨 Lelang Resmi BK</option>
+                  <option value="selesai">🔵 Selesai (Sudah Diambil)</option>
+                </select>
+              </div>
+
+              {/* Harga Lelang */}
+              <div>
+                <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                  Harga Dasar / Pembuka Lelang (Rp):
+                </label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={editingItem.auctionPrice || ''}
+                  onChange={(e) => setEditingItem({ ...editingItem, auctionPrice: e.target.value })}
+                  placeholder="Contoh: 50000"
+                  style={{ fontSize: '13px', marginTop: '4px' }}
+                />
+              </div>
+
+              {/* Lokasi */}
+              <div>
+                <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                  Lokasi Ditemukan / Hilang:
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={editingItem.location || ''}
+                  onChange={(e) => setEditingItem({ ...editingItem, location: e.target.value })}
+                  placeholder="Lokasi barang..."
+                  style={{ fontSize: '13px', marginTop: '4px' }}
+                />
+              </div>
+
+              {/* Deskripsi */}
+              <div>
+                <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                  Deskripsi Barang:
+                </label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  value={editingItem.description || ''}
+                  onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
+                  placeholder="Deskripsi..."
+                  style={{ fontSize: '12px', marginTop: '4px', resize: 'vertical' }}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  style={{
+                    flex: 1,
+                    padding: '10px',
+                    borderRadius: '12px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#64748b',
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  style={{
+                    flex: 1,
+                    padding: '10px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Save size={15} />
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* PENDING VERIFICATION TAB */}
