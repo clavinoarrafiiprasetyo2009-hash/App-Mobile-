@@ -54,14 +54,30 @@ export default function App() {
   const loadItemsFromSupabase = async () => {
     try {
       setIsSyncing(true);
-      const { data, error } = await supabase
+
+      // Opsi B: Batasi pengambilan data ke 30 item terbaru agar fetching super cepat (< 1 detik)
+      const fetchPromise = supabase
         .from('items')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      // Guard Timeout 4 Detik agar pengguna tidak pernah menunggu 18 detik jika Supabase Cold Start
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout 4s')), 4000)
+      );
+
+      const res = await Promise.race([fetchPromise, timeoutPromise]).catch(err => {
+        console.warn('Supabase fetch timeout or error:', err);
+        return { data: null, error: err };
+      });
+
+      const data = res?.data;
+      const error = res?.error;
 
       if (error) {
-        console.warn('Supabase fetch error:', error.message);
-      } else if (data) {
+        console.warn('Supabase fetch status:', error.message || error);
+      } else if (data && data.length > 0) {
         const mappedItems = data.map(dbItem => {
           // Parse price from special_notes if available
           let price = null;
@@ -91,7 +107,7 @@ export default function App() {
           };
         });
         setItems(mappedItems);
-        // Cache to localStorage to avoid flash on refresh
+        // Cache to localStorage
         try {
           localStorage.setItem('sitemu_items_cache', JSON.stringify(mappedItems));
         } catch (e) {}
