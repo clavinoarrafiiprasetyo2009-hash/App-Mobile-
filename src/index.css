@@ -331,3 +331,17 @@ body {
 .animate-pulse {
   animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Floating Action Button (FAB) Positioning ala Canva */
+.floating-fab {
+  position: fixed;
+  bottom: 86px;
+  right: calc(50% - 175px);
+  z-index: 50;
+}
+
+@media (max-width: 480px) {
+  .floating-fab {
+    right: 20px;
+  }
+}
