@@ -34,16 +34,20 @@ export default function App() {
     return 'home';
   });
 
-  // Initialize items from localStorage cache or fallback to INITIAL_ITEMS so it's NEVER blank!
+  // Initialize items from localStorage cache ONLY (never fallback to dummy INITIAL_ITEMS to avoid mock flash!)
   const [items, setItems] = useState(() => {
     try {
       const cached = localStorage.getItem('sitemu_items_cache');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Filter out old legacy dummy items if present in cache
+          const realCached = parsed.filter(i => i.id !== 'item-1' && i.id !== 'item-2' && i.id !== 'item-3' && i.id !== 'item-4');
+          if (realCached.length > 0) return realCached;
+        }
       }
     } catch (e) {}
-    return INITIAL_ITEMS;
+    return [];
   });
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -58,12 +62,12 @@ export default function App() {
     try {
       setIsSyncing(true);
 
-      // Ambil 50 item terbaru dari Supabase tanpa timeout buatan yang mematikan request di mobile 4G
+      // Ambil 30 item terbaru langsung dari Supabase
       const { data, error } = await supabase
         .from('items')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(30);
 
       if (error) {
         console.warn('Supabase fetch status:', error.message || error);
@@ -97,7 +101,7 @@ export default function App() {
         });
 
         setItems(mappedItems);
-        // Cache data Supabase terbaru ke localStorage
+        // Cache data Supabase real terbaru ke localStorage
         try {
           localStorage.setItem('sitemu_items_cache', JSON.stringify(mappedItems));
         } catch (e) {}
