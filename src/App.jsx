@@ -68,22 +68,13 @@ export default function App() {
     try {
       setIsSyncing(true);
 
-      // Fetch 20 item terbaru dengan 5s Max Timeout Guard (agar Skeleton paling lama cuma 5s, bukan 22s!)
-      const fetchPromise = supabase
+      // Ambil seluruh data real dari Supabase secara lengkap tanpa pembatalan timeout
+      const { data, error } = await supabase
         .from('items')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .order('created_at', { ascending: false });
 
-      const timeoutPromise = new Promise((resolve) =>
-        setTimeout(() => resolve({ data: null, error: 'Timeout 5s' }), 5000)
-      );
-
-      const res = await Promise.race([fetchPromise, timeoutPromise]);
-      const data = res?.data;
-      const error = res?.error;
-
-      if (error && error !== 'Timeout 5s') {
+      if (error) {
         console.warn('Supabase fetch status:', error.message || error);
       } else if (data && data.length > 0) {
         const mappedItems = data.map(dbItem => {
