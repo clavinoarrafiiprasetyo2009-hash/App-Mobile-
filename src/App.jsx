@@ -217,27 +217,51 @@ export default function App() {
         phone: currentUser?.phone || '081234567890'
       }
     };
-    setItems(prev => [reportWithPhone, ...prev]);
+
+    // Update local state and localStorage cache immediately so it stays on Beranda
+    setItems(prev => {
+      const nextItems = [reportWithPhone, ...prev];
+      try {
+        localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
+      } catch (e) {}
+      return nextItems;
+    });
 
     try {
-      const { error } = await supabase.from('items').insert([{
+      // Ensure image string isn't bloated beyond Supabase limits
+      let imageToSave = newReport.image;
+      if (imageToSave && imageToSave.length > 600000) {
+        imageToSave = newReport.status === 'hilang'
+          ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=600'
+          : 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600';
+      }
+
+      const { data, error } = await supabase.from('items').insert([{
         title: newReport.title,
         category: newReport.category,
         status: newReport.status,
         location: newReport.location,
         date_reported: newReport.date,
         description: newReport.description,
-        special_notes: newReport.specialNotes,
+        special_notes: newReport.specialNotes || '',
         reporter_name: newReport.reporter.name,
         reporter_role: newReport.reporter.role,
         reporter_avatar: newReport.reporter.avatar,
-        image_url: newReport.image
-      }]);
+        image_url: imageToSave
+      }]).select();
 
       if (error) {
-        console.warn('Supabase insert report error:', error.message);
-      } else {
-        loadItemsFromSupabase();
+        console.warn('Supabase insert report error:', error.message || error);
+      } else if (data && data[0]) {
+        console.log('Inserted to Supabase with ID:', data[0].id);
+        // Sync generated UUID to local state & cache
+        setItems(prev => {
+          const nextItems = prev.map(item => item.id === newReport.id ? { ...item, id: data[0].id } : item);
+          try {
+            localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
+          } catch (e) {}
+          return nextItems;
+        });
       }
     } catch (err) {
       console.warn('Report submit sync error:', err);
