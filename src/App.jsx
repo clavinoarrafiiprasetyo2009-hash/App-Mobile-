@@ -331,6 +331,7 @@ export default function App() {
                 items={items}
                 currentUser={currentUser}
                 onSelectItem={handleSelectItem}
+                onUpdateItemDetails={handleUpdateItemDetails}
               />
             )}
 
