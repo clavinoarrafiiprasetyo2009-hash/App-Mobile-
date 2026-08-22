@@ -52,23 +52,38 @@ export default function App() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSyncing, setIsSyncing] = useState(true);
 
-  // Load items real-time from Supabase on mount
+  // Load items real-time from Supabase on mount + keep-alive heartbeat
   useEffect(() => {
     loadItemsFromSupabase();
+
+    // Heartbeat ping tiap 4 menit agar database Supabase selalu bangkit & tidak pernah tidur (No Cold Start!)
+    const heartbeat = setInterval(() => {
+      supabase.from('items').select('id').limit(1).then(() => {}).catch(() => {});
+    }, 240000);
+
+    return () => clearInterval(heartbeat);
   }, []);
 
   const loadItemsFromSupabase = async () => {
     try {
       setIsSyncing(true);
 
-      // Ambil 30 item terbaru langsung dari Supabase
-      const { data, error } = await supabase
+      // Fetch 20 item terbaru dengan 5s Max Timeout Guard (agar Skeleton paling lama cuma 5s, bukan 22s!)
+      const fetchPromise = supabase
         .from('items')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(30);
+        .limit(20);
 
-      if (error) {
+      const timeoutPromise = new Promise((resolve) =>
+        setTimeout(() => resolve({ data: null, error: 'Timeout 5s' }), 5000)
+      );
+
+      const res = await Promise.race([fetchPromise, timeoutPromise]);
+      const data = res?.data;
+      const error = res?.error;
+
+      if (error && error !== 'Timeout 5s') {
         console.warn('Supabase fetch status:', error.message || error);
       } else if (data && data.length > 0) {
         const mappedItems = data.map(dbItem => {
