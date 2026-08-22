@@ -79,7 +79,7 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
             : '0 10px 25px -5px rgba(15, 23, 42, 0.2)',
         transition: 'all 0.35s ease'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.2)',
             color: 'white',
@@ -90,6 +90,22 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
           }}>
             SiTemu Sekolah 🏫
           </div>
+          {isSyncing && (
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              color: '#93c5fd',
+              padding: '3px 10px',
+              borderRadius: '20px',
+              fontSize: '10px',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <Loader2 size={11} className="spin" />
+              <span>Memuat Supabase...</span>
+            </div>
+          )}
         </div>
         <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
           Cari barang hilang atau ditemukan...
@@ -217,12 +233,7 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
 
       {/* Feed Items List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {isSyncing && items.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
-            <Loader2 size={24} className="spin" style={{ margin: '0 auto 8px', color: '#2563eb' }} />
-            <p style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>Mengambil Data Supabase...</p>
-          </div>
-        ) : filteredItems.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
             <p style={{ fontSize: '14px', fontWeight: 600 }}>Tidak ada laporan barang 🔍</p>
             <p style={{ fontSize: '12px', marginTop: '4px' }}>Coba ubah kata kunci atau kategori pencarian.</p>

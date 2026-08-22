@@ -34,20 +34,19 @@ export default function App() {
     return 'home';
   });
 
-  // Initialize items from localStorage cache ONLY (never fallback to dummy INITIAL_ITEMS to avoid mock flash!)
+  // Initialize items from localStorage cache first; fallback to INITIAL_ITEMS
   const [items, setItems] = useState(() => {
     try {
       const cached = localStorage.getItem('sitemu_items_cache');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Filter out old legacy dummy items if present in cache
-          const realCached = parsed.filter(i => i.id !== 'item-1' && i.id !== 'item-2' && i.id !== 'item-3' && i.id !== 'item-4');
-          if (realCached.length > 0) return realCached;
+        if (Array.isArray(parsed)) {
+          const clean = parsed.filter(i => !['item-1', 'item-2', 'item-3', 'item-4'].includes(i.id));
+          if (clean.length > 0) return clean;
         }
       }
     } catch (e) {}
-    return [];
+    return INITIAL_ITEMS;
   });
 
   const [selectedItem, setSelectedItem] = useState(null);
