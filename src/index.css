@@ -38,7 +38,7 @@ input, textarea {
 }
 
 body {
-  background-color: #cbd5e1;
+  background: radial-gradient(circle at 50% 20%, #e2e8f0 0%, #cbd5e1 100%);
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -55,7 +55,7 @@ body {
   height: 830px !important;
   min-height: 830px !important;
   max-height: 830px !important;
-  background: var(--bg-main);
+  background: radial-gradient(ellipse at top left, #eff6ff 0%, #f8fafc 45%, #f1f5f9 100%);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -64,6 +64,33 @@ body {
   overflow: hidden;
   border: 1px solid #cbd5e1;
   box-sizing: border-box;
+}
+
+/* Subtle ambient background Orbs for all app pages */
+.app-container::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-container::after {
+  content: '';
+  position: absolute;
+  bottom: 60px;
+  left: -80px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 @media (max-width: 480px) {

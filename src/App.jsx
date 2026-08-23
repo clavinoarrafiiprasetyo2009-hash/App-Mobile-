@@ -8,11 +8,21 @@ import VerificationForm from './pages/VerificationForm';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Auction from './pages/Auction';
+import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import { supabase } from './supabaseClient';
 import { INITIAL_ITEMS } from './mockData';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 export default function App() {
+  // First-time Onboarding state
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(() => {
+    try {
+      return localStorage.getItem('sitemu_onboarding') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
   // Session Persistence: restore logged-in user from localStorage if not logged out
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -312,7 +322,14 @@ export default function App() {
     <div className="app-container">
       {/* Main App Content View */}
       <div className="main-content">
-        {!currentUser ? (
+        {!hasSeenOnboarding ? (
+          <WelcomeOnboarding onGetStarted={() => {
+            setHasSeenOnboarding(true);
+            try {
+              localStorage.setItem('sitemu_onboarding', 'true');
+            } catch (e) {}
+          }} />
+        ) : !currentUser ? (
           <Login onLogin={handleLogin} />
         ) : (
           <>
@@ -412,7 +429,7 @@ export default function App() {
       </div>
 
       {/* Bottom Navigation Bar */}
-      {currentUser && (
+      {hasSeenOnboarding && currentUser && (
         <BottomNav
           activeTab={activeTab}
           setActiveTab={setActiveTab}
