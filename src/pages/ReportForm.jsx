@@ -20,47 +20,52 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
 
   const handleImageUpload = (e) => {
     const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const rawDataUrl = event.target.result;
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 450;
-            const MAX_HEIGHT = 450;
-            let width = img.width;
-            let height = img.height;
+    if (!file) return;
 
-            if (width > height) {
-              if (width > MAX_WIDTH) {
-                height *= MAX_WIDTH / width;
-                width = MAX_WIDTH;
-              }
-            } else {
-              if (height > MAX_HEIGHT) {
-                width *= MAX_HEIGHT / height;
-                height = MAX_HEIGHT;
-              }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const rawDataUrl = event.target.result;
+      if (!rawDataUrl) return;
+
+      const img = document.createElement('img');
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 400;
+          let w = img.width || 400;
+          let h = img.height || 400;
+
+          if (w > h) {
+            if (w > MAX_SIZE) {
+              h = Math.round((h * MAX_SIZE) / w);
+              w = MAX_SIZE;
             }
-            canvas.width = Math.round(width);
-            canvas.height = Math.round(height);
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
-            setPhotoUrl(compressedDataUrl || rawDataUrl);
-          } catch (err) {
-            setPhotoUrl(rawDataUrl);
+          } else {
+            if (h > MAX_SIZE) {
+              w = Math.round((w * MAX_SIZE) / h);
+              h = MAX_SIZE;
+            }
           }
-        };
-        img.onerror = () => {
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL('image/jpeg', 0.5);
+          setPhotoUrl(compressed || rawDataUrl);
+        } catch (err) {
           setPhotoUrl(rawDataUrl);
-        };
-        img.src = rawDataUrl;
+        }
       };
-      reader.readAsDataURL(file);
-    }
+      img.onerror = () => {
+        setPhotoUrl(rawDataUrl);
+      };
+      img.src = rawDataUrl;
+    };
+    reader.onerror = () => {
+      console.warn('FileReader error');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleSubmit = (e) => {
@@ -223,18 +228,18 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
         <div className="form-group">
           <label className="form-label">Foto Bukti Barang *</label>
 
-          {/* Hidden HTML5 File Inputs */}
+          {/* Hidden HTML5 File Inputs with unique IDs */}
           <input
+            id="camera-upload-input"
             type="file"
-            ref={cameraInputRef}
             accept="image/*"
             capture="environment"
             style={{ display: 'none' }}
             onChange={handleImageUpload}
           />
           <input
+            id="gallery-upload-input"
             type="file"
-            ref={galleryInputRef}
             accept="image/*"
             style={{ display: 'none' }}
             onChange={handleImageUpload}
@@ -256,9 +261,8 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
                   style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '10px', marginBottom: '8px' }}
                 />
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                  <button
-                    type="button"
-                    onClick={() => cameraInputRef.current?.click()}
+                  <label
+                    htmlFor="camera-upload-input"
                     style={{
                       padding: '6px 12px',
                       borderRadius: '8px',
@@ -273,8 +277,8 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
                       gap: '4px'
                     }}
                   >
-                    <RefreshCw size={12} /> Ambil Ulang Kamera
-                  </button>
+                    <RefreshCw size={12} /> Ambil Ulang Foto
+                  </label>
                   <button
                     type="button"
                     onClick={() => setPhotoUrl('')}
@@ -299,9 +303,8 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
                   Ambil foto barang langsung via Kamera HP atau dari Galeri:
                 </p>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => cameraInputRef.current?.click()}
+                  <label
+                    htmlFor="camera-upload-input"
                     style={{
                       flex: 1,
                       padding: '10px 8px',
@@ -320,11 +323,10 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
                     }}
                   >
                     <Camera size={16} /> Kamera HP
-                  </button>
+                  </label>
 
-                  <button
-                    type="button"
-                    onClick={() => galleryInputRef.current?.click()}
+                  <label
+                    htmlFor="gallery-upload-input"
                     style={{
                       flex: 1,
                       padding: '10px 8px',
@@ -342,7 +344,7 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
                     }}
                   >
                     <Image size={16} /> Pilih Galeri
-                  </button>
+                  </label>
                 </div>
               </div>
             )}
