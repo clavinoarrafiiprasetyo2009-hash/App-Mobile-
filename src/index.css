@@ -359,6 +359,34 @@ body {
   animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(-5deg);
+  }
+}
+
+.animate-float {
+  animation: floatSlow 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 4.8s ease-in-out infinite;
+  will-change: transform;
+}
+
 /* Floating Action Button (FAB) Positioning ala Canva */
 .floating-fab {
   position: fixed;

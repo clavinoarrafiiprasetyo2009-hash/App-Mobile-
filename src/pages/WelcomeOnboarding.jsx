@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Smartphone, BookOpen, ShieldCheck, Bell, ArrowRight } from 'lucide-react';
+import { Search, Smartphone, BookOpen, ShieldCheck, Bell, ArrowRight, Pencil, Coffee, Sparkles } from 'lucide-react';
 
 export default function WelcomeOnboarding({ onGetStarted }) {
   return (
@@ -43,6 +43,87 @@ export default function WelcomeOnboarding({ onGetStarted }) {
         background: 'radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(255, 255, 255, 0) 70%)',
         filter: 'blur(25px)'
       }}></div>
+
+      {/* Subtle Floating School Items Elements (Pen 🖊️, Book 📚, Phone 📱, Coffee 🥤) */}
+      <div className="animate-float" style={{
+        position: 'absolute',
+        top: '32px',
+        right: '28px',
+        width: '44px',
+        height: '44px',
+        borderRadius: '14px',
+        background: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255, 255, 255, 0.9)',
+        boxShadow: '0 10px 20px rgba(37, 99, 235, 0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#2563eb',
+        zIndex: 5
+      }}>
+        <BookOpen size={22} />
+      </div>
+
+      <div className="animate-float-reverse" style={{
+        position: 'absolute',
+        top: '38px',
+        left: '26px',
+        width: '42px',
+        height: '42px',
+        borderRadius: '14px',
+        background: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255, 255, 255, 0.9)',
+        boxShadow: '0 10px 20px rgba(168, 85, 247, 0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#7c3aed',
+        zIndex: 5
+      }}>
+        <Pencil size={20} />
+      </div>
+
+      <div className="animate-float" style={{
+        position: 'absolute',
+        top: '140px',
+        left: '18px',
+        width: '38px',
+        height: '38px',
+        borderRadius: '12px',
+        background: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255, 255, 255, 0.9)',
+        boxShadow: '0 8px 18px rgba(16, 185, 129, 0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#059669',
+        zIndex: 5
+      }}>
+        <Coffee size={18} />
+      </div>
+
+      <div className="animate-float-reverse" style={{
+        position: 'absolute',
+        top: '135px',
+        right: '20px',
+        width: '38px',
+        height: '38px',
+        borderRadius: '12px',
+        background: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255, 255, 255, 0.9)',
+        boxShadow: '0 8px 18px rgba(245, 158, 11, 0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#d97706',
+        zIndex: 5
+      }}>
+        <Smartphone size={18} />
+      </div>
 
       {/* Top Branding Section */}
       <div style={{ textAlign: 'center', marginTop: '20px', position: 'relative', zIndex: 10 }}>
