@@ -43,11 +43,34 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
     <div className="animate-fade" style={{
       borderRadius: '16px',
       padding: '4px',
+      transition: 'background 0.3s ease',
       background: getTabBg(),
-      transition: 'background 0.35s ease'
+      position: 'relative'
     }}>
+      {/* Subtle Background Floating Accents */}
+      <div className="animate-float" style={{
+        position: 'absolute',
+        top: '60px',
+        right: '10px',
+        opacity: 0.12,
+        pointerEvents: 'none',
+        zIndex: 0
+      }}>
+        <Sparkles size={42} color="#2563eb" />
+      </div>
+      <div className="animate-float-reverse" style={{
+        position: 'absolute',
+        top: '340px',
+        left: '-10px',
+        opacity: 0.1,
+        pointerEvents: 'none',
+        zIndex: 0
+      }}>
+        <BookOpen size={48} color="#7c3aed" />
+      </div>
+
       {/* Top Welcome Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', position: 'relative', zIndex: 1 }}>
         <div>
           <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Selamat Datang ☀️</span>
           <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>

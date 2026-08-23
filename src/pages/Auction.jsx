@@ -58,7 +58,18 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
   };
 
   return (
-    <div className="animate-fade">
+    <div className="animate-fade" style={{ position: 'relative' }}>
+      {/* Subtle Floating Gavel Background Accent */}
+      <div className="animate-float" style={{
+        position: 'absolute',
+        top: '120px',
+        right: '10px',
+        opacity: 0.12,
+        pointerEvents: 'none',
+        zIndex: 0
+      }}>
+        <Gavel size={54} color="#d97706" />
+      </div>
       <Header title="🔨 Lelang Barang Sekolah" />
 
       {toastMessage && (
