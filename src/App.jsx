@@ -153,8 +153,7 @@ export default function App() {
     } catch (e) {}
 
     try {
-      await supabase.from('profiles').upsert([{
-        id: updatedUser.id || 'siswa-' + (updatedUser.email ? updatedUser.email.split('@')[0] : Date.now()),
+      const { data: updatedProfile, error: profileErr } = await supabase.from('profiles').upsert([{
         name: updatedUser.name,
         role: updatedUser.role,
         nisn_nik: updatedUser.nisn || updatedUser.nik || '',
@@ -162,7 +161,13 @@ export default function App() {
         phone: updatedUser.phone || '081234567890',
         email: updatedUser.email || '',
         avatar_url: updatedUser.avatar || ''
-      }]);
+      }], { onConflict: 'email' }).select();
+
+      if (profileErr) {
+        console.warn('Profile sync error:', profileErr.message || profileErr);
+      } else if (updatedProfile && updatedProfile[0]) {
+        setCurrentUser(prev => prev ? { ...prev, id: updatedProfile[0].id } : prev);
+      }
     } catch (err) {
       console.warn('Profile sync error:', err);
     }

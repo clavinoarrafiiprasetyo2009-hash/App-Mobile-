@@ -109,10 +109,9 @@ export default function Login({ onLogin }) {
         avatar: savedAvatar
       };
 
-      // Save/Sync student login data to Supabase profiles table
+      // Save/Sync student login data to Supabase profiles table using onConflict: 'email'
       try {
-        await supabase.from('profiles').upsert([{
-          id: siswaUser.id,
+        const { data: profileResult, error: profileErr } = await supabase.from('profiles').upsert([{
           name: siswaUser.name,
           role: 'siswa',
           nisn_nik: identifier || '00000000',
@@ -120,7 +119,13 @@ export default function Login({ onLogin }) {
           phone: savedPhone,
           email: email.trim().toLowerCase(),
           avatar_url: savedAvatar
-        }]);
+        }], { onConflict: 'email' }).select();
+
+        if (profileErr) {
+          console.warn('Supabase profile login sync error:', profileErr.message || profileErr);
+        } else if (profileResult && profileResult[0]) {
+          siswaUser.id = profileResult[0].id;
+        }
       } catch (err) {
         console.warn('Supabase profile login sync:', err);
       }
