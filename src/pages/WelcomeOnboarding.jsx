@@ -4,14 +4,22 @@ import { Search, Smartphone, BookOpen, ShieldCheck, Bell, ArrowRight } from 'luc
 export default function WelcomeOnboarding({ onGetStarted }) {
   return (
     <div className="animate-fade" style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(180deg, #dbeafe 0%, #eff6ff 45%, #e0f2fe 100%)',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100%',
+      height: '100%',
+      zIndex: 100,
+      background: 'linear-gradient(180deg, #c7d2fe 0%, #dbeafe 30%, #eff6ff 65%, #e0f2fe 100%)',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      padding: '24px 20px',
-      position: 'relative',
-      overflow: 'hidden'
+      padding: '24px 20px 24px 20px',
+      boxSizing: 'border-box',
+      overflowY: 'auto',
+      overflowX: 'hidden'
     }}>
       {/* Background Decorative Ambient Orbs */}
       <div style={{
