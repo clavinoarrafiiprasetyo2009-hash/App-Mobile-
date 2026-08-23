@@ -23,33 +23,41 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
+        const rawDataUrl = event.target.result;
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
-          let width = img.width;
-          let height = img.height;
+          try {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 450;
+            const MAX_HEIGHT = 450;
+            let width = img.width;
+            let height = img.height;
 
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
             }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
+            canvas.width = Math.round(width);
+            canvas.height = Math.round(height);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
+            setPhotoUrl(compressedDataUrl || rawDataUrl);
+          } catch (err) {
+            setPhotoUrl(rawDataUrl);
           }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-          setPhotoUrl(compressedDataUrl);
         };
-        img.src = event.target.result;
+        img.onerror = () => {
+          setPhotoUrl(rawDataUrl);
+        };
+        img.src = rawDataUrl;
       };
       reader.readAsDataURL(file);
     }

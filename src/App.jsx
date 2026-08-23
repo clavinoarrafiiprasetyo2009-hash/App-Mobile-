@@ -258,8 +258,17 @@ export default function App() {
   };
 
   const handleSubmitReport = async (newReport) => {
+    // Ensure image string isn't bloated beyond limits before saving to state/cache/Supabase
+    let imageToSave = newReport.image;
+    if (imageToSave && imageToSave.length > 250000) {
+      imageToSave = newReport.status === 'hilang'
+        ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=600'
+        : 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600';
+    }
+
     const reportWithPhone = {
       ...newReport,
+      image: imageToSave,
       reporter: {
         ...newReport.reporter,
         phone: currentUser?.phone || '081234567890'
@@ -276,14 +285,6 @@ export default function App() {
     });
 
     try {
-      // Ensure image string isn't bloated beyond Supabase limits
-      let imageToSave = newReport.image;
-      if (imageToSave && imageToSave.length > 600000) {
-        imageToSave = newReport.status === 'hilang'
-          ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=600'
-          : 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600';
-      }
-
       const { data, error } = await supabase.from('items').insert([{
         title: newReport.title,
         category: newReport.category,
