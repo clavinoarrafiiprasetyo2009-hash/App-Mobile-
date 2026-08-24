@@ -78,11 +78,10 @@ export default function App() {
     try {
       setIsSyncing(true);
 
-      // Ambil seluruh data real dari Supabase secara lengkap tanpa pembatalan timeout
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const [{ data, error }, { data: profilesData }] = await Promise.all([
+        supabase.from('items').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*')
+      ]);
 
       if (error) {
         console.warn('Supabase fetch status:', error.message || error);
@@ -92,6 +91,16 @@ export default function App() {
           if (dbItem.special_notes && dbItem.special_notes.includes('Harga Lelang:')) {
             const rawPrice = dbItem.special_notes.replace(/[^0-9]/g, '');
             if (rawPrice) price = parseInt(rawPrice, 10);
+          }
+
+          // Smart match reporter real phone from profiles table if missing
+          let matchedPhone = dbItem.reporter_phone;
+          if (!matchedPhone && profilesData && dbItem.reporter_name) {
+            const cleanName = dbItem.reporter_name.split(' (')[0].trim().toLowerCase();
+            const matchedProfile = profilesData.find(p => p.name && (p.name.trim().toLowerCase() === cleanName || cleanName.includes(p.name.trim().toLowerCase())));
+            if (matchedProfile && matchedProfile.phone) {
+              matchedPhone = matchedProfile.phone;
+            }
           }
 
           return {
@@ -108,7 +117,7 @@ export default function App() {
             reporter: {
               name: dbItem.reporter_name || 'Siswa SMK',
               role: dbItem.reporter_role || 'Siswa',
-              phone: dbItem.reporter_phone || '081234567890',
+              phone: matchedPhone || '081234567890',
               avatar: dbItem.reporter_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
             },
             image: dbItem.image_url || 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&q=80&w=600'
@@ -300,6 +309,7 @@ export default function App() {
         special_notes: newReport.specialNotes || '',
         reporter_name: newReport.reporter.name,
         reporter_role: newReport.reporter.role,
+        reporter_phone: reportWithPhone.reporter.phone || currentUser?.phone || '081234567890',
         reporter_avatar: newReport.reporter.avatar,
         image_url: imageToSave
       }]).select();
