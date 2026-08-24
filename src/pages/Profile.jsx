@@ -49,25 +49,62 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newAvatar = reader.result;
-        setAvatar(newAvatar);
-        // Automatically save avatar change to profile state
-        const updatedUser = {
-          ...currentUser,
-          name: name || currentUser.name,
-          class: currentUser?.role === 'siswa' ? (userClass || currentUser.class) : undefined,
-          email: email || currentUser.email,
-          phone: phone || currentUser.phone,
-          avatar: newAvatar
-        };
-        onUpdateProfile(updatedUser);
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const rawDataUrl = event.target.result;
+      if (!rawDataUrl) return;
+
+      const img = document.createElement('img');
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 250;
+          let w = img.width || 250;
+          let h = img.height || 250;
+
+          if (w > h) {
+            if (w > MAX_SIZE) {
+              h = Math.round((h * MAX_SIZE) / w);
+              w = MAX_SIZE;
+            }
+          } else {
+            if (h > MAX_SIZE) {
+              w = Math.round((w * MAX_SIZE) / h);
+              h = MAX_SIZE;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedAvatar = canvas.toDataURL('image/jpeg', 0.6) || rawDataUrl;
+
+          setAvatar(compressedAvatar);
+          const updatedUser = {
+            ...currentUser,
+            name: name || currentUser.name,
+            class: currentUser?.role === 'siswa' ? (userClass || currentUser.class) : undefined,
+            email: email || currentUser.email,
+            phone: phone || currentUser.phone,
+            avatar: compressedAvatar
+          };
+          onUpdateProfile(updatedUser);
+        } catch (err) {
+          setAvatar(rawDataUrl);
+          onUpdateProfile({ ...currentUser, avatar: rawDataUrl });
+        }
       };
-      reader.readAsDataURL(file);
-    }
+      img.onerror = () => {
+        setAvatar(rawDataUrl);
+        onUpdateProfile({ ...currentUser, avatar: rawDataUrl });
+      };
+      img.src = rawDataUrl;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   return (

@@ -156,20 +156,27 @@ export default function App() {
   };
 
   const handleUpdateProfile = async (updatedUser) => {
-    setCurrentUser(updatedUser);
+    // Ensure avatar base64 string isn't bloated beyond limits before saving
+    let avatarToSave = updatedUser.avatar;
+    if (avatarToSave && avatarToSave.length > 250000) {
+      avatarToSave = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
+    }
+
+    const cleanUser = { ...updatedUser, avatar: avatarToSave };
+    setCurrentUser(cleanUser);
     try {
-      localStorage.setItem('sitemu_user', JSON.stringify(updatedUser));
+      localStorage.setItem('sitemu_user', JSON.stringify(cleanUser));
     } catch (e) {}
 
     try {
       const { data: updatedProfile, error: profileErr } = await supabase.from('profiles').upsert([{
-        name: updatedUser.name,
-        role: updatedUser.role,
-        nisn_nik: updatedUser.nisn || updatedUser.nik || '',
-        class_name: updatedUser.class || '',
-        phone: updatedUser.phone || '081234567890',
-        email: updatedUser.email || '',
-        avatar_url: updatedUser.avatar || ''
+        name: cleanUser.name,
+        role: cleanUser.role,
+        nisn_nik: cleanUser.nisn || cleanUser.nik || '',
+        class_name: cleanUser.class || '',
+        phone: cleanUser.phone || null,
+        email: cleanUser.email || '',
+        avatar_url: avatarToSave
       }], { onConflict: 'email' }).select();
 
       if (profileErr) {
