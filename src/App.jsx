@@ -316,7 +316,6 @@ export default function App() {
         special_notes: newReport.specialNotes || '',
         reporter_name: newReport.reporter.name,
         reporter_role: newReport.reporter.role,
-        reporter_phone: reportWithPhone.reporter.phone || currentUser?.phone || '081234567890',
         reporter_avatar: newReport.reporter.avatar,
         image_url: imageToSave
       }]).select();
