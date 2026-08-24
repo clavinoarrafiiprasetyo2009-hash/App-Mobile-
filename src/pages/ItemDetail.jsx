@@ -5,12 +5,10 @@ import { MapPin, Calendar, ShieldAlert, MessageCircle, FileCheck, Share2, PhoneC
 export default function ItemDetail({ item, onBack, onStartVerification }) {
   if (!item) return null;
 
-  // Format WhatsApp Link
-  const phone = item.reporter.phone || '081234567890';
-  const cleanPhone = phone.replace(/[^0-9]/g, '');
-  const formattedPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
-  const waText = encodeURIComponent(`Halo ${item.reporter.name}, saya menemukan/melihat laporan "${item.title}" kamu di aplikasi SiTemu Sekolah. Boleh janjian bertemu?`);
-  const waUrl = `https://wa.me/${formattedPhone}?text=${waText}`;
+  // Direct WhatsApp Link to Admin Guru BK
+  const adminBkPhone = '6281299887766';
+  const waText = encodeURIComponent(`Halo Guru BK, saya mau menanyakan/mengonfirmasi laporan barang: "${item.title}" (${item.status === 'hilang' ? 'Laporan Kehilangan' : 'Barang Ditemukan'}) yang dilaporkan oleh ${item.reporter.name}. Apakah barang sudah ada / bisa diurus di Ruang BK?`);
+  const waUrl = `https://wa.me/${adminBkPhone}?text=${waText}`;
 
   return (
     <div className="animate-fade">
@@ -72,12 +70,10 @@ export default function ItemDetail({ item, onBack, onStartVerification }) {
             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{item.reporter.name}</h4>
             <span style={{ fontSize: '11px', color: '#64748b' }}>Pelapor • {item.reporter.role}</span>
           </div>
-          {phone && (
-            <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#059669', padding: '4px 8px', borderRadius: '8px', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <PhoneCall size={12} />
-              <span>{phone}</span>
-            </div>
-          )}
+          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', padding: '4px 8px', borderRadius: '8px', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <PhoneCall size={12} />
+            <span>Resmi via Guru BK</span>
+          </div>
         </div>
 
         <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>Deskripsi Barang:</h4>
@@ -106,7 +102,7 @@ export default function ItemDetail({ item, onBack, onStartVerification }) {
 
       {/* Action Buttons */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {/* Direct WhatsApp Contact Button */}
+        {/* Direct WhatsApp Contact Button to Guru BK */}
         <a
           href={waUrl}
           target="_blank"
@@ -128,7 +124,7 @@ export default function ItemDetail({ item, onBack, onStartVerification }) {
           }}
         >
           <MessageCircle size={18} />
-          Hubungi Pelapor via WhatsApp ({item.reporter.name.split(' ')[0]})
+          Hubungi Admin BK via WhatsApp
         </a>
 
         {item.status === 'ditemukan' && (

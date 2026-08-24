@@ -301,18 +301,20 @@ export default function Login({ onLogin }) {
             />
           </div>
 
-          {/* Mandatory WhatsApp Number Field */}
-          <div className="form-group">
-            <label className="form-label">No. WhatsApp Aktif *</label>
-            <input
-              type="tel"
-              className="form-input"
-              placeholder="Contoh: 081234567890"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
-          </div>
+          {/* WhatsApp Number Field (Khusus Admin / Guru BK) */}
+          {!isSiswa && (
+            <div className="form-group">
+              <label className="form-label">No. WhatsApp Admin BK *</label>
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="Contoh: 081299887766"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
+          )}
 
           {isRegister && isSiswa && (
             <div className="form-group">

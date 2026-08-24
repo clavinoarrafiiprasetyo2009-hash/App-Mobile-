@@ -139,10 +139,10 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
           {currentUser?.role === 'guru' ? `Guru / Admin BK • NIK: ${currentUser?.nik || '03456789'}` : `${currentUser?.class || 'XII RPL 1'} • NISN: ${currentUser?.nisn || '005423190'}`}
         </p>
 
-        {currentUser?.phone && (
+        {currentUser?.role === 'guru' && currentUser?.phone && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '11px', color: '#2563eb', marginTop: '6px', fontWeight: 700 }}>
             <Phone size={12} />
-            <span>No. Telp / WA: {currentUser.phone}</span>
+            <span>No. Telp / WA Admin: {currentUser.phone}</span>
           </div>
         )}
 
@@ -440,17 +440,19 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
                 </div>
               )}
 
-              <div className="form-group">
-                <label className="form-label">No. Telepon / WhatsApp *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Contoh: 081234567890"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                />
-              </div>
+              {currentUser?.role === 'guru' && (
+                <div className="form-group">
+                  <label className="form-label">No. Telepon / WhatsApp Admin *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Contoh: 081299887766"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">Email Sekolah *</label>
