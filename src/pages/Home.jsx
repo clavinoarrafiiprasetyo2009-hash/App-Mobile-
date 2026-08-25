@@ -1,11 +1,31 @@
-import React, { useState } from 'react';
-import { Search, Sparkles, Smartphone, BookOpen, Coffee, Briefcase, Glasses, Key, MapPin, ChevronRight, Shirt, CreditCard, Package, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Sparkles, Smartphone, BookOpen, Coffee, Briefcase, Glasses, Key, MapPin, ChevronRight, Shirt, CreditCard, Package, Loader2, Bell, BellRing, CheckCircle2 } from 'lucide-react';
 import { CATEGORIES } from '../mockData';
+import { requestNotificationPermission, getNotificationPermissionState, sendLocalNotification } from '../utils/notificationHelper';
 
 export default function Home({ items, currentUser, isSyncing, onSelectItem, onNavigateReport }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'hilang' | 'ditemukan'
+  const [notifState, setNotifState] = useState('default');
+  const [showNotifToast, setShowNotifToast] = useState(false);
+
+  useEffect(() => {
+    setNotifState(getNotificationPermissionState());
+  }, []);
+
+  const handleToggleNotification = async () => {
+    const perm = await requestNotificationPermission();
+    setNotifState(perm);
+    if (perm === 'granted') {
+      sendLocalNotification('Notifikasi PWA SiTemu Aktif! 🔔', {
+        body: 'Selamat! Kamu akan menerima notifikasi real-time saat ada laporan baru / barang ditemukan.',
+        tag: 'manual-test'
+      });
+      setShowNotifToast(true);
+      setTimeout(() => setShowNotifToast(false), 4000);
+    }
+  };
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,12 +97,58 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
             Halo, {currentUser?.name?.split(' ')[0] || 'Siswa'}! 👋
           </h2>
         </div>
-        <img
-          src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'}
-          alt="Avatar"
-          style={{ width: '44px', height: '44px', borderRadius: '50%', border: '2.5px solid #2563eb', objectFit: 'cover' }}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Interactive Bell Notification Toggle */}
+          <button
+            onClick={handleToggleNotification}
+            title={notifState === 'granted' ? 'Notifikasi PWA Aktif (Klik untuk Tes)' : 'Aktifkan Notifikasi HP'}
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              border: notifState === 'granted' ? '1.5px solid #2563eb' : '1.5px solid #cbd5e1',
+              background: notifState === 'granted' ? '#eff6ff' : '#ffffff',
+              color: notifState === 'granted' ? '#2563eb' : '#64748b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: notifState === 'granted' ? '0 4px 12px rgba(37, 99, 235, 0.2)' : '0 2px 6px rgba(0, 0, 0, 0.05)',
+              transition: 'all 0.25s ease'
+            }}
+          >
+            {notifState === 'granted' ? <BellRing size={20} className="animate-pulse" /> : <Bell size={20} />}
+          </button>
+
+          <img
+            src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'}
+            alt="Avatar"
+            style={{ width: '44px', height: '44px', borderRadius: '50%', border: '2.5px solid #2563eb', objectFit: 'cover' }}
+          />
+        </div>
       </div>
+
+      {/* Notification Toast Alert */}
+      {showNotifToast && (
+        <div style={{
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          color: '#1e40af',
+          padding: '12px 14px',
+          borderRadius: '14px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '12px',
+          fontWeight: 700,
+          boxShadow: '0 4px 14px rgba(37, 99, 235, 0.15)',
+          animation: 'fade 0.3s ease'
+        }}>
+          <CheckCircle2 size={18} color="#2563eb" flexShrink={0} />
+          <span>🔔 Notifikasi HP Aktif! Tes notifikasi telah dikirimkan ke perangkat kamu.</span>
+        </div>
+      )}
 
       {/* Main Banner Search Box */}
       <div style={{

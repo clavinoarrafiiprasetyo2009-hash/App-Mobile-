@@ -12,6 +12,7 @@ import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import { supabase } from './supabaseClient';
 import { INITIAL_ITEMS } from './mockData';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
+import { notifyNewReport, notifyStatusChange } from './utils/notificationHelper';
 
 export default function App() {
   // First-time Onboarding state
@@ -190,6 +191,11 @@ export default function App() {
   };
 
   const handleUpdateItemStatus = async (itemId, newStatus, price) => {
+    const targetItem = items.find(i => i.id === itemId);
+    if (targetItem) {
+      notifyStatusChange(targetItem.title, newStatus);
+    }
+
     setItems(prevItems => {
       const nextItems = prevItems.map(item => {
         if (item.id === itemId) {
@@ -295,6 +301,9 @@ export default function App() {
         phone: currentUser?.phone || '081234567890'
       }
     };
+
+    // Trigger PWA Web Push Notification
+    notifyNewReport(newReport.title, newReport.status);
 
     // Update local state and localStorage cache immediately so it stays on Beranda
     setItems(prev => {
