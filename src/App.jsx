@@ -117,7 +117,8 @@ export default function App() {
       } else if (data && data.length > 0) {
         const mappedItems = data.map(dbItem => {
           let price = null;
-          if (dbItem.special_notes && dbItem.special_notes.includes('Harga Lelang:')) {
+          const isLelangNotes = dbItem.special_notes && dbItem.special_notes.toLowerCase().includes('harga lelang:');
+          if (isLelangNotes) {
             const rawPrice = dbItem.special_notes.replace(/[^0-9]/g, '');
             if (rawPrice) price = parseInt(rawPrice, 10);
           }
@@ -132,17 +133,19 @@ export default function App() {
             }
           }
 
+          const isAuctionItem = dbItem.status === 'lelang' || isLelangNotes;
+
           return {
             id: dbItem.id,
             title: dbItem.title,
             category: dbItem.category,
-            status: dbItem.status,
+            status: isAuctionItem ? 'lelang' : dbItem.status,
             location: dbItem.location,
             date: dbItem.date_reported || 'Baru saja',
             description: dbItem.description,
             specialNotes: dbItem.special_notes || '',
             auctionPrice: price || 15000,
-            isAuction: dbItem.status === 'lelang' || (dbItem.special_notes && dbItem.special_notes.includes('Harga Lelang:')),
+            isAuction: isAuctionItem,
             reporter: {
               name: dbItem.reporter_name || 'Siswa SMK',
               role: dbItem.reporter_role || 'Siswa',
@@ -243,13 +246,28 @@ export default function App() {
     });
 
     try {
-      await supabase
+      const formattedPrice = price ? Number(price).toLocaleString('id-ID') : '15.000';
+      const notes = newStatus === 'lelang' 
+        ? `Harga Lelang: Rp ${formattedPrice}`
+        : (targetItem?.specialNotes || '');
+
+      // First try updating status & special_notes directly
+      const { error } = await supabase
         .from('items')
         .update({
           status: newStatus,
-          special_notes: price ? `Harga Lelang: Rp ${Number(price).toLocaleString('id-ID')}` : undefined
+          special_notes: notes
         })
         .eq('id', itemId);
+
+      if (error) {
+        console.warn('Status update warning, attempting fallback update:', error.message || error);
+        // Fallback: If DB constraint rejects status='lelang', update special_notes so item remains in Lelang on refresh
+        await supabase
+          .from('items')
+          .update({ special_notes: notes })
+          .eq('id', itemId);
+      }
     } catch (err) {
       console.warn('Update item status error:', err);
     }
