@@ -31,9 +31,9 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
       img.onload = () => {
         try {
           const canvas = document.createElement('canvas');
-          const MAX_SIZE = 400;
-          let w = img.width || 400;
-          let h = img.height || 400;
+          const MAX_SIZE = 900; // HD 1080p crisp clarity for modern phone screens
+          let w = img.width || 900;
+          let h = img.height || 900;
 
           if (w > h) {
             if (w > MAX_SIZE) {
@@ -49,8 +49,15 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
           canvas.width = w;
           canvas.height = h;
           const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, w, h);
-          const compressed = canvas.toDataURL('image/jpeg', 0.5);
+
+          // Use modern WebP format for 1080p HD sharpness with tiny ~60KB file size!
+          let compressed = canvas.toDataURL('image/webp', 0.82);
+          if (!compressed || !compressed.startsWith('data:image/webp')) {
+            compressed = canvas.toDataURL('image/jpeg', 0.80);
+          }
           setPhotoUrl(compressed || rawDataUrl);
         } catch (err) {
           setPhotoUrl(rawDataUrl);
