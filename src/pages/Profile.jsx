@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { User, LogOut, History, ChevronRight, Edit3, Check, X, Camera, Phone, Upload, CheckCircle2, AlertTriangle } from 'lucide-react';
 
-export default function Profile({ currentUser, items, onLogout, onSelectItem, onUpdateProfile }) {
+export default function Profile({ currentUser, items, onLogout, onSelectItem, onUpdateProfile, onNavigateAdmin }) {
   const [activeHistoryTab, setActiveHistoryTab] = useState('hilang'); // 'hilang' | 'ditemukan' | 'selesai'
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -183,25 +183,49 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-          <button
-            onClick={() => setIsEditModalOpen(true)}
-            className="btn-primary"
-            style={{ flex: 1, padding: '10px 12px', fontSize: '12px' }}
-          >
-            <Edit3 size={15} />
-            Edit Profil Saya
-          </button>
-          
-          {/* Logout Button triggers Confirmation Modal */}
-          <button
-            onClick={() => setIsLogoutModalOpen(true)}
-            className="btn-secondary"
-            style={{ flex: 1, padding: '10px 12px', fontSize: '12px', color: '#ef4444', borderColor: '#fecaca', background: '#fef2f2' }}
-          >
-            <LogOut size={15} color="#ef4444" />
-            Keluar
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="btn-primary"
+              style={{ flex: 1, padding: '10px 12px', fontSize: '12px' }}
+            >
+              <Edit3 size={15} />
+              Edit Profil Saya
+            </button>
+            
+            {/* Logout Button triggers Confirmation Modal */}
+            <button
+              onClick={() => setIsLogoutModalOpen(true)}
+              className="btn-secondary"
+              style={{ flex: 1, padding: '10px 12px', fontSize: '12px', color: '#ef4444', borderColor: '#fecaca', background: '#fef2f2' }}
+            >
+              <LogOut size={15} color="#ef4444" />
+              Keluar
+            </button>
+          </div>
+
+          {currentUser?.role === 'guru' && onNavigateAdmin && (
+            <button
+              onClick={onNavigateAdmin}
+              className="btn-secondary"
+              style={{
+                width: '100%',
+                padding: '10px',
+                fontSize: '12px',
+                fontWeight: 800,
+                color: '#7c3aed',
+                borderColor: '#e9d5ff',
+                background: '#faf5ff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              💬 Kelola 3 Kontak Guru BK & 2 SP2K (Admin)
+            </button>
+          )}
         </div>
       </div>
 

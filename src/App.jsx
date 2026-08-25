@@ -446,6 +446,7 @@ export default function App() {
                 onLogout={handleLogout}
                 onSelectItem={handleSelectItem}
                 onUpdateProfile={handleUpdateProfile}
+                onNavigateAdmin={() => setActiveTab('admin')}
               />
             )}
 
