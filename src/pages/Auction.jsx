@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import { Gavel, Tag, Clock, MessageCircle, AlertCircle, ShieldCheck, Edit3, Save, X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
-export default function Auction({ items, currentUser, onSelectItem, onUpdateItemDetails }) {
+export default function Auction({ items, currentUser, onSelectItem, onUpdateItemDetails, onOpenContactModal }) {
   const [filterCategory, setFilterCategory] = useState('all');
   const [editingItem, setEditingItem] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
@@ -196,10 +196,8 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
                             Edit
                           </button>
                         )}
-                        <a
-                          href={waUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => onOpenContactModal && onOpenContactModal(item)}
                           style={{
                             background: 'linear-gradient(135deg, #d97706, #b45309)',
                             color: 'white',
@@ -207,7 +205,8 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
                             borderRadius: '10px',
                             fontSize: '11px',
                             fontWeight: 800,
-                            textDecoration: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
@@ -215,8 +214,8 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
                           }}
                         >
                           <MessageCircle size={13} />
-                          Beli via BK
-                        </a>
+                          Beli via BK / SP2K
+                        </button>
                       </div>
                     </div>
                   </div>

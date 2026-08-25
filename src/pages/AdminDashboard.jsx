@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight, Edit3, Save, X, Tag } from 'lucide-react';
+import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight, Edit3, Save, X, Tag, Plus, UserPlus, Phone, BookOpen, MessageCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
-export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus, onUpdateItemDetails }) {
-  const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'reports' | 'pending' | 'auction-manage'
+export default function AdminDashboard({ items, contacts = [], onSelectItem, onUpdateItemStatus, onUpdateItemDetails, onUpdateContacts }) {
+  const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'reports' | 'pending' | 'auction-manage' | 'contacts'
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -14,6 +14,10 @@ export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus
 
   // Edit Item Modal State (Admin edit nama, harga, jenis/kategori, status, lokasi)
   const [editingItem, setEditingItem] = useState(null);
+
+  // Edit/Add Contact State (Admin edit/tambah kontak BK / SP2K)
+  const [editingContact, setEditingContact] = useState(null);
+  const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
 
   const totalHilang = items.filter(i => i.status === 'hilang').length;
   const totalDitemukan = items.filter(i => i.status === 'ditemukan').length;
@@ -190,6 +194,24 @@ export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus
           }}
         >
           🔨 Lelang (&gt;30hr)
+        </button>
+
+        <button
+          onClick={() => setAdminTab('contacts')}
+          style={{
+            flex: 1,
+            padding: '8px 4px',
+            borderRadius: '8px',
+            border: 'none',
+            background: adminTab === 'contacts' ? '#7c3aed' : 'transparent',
+            color: adminTab === 'contacts' ? 'white' : '#475569',
+            fontWeight: 700,
+            fontSize: '11px',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          💬 Kontak BK/SP2K ({contacts.length})
         </button>
       </div>
 
@@ -426,6 +448,323 @@ export default function AdminDashboard({ items, onSelectItem, onUpdateItemStatus
             ))}
           </div>
         </>
+      )}
+
+      {/* CONTACTS MANAGEMENT TAB (3 Guru BK & 2 SP2K) */}
+      {adminTab === 'contacts' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>Kelola Kontak BK & SP2K 💬</h4>
+              <p style={{ fontSize: '11px', color: '#64748b' }}>Atur daftar 3 Guru BK (sesuai kelas diampu) & 2 Tim SP2K.</p>
+            </div>
+            <button
+              onClick={() => {
+                setEditingContact({
+                  id: 'contact-' + Date.now(),
+                  name: '',
+                  role: 'guru_bk',
+                  title: 'Guru BK Kelas...',
+                  classes: 'Kelas...',
+                  phone: '08',
+                  avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
+                  schedule: 'Senin - Jumat (07:00 - 15:30 WIB)',
+                  location: 'Ruang BK Lt. 1'
+                });
+                setIsAddContactModalOpen(true);
+              }}
+              className="btn-primary"
+              style={{ padding: '8px 12px', fontSize: '11px', gap: '4px' }}
+            >
+              <UserPlus size={14} />
+              + Tambah Kontak
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {contacts.map((c, index) => {
+              const isBk = c.role === 'guru_bk';
+              return (
+                <div
+                  key={c.id || index}
+                  style={{
+                    background: isBk ? '#ffffff' : '#f0fdf4',
+                    border: `1.5px solid ${isBk ? '#e9d5ff' : '#a7f3d0'}`,
+                    borderRadius: '16px',
+                    padding: '14px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <img
+                      src={c.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2'}
+                      alt={c.name}
+                      style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isBk ? '#7c3aed' : '#059669'}` }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>{c.name}</h4>
+                        <span style={{
+                          background: isBk ? '#f3e8ff' : '#d1fae5',
+                          color: isBk ? '#7c3aed' : '#047857',
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          padding: '2px 6px',
+                          borderRadius: '6px'
+                        }}>
+                          {isBk ? '🏫 GURU BK' : '🛡️ TIM SP2K'}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>{c.title}</span>
+                      <div style={{ fontSize: '11px', color: '#2563eb', fontWeight: 700, marginTop: '2px' }}>
+                        📍 Kelas Diampu: {c.classes}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px dashed #e2e8f0' }}>
+                    <div style={{ fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+                      📞 WA: <strong>{c.phone}</strong>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        onClick={() => {
+                          setEditingContact({ ...c });
+                          setIsAddContactModalOpen(false);
+                        }}
+                        style={{
+                          background: '#eff6ff',
+                          border: '1px solid #bfdbfe',
+                          color: '#2563eb',
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Edit3 size={13} />
+                        Edit Kontak
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Hapus kontak ${c.name}?`)) {
+                            const updated = contacts.filter(item => item.id !== c.id);
+                            if (onUpdateContacts) onUpdateContacts(updated);
+                          }
+                        }}
+                        style={{
+                          background: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          color: '#ef4444',
+                          padding: '6px 10px',
+                          borderRadius: '8px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* EDIT / ADD CONTACT MODAL */}
+      {(editingContact || isAddContactModalOpen) && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100, padding: '16px'
+        }}>
+          <div className="animate-fade" style={{
+            background: '#ffffff',
+            borderRadius: '20px',
+            padding: '20px',
+            width: '100%',
+            maxWidth: '420px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <UserPlus size={18} color="#7c3aed" />
+                {isAddContactModalOpen ? 'Tambah Kontak BK/SP2K Baru' : 'Edit Kontak BK/SP2K'}
+              </h3>
+              <button
+                onClick={() => { setEditingContact(null); setIsAddContactModalOpen(false); }}
+                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              let updatedContacts;
+              if (isAddContactModalOpen) {
+                updatedContacts = [...contacts, editingContact];
+              } else {
+                updatedContacts = contacts.map(c => c.id === editingContact.id ? editingContact : c);
+              }
+              if (onUpdateContacts) onUpdateContacts(updatedContacts);
+              setEditingContact(null);
+              setIsAddContactModalOpen(false);
+              setToastMessage('✅ Data kontak Guru BK / SP2K berhasil diperbarui!');
+              setTimeout(() => setToastMessage(''), 3500);
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Nama */}
+                <div>
+                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    Nama Lengkap (Gelar/Role): *
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={editingContact?.name || ''}
+                    onChange={(e) => setEditingContact({ ...editingContact, name: e.target.value })}
+                    placeholder="Contoh: Ibu Rina, S.Pd"
+                    style={{ fontSize: '13px', marginTop: '4px' }}
+                  />
+                </div>
+
+                {/* Peran / Role */}
+                <div>
+                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    Kategori / Peran: *
+                  </label>
+                  <select
+                    className="form-input"
+                    value={editingContact?.role || 'guru_bk'}
+                    onChange={(e) => setEditingContact({ ...editingContact, role: e.target.value })}
+                    style={{ fontSize: '13px', marginTop: '4px', background: '#ffffff' }}
+                  >
+                    <option value="guru_bk">🏫 Guru BK</option>
+                    <option value="sp2k">🛡️ Tim SP2K (Organisasi)</option>
+                  </select>
+                </div>
+
+                {/* Judul Jabatan */}
+                <div>
+                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    Jabatan / Judul: *
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={editingContact?.title || ''}
+                    onChange={(e) => setEditingContact({ ...editingContact, title: e.target.value })}
+                    placeholder="Contoh: Guru BK Kelas X / Piket SP2K Pagi"
+                    style={{ fontSize: '13px', marginTop: '4px' }}
+                  />
+                </div>
+
+                {/* Kelas Yang Diampu */}
+                <div>
+                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    Daftar Kelas Yang Diampu: *
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={editingContact?.classes || ''}
+                    onChange={(e) => setEditingContact({ ...editingContact, classes: e.target.value })}
+                    placeholder="Contoh: Kelas X (Semua Jurusan)"
+                    style={{ fontSize: '13px', marginTop: '4px' }}
+                  />
+                </div>
+
+                {/* No WhatsApp */}
+                <div>
+                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    No. WhatsApp Aktif: *
+                  </label>
+                  <input
+                    type="tel"
+                    className="form-input"
+                    required
+                    value={editingContact?.phone || ''}
+                    onChange={(e) => setEditingContact({ ...editingContact, phone: e.target.value })}
+                    placeholder="Contoh: 081299887766"
+                    style={{ fontSize: '13px', marginTop: '4px' }}
+                  />
+                </div>
+
+                {/* Jadwal */}
+                <div>
+                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    Jadwal Layanan / Piket:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={editingContact?.schedule || ''}
+                    onChange={(e) => setEditingContact({ ...editingContact, schedule: e.target.value })}
+                    placeholder="Contoh: Senin - Jumat (07:00 - 15:30 WIB)"
+                    style={{ fontSize: '13px', marginTop: '4px' }}
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setEditingContact(null); setIsAddContactModalOpen(false); }}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      borderRadius: '10px',
+                      border: '1px solid #cbd5e1',
+                      background: '#f8fafc',
+                      color: '#475569',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      borderRadius: '10px',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      background: 'linear-gradient(135deg, #7c3aed, #6d28d9)'
+                    }}
+                  >
+                    <Save size={15} />
+                    Simpan Kontak
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* EDIT ITEM MODAL FOR ADMIN BK */}

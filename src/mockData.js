@@ -184,3 +184,61 @@ export const ADMIN_STATS = {
   totalCompleted: 42,
   pendingVerifications: 5
 };
+
+export const INITIAL_CONTACTS = [
+  {
+    id: 'contact-bk-1',
+    name: 'Ibu Rina, S.Pd',
+    role: 'guru_bk',
+    title: 'Guru BK Kelas X',
+    classes: 'Kelas X (Semua Jurusan)',
+    phone: '081299887766',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
+    schedule: 'Senin - Jumat (07:00 - 15:30 WIB)',
+    location: 'Ruang BK Lt. 1'
+  },
+  {
+    id: 'contact-bk-2',
+    name: 'Pak Bambang, M.Pd',
+    role: 'guru_bk',
+    title: 'Guru BK Kelas XI',
+    classes: 'Kelas XI (Semua Jurusan)',
+    phone: '081388776655',
+    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200',
+    schedule: 'Senin - Jumat (07:00 - 15:30 WIB)',
+    location: 'Ruang BK Lt. 1'
+  },
+  {
+    id: 'contact-bk-3',
+    name: 'Ibu Maya, S.Pd',
+    role: 'guru_bk',
+    title: 'Guru BK Kelas XII',
+    classes: 'Kelas XII (Semua Jurusan)',
+    phone: '081577665544',
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200',
+    schedule: 'Senin - Jumat (07:00 - 15:30 WIB)',
+    location: 'Ruang BK Lt. 1'
+  },
+  {
+    id: 'contact-sp2k-1',
+    name: 'Aditya Pratama (SP2K)',
+    role: 'sp2k',
+    title: 'Tim SP2K Piket Pagi',
+    classes: 'Pengurus SP2K (Siswa Hilang & Ditemukan)',
+    phone: '081211223344',
+    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200',
+    schedule: 'Istirahat Pagi (09:45 - 10:15 WIB)',
+    location: 'Pos SP2K / Ruang BK'
+  },
+  {
+    id: 'contact-sp2k-2',
+    name: 'Nabila Putri (SP2K)',
+    role: 'sp2k',
+    title: 'Tim SP2K Piket Siang',
+    classes: 'Pengurus SP2K (Siswa Hilang & Ditemukan)',
+    phone: '081322334455',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200',
+    schedule: 'Istirahat Siang (12:00 - 13:00 WIB)',
+    location: 'Pos SP2K / Ruang BK'
+  }
+];

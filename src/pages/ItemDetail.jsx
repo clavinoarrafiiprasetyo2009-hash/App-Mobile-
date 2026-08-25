@@ -2,13 +2,8 @@ import React from 'react';
 import Header from '../components/Header';
 import { MapPin, Calendar, ShieldAlert, MessageCircle, FileCheck, Share2, PhoneCall } from 'lucide-react';
 
-export default function ItemDetail({ item, onBack, onStartVerification }) {
+export default function ItemDetail({ item, onBack, onStartVerification, onOpenContactModal }) {
   if (!item) return null;
-
-  // Direct WhatsApp Link to Admin Guru BK
-  const adminBkPhone = '6281299887766';
-  const waText = encodeURIComponent(`Halo Guru BK, saya mau menanyakan/mengonfirmasi laporan barang: "${item.title}" (${item.status === 'hilang' ? 'Laporan Kehilangan' : 'Barang Ditemukan'}) yang dilaporkan oleh ${item.reporter.name}. Apakah barang sudah ada / bisa diurus di Ruang BK?`);
-  const waUrl = `https://wa.me/${adminBkPhone}?text=${waText}`;
 
   return (
     <div className="animate-fade">
@@ -102,11 +97,9 @@ export default function ItemDetail({ item, onBack, onStartVerification }) {
 
       {/* Action Buttons */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {/* Direct WhatsApp Contact Button to Guru BK */}
-        <a
-          href={waUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Multi-Contact Selector Button (3 Guru BK & 2 SP2K) */}
+        <button
+          onClick={() => onOpenContactModal && onOpenContactModal(item)}
           className="btn-primary"
           style={{
             background: 'linear-gradient(135deg, #25d366, #128c7e)',
@@ -115,17 +108,18 @@ export default function ItemDetail({ item, onBack, onStartVerification }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            textDecoration: 'none',
             color: 'white',
             padding: '14px',
             borderRadius: '14px',
             fontWeight: 800,
-            fontSize: '13px'
+            fontSize: '13px',
+            border: 'none',
+            cursor: 'pointer'
           }}
         >
           <MessageCircle size={18} />
-          Hubungi Admin BK via WhatsApp
-        </a>
+          Hubungi Guru BK / SP2K via WhatsApp 💬
+        </button>
 
         {item.status === 'ditemukan' && (
           <button

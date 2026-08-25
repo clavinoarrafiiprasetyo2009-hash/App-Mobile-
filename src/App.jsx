@@ -9,8 +9,9 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Auction from './pages/Auction';
 import WelcomeOnboarding from './pages/WelcomeOnboarding';
+import ContactSelectorModal from './components/ContactSelectorModal';
 import { supabase } from './supabaseClient';
-import { INITIAL_ITEMS } from './mockData';
+import { INITIAL_ITEMS, INITIAL_CONTACTS } from './mockData';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import { notifyNewReport, notifyStatusChange } from './utils/notificationHelper';
 
@@ -62,6 +63,33 @@ export default function App() {
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSyncing, setIsSyncing] = useState(true);
+
+  // Contacts state for 3 Guru BK & 2 SP2K
+  const [contacts, setContacts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sitemu_contacts');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return INITIAL_CONTACTS;
+  });
+
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [selectedContactItem, setSelectedContactItem] = useState(null);
+
+  const handleOpenContactModal = (item) => {
+    setSelectedContactItem(item || null);
+    setIsContactModalOpen(true);
+  };
+
+  const handleUpdateContacts = (newContacts) => {
+    setContacts(newContacts);
+    try {
+      localStorage.setItem('sitemu_contacts', JSON.stringify(newContacts));
+    } catch (e) {}
+  };
 
   // Load items real-time from Supabase on mount + keep-alive heartbeat
   useEffect(() => {
@@ -380,6 +408,7 @@ export default function App() {
                 currentUser={currentUser}
                 onSelectItem={handleSelectItem}
                 onUpdateItemDetails={handleUpdateItemDetails}
+                onOpenContactModal={handleOpenContactModal}
               />
             )}
 
@@ -388,6 +417,7 @@ export default function App() {
                 item={selectedItem}
                 onBack={() => setActiveTab('home')}
                 onStartVerification={handleStartVerification}
+                onOpenContactModal={handleOpenContactModal}
               />
             )}
 
@@ -424,9 +454,11 @@ export default function App() {
               isGuru ? (
                 <AdminDashboard
                   items={items}
+                  contacts={contacts}
                   onSelectItem={handleSelectItem}
                   onUpdateItemStatus={handleUpdateItemStatus}
                   onUpdateItemDetails={handleUpdateItemDetails}
+                  onUpdateContacts={handleUpdateContacts}
                 />
               ) : (
                 <div className="animate-fade" style={{ textAlign: 'center', padding: '40px 20px' }}>
@@ -467,6 +499,15 @@ export default function App() {
           currentUser={currentUser}
         />
       )}
+
+      {/* Multi-Contact BK & SP2K Selector Modal */}
+      <ContactSelectorModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        contacts={contacts}
+        item={selectedContactItem}
+        currentUser={currentUser}
+      />
     </div>
   );
 }
