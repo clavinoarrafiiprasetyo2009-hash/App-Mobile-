@@ -20,7 +20,7 @@ export default function Login({ onLogin }) {
   const ADMIN_CREDENTIALS = {
     nik: '19850712201001',
     email: 'admin.bk@smk.sch.id',
-    password: 'adminBK2026!'
+    password: 'Bk@SiTemu2026#Secure!'
   };
 
   const handleSubmit = async (e) => {
@@ -31,9 +31,9 @@ export default function Login({ onLogin }) {
     try {
       // Check if logging in as Guru / Admin
       if (role === 'guru') {
-        const isCorrectNik = identifier.trim() === ADMIN_CREDENTIALS.nik || identifier.trim() === 'admin';
-        const isCorrectEmail = email.trim().toLowerCase() === ADMIN_CREDENTIALS.email || email.trim().toLowerCase() === 'admin@smk.sch.id';
-        const isCorrectPass = password === ADMIN_CREDENTIALS.password || password === 'admin123';
+        const isCorrectNik = identifier.trim() === ADMIN_CREDENTIALS.nik || identifier.trim().toLowerCase() === 'admin.bk@smk.sch.id';
+        const isCorrectEmail = email.trim().toLowerCase() === ADMIN_CREDENTIALS.email;
+        const isCorrectPass = password === ADMIN_CREDENTIALS.password;
 
         if (!isCorrectPass || (!isCorrectNik && !isCorrectEmail)) {
           setErrorMessage('⚠️ Akses Gagal! NIK/Email atau Password khusus Guru BK salah.');
