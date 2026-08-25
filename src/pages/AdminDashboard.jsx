@@ -114,104 +114,109 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
         </div>
       )}
 
-      {/* Admin Sub-Navigation Tabs */}
-      <div style={{
-        display: 'flex',
-        background: '#f1f5f9',
-        borderRadius: '12px',
-        padding: '4px',
-        marginBottom: '16px',
-        border: '1px solid #e2e8f0',
-        overflowX: 'auto'
-      }}>
+      {/* Admin Sub-Navigation Tabs - Clean & No Scrollbar */}
+      <div 
+        className="no-scrollbar"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(5, 1fr)',
+          gap: '3px',
+          background: '#f1f5f9',
+          borderRadius: '14px',
+          padding: '3px',
+          marginBottom: '16px',
+          border: '1px solid #e2e8f0',
+          width: '100%'
+        }}
+      >
         <button
           onClick={() => setAdminTab('overview')}
           style={{
-            flex: 1,
-            padding: '8px 4px',
-            borderRadius: '8px',
+            padding: '7px 2px',
+            borderRadius: '10px',
             border: 'none',
             background: adminTab === 'overview' ? '#2563eb' : 'transparent',
             color: adminTab === 'overview' ? 'white' : '#475569',
-            fontWeight: 700,
-            fontSize: '11px',
+            fontWeight: 800,
+            fontSize: '10.5px',
             cursor: 'pointer',
-            whiteSpace: 'nowrap'
+            textAlign: 'center',
+            transition: 'all 0.2s ease'
           }}
         >
-          📊 Ringkasan
+          📊 Stats
         </button>
 
         <button
           onClick={() => setAdminTab('reports')}
           style={{
-            flex: 1,
-            padding: '8px 4px',
-            borderRadius: '8px',
+            padding: '7px 2px',
+            borderRadius: '10px',
             border: 'none',
             background: adminTab === 'reports' ? '#2563eb' : 'transparent',
             color: adminTab === 'reports' ? 'white' : '#475569',
-            fontWeight: 700,
-            fontSize: '11px',
+            fontWeight: 800,
+            fontSize: '10.5px',
             cursor: 'pointer',
-            whiteSpace: 'nowrap'
+            textAlign: 'center',
+            transition: 'all 0.2s ease'
           }}
         >
-          📋 Kelola ({items.length})
+          📋 Kelola
         </button>
 
         <button
           onClick={() => setAdminTab('pending')}
           style={{
-            flex: 1,
-            padding: '8px 4px',
-            borderRadius: '8px',
+            padding: '7px 2px',
+            borderRadius: '10px',
             border: 'none',
             background: adminTab === 'pending' ? '#2563eb' : 'transparent',
             color: adminTab === 'pending' ? 'white' : '#475569',
-            fontWeight: 700,
-            fontSize: '11px',
+            fontWeight: 800,
+            fontSize: '10.5px',
             cursor: 'pointer',
-            whiteSpace: 'nowrap'
+            textAlign: 'center',
+            transition: 'all 0.2s ease'
           }}
         >
-          ⏳ Pending ({pendingItems.length})
+          ⏳ Pending
         </button>
 
         <button
           onClick={() => setAdminTab('auction-manage')}
           style={{
-            flex: 1,
-            padding: '8px 4px',
-            borderRadius: '8px',
+            padding: '7px 2px',
+            borderRadius: '10px',
             border: 'none',
             background: adminTab === 'auction-manage' ? '#d97706' : 'transparent',
             color: adminTab === 'auction-manage' ? 'white' : '#475569',
-            fontWeight: 700,
-            fontSize: '11px',
+            fontWeight: 800,
+            fontSize: '10.5px',
             cursor: 'pointer',
-            whiteSpace: 'nowrap'
+            textAlign: 'center',
+            transition: 'all 0.2s ease'
           }}
         >
-          🔨 Lelang (&gt;30hr)
+          🔨 Lelang
         </button>
 
         <button
           onClick={() => setAdminTab('contacts')}
           style={{
-            flex: 1,
-            padding: '8px 4px',
-            borderRadius: '8px',
+            padding: '7px 2px',
+            borderRadius: '10px',
             border: 'none',
             background: adminTab === 'contacts' ? '#7c3aed' : 'transparent',
             color: adminTab === 'contacts' ? 'white' : '#475569',
-            fontWeight: 700,
-            fontSize: '11px',
+            fontWeight: 800,
+            fontSize: '10.5px',
             cursor: 'pointer',
-            whiteSpace: 'nowrap'
+            textAlign: 'center',
+            transition: 'all 0.2s ease'
           }}
         >
-          💬 Kontak BK/SP2K ({contacts.length})
+          💬 Kontak
         </button>
       </div>
 
@@ -531,49 +536,26 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
                     </div>
 
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      <button
-                        onClick={() => {
-                          setEditingContact({ ...c });
-                          setIsAddContactModalOpen(false);
-                        }}
+                      <a
+                        href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '').startsWith('0') ? '62' + c.phone.replace(/[^0-9]/g, '').slice(1) : c.phone.replace(/[^0-9]/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         style={{
-                          background: '#eff6ff',
-                          border: '1px solid #bfdbfe',
-                          color: '#2563eb',
+                          background: 'linear-gradient(135deg, #25d366, #128c7e)',
+                          color: 'white',
                           padding: '6px 12px',
                           borderRadius: '8px',
                           fontSize: '11px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
+                          fontWeight: 800,
+                          textDecoration: 'none',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '4px'
                         }}
                       >
-                        <Edit3 size={13} />
-                        Edit Kontak
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          if (window.confirm(`Hapus kontak ${c.name}?`)) {
-                            const updated = contacts.filter(item => item.id !== c.id);
-                            if (onUpdateContacts) onUpdateContacts(updated);
-                          }
-                        }}
-                        style={{
-                          background: '#fef2f2',
-                          border: '1px solid #fecaca',
-                          color: '#ef4444',
-                          padding: '6px 10px',
-                          borderRadius: '8px',
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <X size={13} />
-                      </button>
+                        <MessageCircle size={13} />
+                        Chat WA
+                      </a>
                     </div>
                   </div>
                 </div>

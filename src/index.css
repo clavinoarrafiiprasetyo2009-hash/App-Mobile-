@@ -20,6 +20,15 @@
   --radius-full: 9999px;
 }
 
+/* Hide scrollbar utility for clean sub-nav tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

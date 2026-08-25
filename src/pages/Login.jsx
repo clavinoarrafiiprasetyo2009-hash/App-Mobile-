@@ -309,19 +309,32 @@ export default function Login({ onLogin }) {
             />
           </div>
 
-          {/* WhatsApp Number Field (Khusus Admin / Guru BK) */}
+          {/* WhatsApp Number & Kelas Diampu Field (Khusus Admin / Guru BK) */}
           {!isSiswa && (
-            <div className="form-group">
-              <label className="form-label">No. WhatsApp Admin BK *</label>
-              <input
-                type="tel"
-                className="form-input"
-                placeholder="Contoh: 081299887766"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </div>
+            <>
+              <div className="form-group">
+                <label className="form-label">No. WhatsApp Guru / Admin BK *</label>
+                <input
+                  type="tel"
+                  className="form-input"
+                  placeholder="Contoh: 081299887766"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Kelas Yang Diampu / Peran Guru BK *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Contoh: Kelas X (Semua Jurusan) / Guru BK Utama"
+                  value={userClass}
+                  onChange={(e) => setUserClass(e.target.value)}
+                />
+              </div>
+            </>
           )}
 
           {isRegister && isSiswa && (
