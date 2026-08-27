@@ -156,24 +156,27 @@ export default function Login({ onLogin }) {
     }}>
       {/* App Branding */}
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <div style={{
-          width: '64px',
-          height: '64px',
-          borderRadius: '20px',
-          background: isSiswa 
-            ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' 
-            : 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: '32px',
-          marginBottom: '10px',
-          boxShadow: isSiswa 
-            ? '0 10px 25px rgba(37, 99, 235, 0.35)' 
-            : '0 10px 25px rgba(124, 58, 237, 0.35)',
-          transition: 'all 0.3s ease'
-        }}>
+        <div 
+          className="animate-float"
+          style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '20px',
+            background: isSiswa 
+              ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' 
+              : 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '32px',
+            marginBottom: '10px',
+            boxShadow: isSiswa 
+              ? '0 10px 25px rgba(37, 99, 235, 0.35)' 
+              : '0 10px 25px rgba(124, 58, 237, 0.35)',
+            transition: 'all 0.3s ease'
+          }}
+        >
           🔍
         </div>
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>SiTemu</h1>
@@ -212,7 +215,9 @@ export default function Login({ onLogin }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            transition: 'all 0.25s ease'
+            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            boxShadow: isSiswa ? '0 4px 12px rgba(37, 99, 235, 0.3)' : 'none',
+            transform: isSiswa ? 'scale(1.02)' : 'scale(1)'
           }}
         >
           <UserCheck size={16} />
@@ -238,7 +243,9 @@ export default function Login({ onLogin }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            transition: 'all 0.25s ease'
+            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            boxShadow: !isSiswa ? '0 4px 12px rgba(124, 58, 237, 0.3)' : 'none',
+            transform: !isSiswa ? 'scale(1.02)' : 'scale(1)'
           }}
         >
           <Shield size={16} />
@@ -247,14 +254,18 @@ export default function Login({ onLogin }) {
       </div>
 
       {/* Form Card */}
-      <div className="glass-card" style={{
-        background: isSiswa ? '#ffffff' : '#faf5ff',
-        borderColor: isSiswa ? '#cbd5e1' : '#e9d5ff',
-        boxShadow: isSiswa 
-          ? '0 8px 30px rgba(37, 99, 235, 0.08)' 
-          : '0 8px 30px rgba(124, 58, 237, 0.08)',
-        transition: 'all 0.3s ease'
-      }}>
+      <div 
+        key={role + (isRegister ? '-reg' : '-log')}
+        className="glass-card animate-slide-up" 
+        style={{
+          background: isSiswa ? '#ffffff' : '#faf5ff',
+          borderColor: isSiswa ? '#cbd5e1' : '#e9d5ff',
+          boxShadow: isSiswa 
+            ? '0 8px 30px rgba(37, 99, 235, 0.08)' 
+            : '0 8px 30px rgba(124, 58, 237, 0.08)',
+          transition: 'all 0.3s ease'
+        }}
+      >
         <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
           {isRegister ? 'Buat Akun Siswa Baru 📝' : `Login ${isSiswa ? 'Siswa' : 'Guru / Admin BK'}`}
         </h3>
