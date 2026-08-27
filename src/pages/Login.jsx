@@ -152,8 +152,61 @@ export default function Login({ onLogin }) {
       minHeight: '100%',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      position: 'relative'
     }}>
+      {/* Ambient Floating 3D School Ornaments (Buku 📚, Pensil ✏️, Tas 🎒, Topi 🎓) */}
+      <div className="animate-float" style={{
+        position: 'absolute',
+        top: '12px',
+        left: '8px',
+        fontSize: '28px',
+        opacity: 0.9,
+        filter: 'drop-shadow(0 4px 10px rgba(37, 99, 235, 0.25))',
+        pointerEvents: 'none',
+        zIndex: 2
+      }}>
+        📚
+      </div>
+
+      <div className="animate-float-reverse" style={{
+        position: 'absolute',
+        top: '18px',
+        right: '10px',
+        fontSize: '28px',
+        opacity: 0.9,
+        filter: 'drop-shadow(0 4px 10px rgba(124, 58, 237, 0.25))',
+        pointerEvents: 'none',
+        zIndex: 2
+      }}>
+        ✏️
+      </div>
+
+      <div className="animate-float" style={{
+        position: 'absolute',
+        bottom: '10px',
+        left: '12px',
+        fontSize: '26px',
+        opacity: 0.85,
+        filter: 'drop-shadow(0 4px 10px rgba(16, 185, 129, 0.25))',
+        pointerEvents: 'none',
+        zIndex: 2
+      }}>
+        🎒
+      </div>
+
+      <div className="animate-float-reverse" style={{
+        position: 'absolute',
+        bottom: '14px',
+        right: '12px',
+        fontSize: '26px',
+        opacity: 0.85,
+        filter: 'drop-shadow(0 4px 10px rgba(245, 158, 11, 0.25))',
+        pointerEvents: 'none',
+        zIndex: 2
+      }}>
+        🎓
+      </div>
       {/* App Branding */}
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <div 
