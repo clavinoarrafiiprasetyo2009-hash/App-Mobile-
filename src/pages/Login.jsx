@@ -475,39 +475,6 @@ export default function Login({ onLogin }) {
             </div>
           </div>
 
-          {!isSiswa && (
-            <div style={{ marginTop: '12px', textAlign: 'center' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setIdentifier('19850712201001');
-                  setPhone('081299887766');
-                  setUserClass('Guru BK Utama');
-                  setEmail('admin.bk@smk.sch.id');
-                  setPassword('admin123');
-                  setErrorMessage('');
-                }}
-                style={{
-                  background: '#faf5ff',
-                  border: '1.5px dashed #c084fc',
-                  color: '#7c3aed',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
-                }}
-              >
-                ⚡ Isi Otomatis Data Admin (Fast Login)
-              </button>
-            </div>
-          )}
-
           <button
             type="submit"
             className="btn-primary"
