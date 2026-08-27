@@ -327,6 +327,22 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{item.title}</h5>
                   <span style={{ fontSize: '11px', color: '#64748b' }}>{item.date.split(',')[0]} • {item.location}</span>
+                  {item.isPublished === false && (
+                    <div style={{ marginTop: '2px' }}>
+                      <span style={{
+                        background: '#fef2f2',
+                        color: '#dc2626',
+                        fontSize: '9.5px',
+                        fontWeight: 800,
+                        padding: '1px 6px',
+                        borderRadius: '6px',
+                        border: '1px solid #fecaca',
+                        display: 'inline-block'
+                      }}>
+                        ⏳ Menunggu Moderasi BK
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <ChevronRight size={16} color="#94a3b8" />
               </div>

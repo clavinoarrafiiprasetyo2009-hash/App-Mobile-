@@ -134,6 +134,7 @@ export default function App() {
           }
 
           const isAuctionItem = dbItem.status === 'lelang' || isLelangNotes;
+          const isPublished = dbItem.is_published !== false;
 
           return {
             id: dbItem.id,
@@ -146,6 +147,7 @@ export default function App() {
             specialNotes: dbItem.special_notes || '',
             auctionPrice: price || 15000,
             isAuction: isAuctionItem,
+            isPublished: isPublished,
             reporter: {
               name: dbItem.reporter_name || 'Siswa SMK',
               role: dbItem.reporter_role || 'Siswa',
@@ -339,9 +341,13 @@ export default function App() {
         : 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600';
     }
 
+    // Reports submitted by Guru BK are auto-approved; Reports submitted by Siswa require BK approval moderation
+    const isAutoPublished = currentUser?.role === 'guru';
+
     const reportWithPhone = {
       ...newReport,
       image: imageToSave,
+      isPublished: isAutoPublished,
       reporter: {
         ...newReport.reporter,
         phone: currentUser?.phone || '081234567890'
@@ -351,7 +357,7 @@ export default function App() {
     // Trigger PWA Web Push Notification
     notifyNewReport(newReport.title, newReport.status);
 
-    // Update local state and localStorage cache immediately so it stays on Beranda
+    // Update local state and localStorage cache immediately
     setItems(prev => {
       const nextItems = [reportWithPhone, ...prev];
       try {
@@ -372,7 +378,8 @@ export default function App() {
         reporter_name: newReport.reporter.name,
         reporter_role: newReport.reporter.role,
         reporter_avatar: newReport.reporter.avatar,
-        image_url: imageToSave
+        image_url: imageToSave,
+        is_published: isAutoPublished
       }]).select();
 
       if (error) {
@@ -390,6 +397,44 @@ export default function App() {
       }
     } catch (err) {
       console.warn('Report submit sync error:', err);
+    }
+  };
+
+  const handleApprovePublication = async (itemId) => {
+    setItems(prevItems => {
+      const nextItems = prevItems.map(item => item.id === itemId ? { ...item, isPublished: true } : item);
+      try {
+        localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
+      } catch (e) {}
+      return nextItems;
+    });
+
+    try {
+      await supabase
+        .from('items')
+        .update({ is_published: true })
+        .eq('id', itemId);
+    } catch (err) {
+      console.warn('Approve publication sync error:', err);
+    }
+  };
+
+  const handleRejectPublication = async (itemId) => {
+    setItems(prevItems => {
+      const nextItems = prevItems.filter(item => item.id !== itemId);
+      try {
+        localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
+      } catch (e) {}
+      return nextItems;
+    });
+
+    try {
+      await supabase
+        .from('items')
+        .delete()
+        .eq('id', itemId);
+    } catch (err) {
+      console.warn('Reject publication sync error:', err);
     }
   };
 
@@ -478,6 +523,8 @@ export default function App() {
                   onUpdateItemStatus={handleUpdateItemStatus}
                   onUpdateItemDetails={handleUpdateItemDetails}
                   onUpdateContacts={handleUpdateContacts}
+                  onApprovePublication={handleApprovePublication}
+                  onRejectPublication={handleRejectPublication}
                 />
               ) : (
                 <div className="animate-fade" style={{ textAlign: 'center', padding: '40px 20px' }}>

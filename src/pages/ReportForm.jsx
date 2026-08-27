@@ -405,10 +405,12 @@ export default function ReportForm({ currentUser, onBack, onSubmitReport, onGoHo
               <CheckCircle2 size={36} />
             </div>
             <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
-              Laporan Berhasil Diposting! 🎉
+              {currentUser?.role === 'guru' ? 'Laporan Langsung Tayang! 🎉' : 'Laporan Terkirim (Proses Moderasi) 🛡️'}
             </h3>
             <p style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.4', marginBottom: '18px' }}>
-              Laporanmu sudah masuk ke dalam sistem <strong>SiTemu Sekolah</strong> dan dapat dilihat oleh seluruh siswa & guru.
+              {currentUser?.role === 'guru'
+                ? 'Laporan resmi Guru BK telah ditayangkan secara publik di Beranda sekolah.'
+                : 'Laporanmu sedang ditinjau oleh Admin/Guru BK sebelum ditayangkan di Beranda sekolah untuk mencegah postingan palsu.'}
             </p>
             <button
               className="btn-primary"

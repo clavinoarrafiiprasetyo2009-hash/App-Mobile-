@@ -28,6 +28,8 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
   };
 
   const filteredItems = items.filter(item => {
+    // Public Home feed ONLY shows published reports approved by Admin BK!
+    const isPublished = item.isPublished !== false;
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -35,7 +37,7 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
     const matchesTab = activeTab === 'all' || item.status === activeTab;
 
-    return matchesSearch && matchesCategory && matchesTab;
+    return isPublished && matchesSearch && matchesCategory && matchesTab;
   });
 
   const getCategoryIcon = (catId) => {

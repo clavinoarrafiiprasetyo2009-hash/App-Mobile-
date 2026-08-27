@@ -3,8 +3,17 @@ import Header from '../components/Header';
 import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight, Edit3, Save, X, Tag, Plus, UserPlus, Phone, BookOpen, MessageCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
-export default function AdminDashboard({ items, contacts = [], onSelectItem, onUpdateItemStatus, onUpdateItemDetails, onUpdateContacts }) {
-  const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'reports' | 'pending' | 'auction-manage' | 'contacts'
+export default function AdminDashboard({ 
+  items, 
+  contacts = [], 
+  onSelectItem, 
+  onUpdateItemStatus, 
+  onUpdateItemDetails, 
+  onUpdateContacts,
+  onApprovePublication,
+  onRejectPublication 
+}) {
+  const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'moderation' | 'reports' | 'pending' | 'auction-manage' | 'contacts'
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -23,6 +32,8 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
   const totalDitemukan = items.filter(i => i.status === 'ditemukan').length;
   const totalSelesai = items.filter(i => i.status === 'selesai').length;
   const totalLelang = items.filter(i => i.status === 'lelang' || i.isAuction).length;
+
+  const pendingApprovalItems = items.filter(i => i.isPublished === false);
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -118,21 +129,22 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
       <div 
         className="no-scrollbar"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: '3px',
+          display: 'flex',
+          gap: '4px',
           background: '#f1f5f9',
           borderRadius: '14px',
-          padding: '3px',
+          padding: '4px',
           marginBottom: '16px',
           border: '1px solid #e2e8f0',
-          width: '100%'
+          width: '100%',
+          overflowX: 'auto'
         }}
       >
         <button
           onClick={() => setAdminTab('overview')}
           style={{
-            padding: '7px 2px',
+            flex: 1,
+            padding: '7px 4px',
             borderRadius: '10px',
             border: 'none',
             background: adminTab === 'overview' ? '#2563eb' : 'transparent',
@@ -141,6 +153,7 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
             fontSize: '10.5px',
             cursor: 'pointer',
             textAlign: 'center',
+            whiteSpace: 'nowrap',
             transition: 'all 0.2s ease'
           }}
         >
@@ -148,9 +161,31 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
         </button>
 
         <button
+          onClick={() => setAdminTab('moderation')}
+          style={{
+            flex: 1.2,
+            padding: '7px 4px',
+            borderRadius: '10px',
+            background: adminTab === 'moderation' ? '#dc2626' : (pendingApprovalItems.length > 0 ? '#fef2f2' : 'transparent'),
+            color: adminTab === 'moderation' ? 'white' : (pendingApprovalItems.length > 0 ? '#dc2626' : '#475569'),
+            fontWeight: 800,
+            fontSize: '10.5px',
+            cursor: 'pointer',
+            textAlign: 'center',
+            whiteSpace: 'nowrap',
+            position: 'relative',
+            border: pendingApprovalItems.length > 0 && adminTab !== 'moderation' ? '1px solid #fecaca' : 'none',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          🛡️ Moderasi ({pendingApprovalItems.length})
+        </button>
+
+        <button
           onClick={() => setAdminTab('reports')}
           style={{
-            padding: '7px 2px',
+            flex: 1,
+            padding: '7px 4px',
             borderRadius: '10px',
             border: 'none',
             background: adminTab === 'reports' ? '#2563eb' : 'transparent',
@@ -159,6 +194,7 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
             fontSize: '10.5px',
             cursor: 'pointer',
             textAlign: 'center',
+            whiteSpace: 'nowrap',
             transition: 'all 0.2s ease'
           }}
         >
@@ -168,7 +204,8 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
         <button
           onClick={() => setAdminTab('pending')}
           style={{
-            padding: '7px 2px',
+            flex: 1,
+            padding: '7px 4px',
             borderRadius: '10px',
             border: 'none',
             background: adminTab === 'pending' ? '#2563eb' : 'transparent',
@@ -177,6 +214,7 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
             fontSize: '10.5px',
             cursor: 'pointer',
             textAlign: 'center',
+            whiteSpace: 'nowrap',
             transition: 'all 0.2s ease'
           }}
         >
@@ -186,7 +224,8 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
         <button
           onClick={() => setAdminTab('auction-manage')}
           style={{
-            padding: '7px 2px',
+            flex: 1,
+            padding: '7px 4px',
             borderRadius: '10px',
             border: 'none',
             background: adminTab === 'auction-manage' ? '#d97706' : 'transparent',
@@ -195,6 +234,7 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
             fontSize: '10.5px',
             cursor: 'pointer',
             textAlign: 'center',
+            whiteSpace: 'nowrap',
             transition: 'all 0.2s ease'
           }}
         >
@@ -204,7 +244,8 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
         <button
           onClick={() => setAdminTab('contacts')}
           style={{
-            padding: '7px 2px',
+            flex: 1,
+            padding: '7px 4px',
             borderRadius: '10px',
             border: 'none',
             background: adminTab === 'contacts' ? '#7c3aed' : 'transparent',
@@ -213,12 +254,168 @@ export default function AdminDashboard({ items, contacts = [], onSelectItem, onU
             fontSize: '10.5px',
             cursor: 'pointer',
             textAlign: 'center',
+            whiteSpace: 'nowrap',
             transition: 'all 0.2s ease'
           }}
         >
           💬 Kontak
         </button>
       </div>
+
+      {/* MODERATION TAB (Persetujuan Postingan Laporan Siswa Baru) */}
+      {adminTab === 'moderation' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>Moderasi Postingan Siswa 🛡️</h4>
+              <p style={{ fontSize: '11px', color: '#64748b' }}>Tinjau laporan baru sebelum ditayangkan di Beranda publik.</p>
+            </div>
+            <span style={{
+              background: pendingApprovalItems.length > 0 ? '#fef2f2' : '#f0fdf4',
+              color: pendingApprovalItems.length > 0 ? '#dc2626' : '#166534',
+              fontSize: '11px',
+              fontWeight: 800,
+              padding: '4px 10px',
+              borderRadius: '20px',
+              border: `1px solid ${pendingApprovalItems.length > 0 ? '#fecaca' : '#bbf7d0'}`
+            }}>
+              {pendingApprovalItems.length} Menunggu Persetujuan
+            </span>
+          </div>
+
+          {pendingApprovalItems.length === 0 ? (
+            <div style={{
+              background: '#f8fafc',
+              border: '2px dashed #cbd5e1',
+              borderRadius: '20px',
+              padding: '32px 16px',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '52px', height: '52px', borderRadius: '50%',
+                background: '#f0fdf4', color: '#166534',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 12px'
+              }}>
+                <CheckCircle2 size={28} />
+              </div>
+              <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+                Semua Postingan Bersih & Ter-moderasi! 🎉
+              </h4>
+              <p style={{ fontSize: '11px', color: '#64748b', maxWidth: '280px', margin: '0 auto', lineHeight: '1.4' }}>
+                Tidak ada laporan siswa yang tertunda. Semua postingan baru di Beranda telah disetujui Guru BK.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {pendingApprovalItems.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    background: '#ffffff',
+                    border: '1.5px solid #fecaca',
+                    borderRadius: '16px',
+                    padding: '14px',
+                    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.05)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
+                  }}
+                >
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      style={{ width: '64px', height: '64px', borderRadius: '12px', objectFit: 'cover' }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                        <span style={{
+                          background: item.status === 'hilang' ? '#fef2f2' : '#f0fdf4',
+                          color: item.status === 'hilang' ? '#dc2626' : '#166534',
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          padding: '2px 6px',
+                          borderRadius: '6px'
+                        }}>
+                          {item.status === 'hilang' ? '🔴 HILANG' : '🟢 DITEMUKAN'}
+                        </span>
+                        <span style={{ fontSize: '10px', color: '#94a3b8' }}>• {item.date}</span>
+                      </div>
+                      <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        {item.title}
+                      </h4>
+                      <p style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                        📍 {item.location}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '10px', fontSize: '11px', color: '#334155' }}>
+                    <strong>Pelapor:</strong> {item.reporter.name} ({item.reporter.role})<br />
+                    <strong>Deskripsi:</strong> {item.description || 'Tidak ada deskripsi.'}
+                  </div>
+
+                  {/* Moderation Actions */}
+                  <div style={{ display: 'flex', gap: '8px', paddingTop: '6px', borderTop: '1px dashed #e2e8f0' }}>
+                    <button
+                      onClick={() => {
+                        if (onApprovePublication) onApprovePublication(item.id);
+                        setToastMessage(`✅ Laporan "${item.title}" disetujui & tayang di Beranda!`);
+                        setTimeout(() => setToastMessage(''), 3500);
+                      }}
+                      style={{
+                        flex: 1,
+                        background: 'linear-gradient(135deg, #16a34a, #15803d)',
+                        color: 'white',
+                        padding: '8px',
+                        borderRadius: '10px',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <CheckCircle2 size={14} />
+                      Setujui & Publikasikan
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Tolak dan hapus laporan "${item.title}"?`)) {
+                          if (onRejectPublication) onRejectPublication(item.id);
+                          setToastMessage(`❌ Laporan "${item.title}" ditolak & dihapus.`);
+                          setTimeout(() => setToastMessage(''), 3500);
+                        }
+                      }}
+                      style={{
+                        background: '#fef2f2',
+                        border: '1px solid #fecaca',
+                        color: '#dc2626',
+                        padding: '8px 12px',
+                        borderRadius: '10px',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <X size={14} />
+                      Tolak
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* OVERVIEW TAB */}
       {adminTab === 'overview' && (

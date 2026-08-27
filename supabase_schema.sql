@@ -35,8 +35,12 @@ CREATE TABLE IF NOT EXISTS public.items (
   reporter_phone TEXT,
   reporter_avatar TEXT,
   image_url TEXT NOT NULL,
+  is_published BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Perintah SQL untuk Menambahkan Kolom is_published jika tabel sudah ada di Supabase
+ALTER TABLE public.items ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT TRUE;
 
 -- 4. TABEL AUCTIONS (Khusus Fitur Lelang Barang Unclaimed > 30 Hari)
 CREATE TABLE IF NOT EXISTS public.auctions (
