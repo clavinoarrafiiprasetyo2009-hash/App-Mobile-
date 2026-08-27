@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, Shield, UserCheck, AlertCircle } from 'lucide-react';
+import { LogIn, UserPlus, Shield, UserCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 export default function Login({ onLogin }) {
   const [isRegister, setIsRegister] = useState(false);
   const [role, setRole] = useState('siswa'); // 'siswa' | 'guru'
+  const [showPassword, setShowPassword] = useState(false);
   
   // Form fields empty by default
   const [name, setName] = useState('');
@@ -450,14 +451,36 @@ export default function Login({ onLogin }) {
 
           <div className="form-group">
             <label className="form-label">Kata Sandi *</label>
-            <input
-              type="password"
-              className="form-input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-input"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ paddingRight: '40px' }}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? 'Sembunyikan Kata Sandi' : 'Lihat Kata Sandi'}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '4px'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button
