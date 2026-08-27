@@ -77,68 +77,89 @@ export default function Login({ onLogin }) {
         return;
       }
 
-      // Extract first part of email (e.g. vino@smk.id -> Vino)
-      const emailPrefix = email.split('@')[0] || 'Siswa';
+      // Extract email and query Supabase profiles
+      const inputEmail = email.trim().toLowerCase();
+      const inputNisn = identifier.trim();
+
+      const { data: existingProfile, error: fetchErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', inputEmail)
+        .maybeSingle();
+
+      // MODE LOGIN SISWA: Akun Wajib Terdaftar Terlebih Dahulu!
+      if (!isRegister) {
+        if (!existingProfile) {
+          setErrorMessage('⚠️ Akun Siswa ini belum terdaftar! Silakan klik "Daftar Baru" di bawah untuk membuat akun terlebih dahulu.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Login sukses dengan data profil resmi yang sudah terdaftar
+        const loggedInSiswa = {
+          id: existingProfile.id || ('siswa-' + (inputNisn || Date.now())),
+          name: existingProfile.name || inputEmail.split('@')[0],
+          role: 'siswa',
+          nisn: existingProfile.nisn_nik || inputNisn,
+          class: existingProfile.class_name || 'XII RPL 1',
+          phone: existingProfile.phone || '081234567890',
+          email: inputEmail,
+          avatar: existingProfile.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
+        };
+
+        onLogin(loggedInSiswa);
+        return;
+      }
+
+      // MODE DAFTAR BARU SISWA (isRegister === true)
+      if (existingProfile) {
+        setErrorMessage('⚠️ Email ini sudah terdaftar! Silakan pindah ke menu "Login" untuk masuk.');
+        setIsLoading(false);
+        return;
+      }
+
+      const emailPrefix = inputEmail.split('@')[0] || 'Siswa';
       const emailDerivedName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
       const finalName = name.trim() ? name.trim() : emailDerivedName;
+      const finalClass = userClass.trim() ? userClass.trim() : 'XII RPL 1';
+      const finalPhone = phone.trim() ? phone.trim() : '081234567890';
+      const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
 
-      // Fetch saved Siswa profile from Supabase to preserve custom uploaded avatar photo!
-      let savedAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
-      let savedName = finalName;
-      let savedClass = userClass || 'XII RPL 1';
-      let savedPhone = phone || '081234567890';
-
-      try {
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('email', email.trim().toLowerCase())
-          .maybeSingle();
-
-        if (existingProfile) {
-          if (existingProfile.avatar_url) savedAvatar = existingProfile.avatar_url;
-          if (existingProfile.name && !name.trim()) savedName = existingProfile.name;
-          if (existingProfile.class_name && !userClass) savedClass = existingProfile.class_name;
-          if (existingProfile.phone && !phone) savedPhone = existingProfile.phone;
-        }
-      } catch (err) {
-        console.warn('Profile fetch check error:', err);
-      }
-
-      // Process Siswa Login / Registration
-      const siswaUser = {
-        id: 'siswa-' + (identifier || email.split('@')[0] || Date.now()),
-        name: savedName,
+      // Process New Siswa Registration
+      const newSiswaUser = {
+        id: 'siswa-' + (inputNisn || Date.now()),
+        name: finalName,
         role: 'siswa',
-        nisn: identifier,
-        class: savedClass,
-        phone: savedPhone,
-        email: email.trim().toLowerCase(),
-        avatar: savedAvatar
+        nisn: inputNisn,
+        class: finalClass,
+        phone: finalPhone,
+        email: inputEmail,
+        avatar: defaultAvatar
       };
 
-      // Save/Sync student login data to Supabase profiles table using onConflict: 'email'
+      // Save/Sync student registration data to Supabase profiles table
       try {
-        const { data: profileResult, error: profileErr } = await supabase.from('profiles').upsert([{
-          name: siswaUser.name,
+        const { data: profileResult, error: profileErr } = await supabase.from('profiles').insert([{
+          name: finalName,
           role: 'siswa',
-          nisn_nik: identifier || '00000000',
-          class_name: savedClass,
-          phone: savedPhone,
-          email: email.trim().toLowerCase(),
-          avatar_url: savedAvatar
-        }], { onConflict: 'email' }).select();
+          nisn_nik: inputNisn || '00000000',
+          class_name: finalClass,
+          phone: finalPhone,
+          email: inputEmail,
+          avatar_url: defaultAvatar
+        }]).select();
 
         if (profileErr) {
-          console.warn('Supabase profile login sync error:', profileErr.message || profileErr);
+          console.warn('Supabase profile registration sync error:', profileErr.message || profileErr);
         } else if (profileResult && profileResult[0]) {
-          siswaUser.id = profileResult[0].id;
+          newSiswaUser.id = profileResult[0].id;
         }
       } catch (err) {
-        console.warn('Supabase profile login sync:', err);
+        console.warn('Supabase profile registration error:', err);
       }
 
-      onLogin(siswaUser);
+      onLogin(newSiswaUser);
+      return;
     } finally {
       setIsLoading(false);
     }
