@@ -52,6 +52,7 @@ export const INITIAL_ITEMS = [
     location: 'Perpustakaan Lt. 2',
     date: '18 Agu 2026, 14:20 WIB',
     description: 'Terakhir ditaruh di meja baca no 4 dekat jendela. Pakai casing transparan dengan stiker logo SMK.',
+    isPublished: true,
     reporter: {
       name: 'Vino S. Prasetya',
       role: 'Siswa (XII RPL 1)',
@@ -68,6 +69,7 @@ export const INITIAL_ITEMS = [
     location: 'Kantin Sekolah (Meja No 12)',
     date: '19 Agu 2026, 09:15 WIB',
     description: 'Ditemukan terselip di bawah kursi kantin. Isi dalam ada kartu siswa dan uang tunai secukupnya.',
+    isPublished: true,
     reporter: {
       name: 'Bu Rina (Guru BK)',
       role: 'Guru BK / Pengawas',
@@ -78,12 +80,32 @@ export const INITIAL_ITEMS = [
   },
   {
     id: 'item-3',
+    title: 'Jaket Hoodie Converse Original (Lelang BK)',
+    category: 'pakaian',
+    status: 'lelang',
+    location: 'Ruang BK Lt. 1',
+    date: '10 Jul 2026, 10:00 WIB',
+    description: 'Barang temuan yang sudah melebihi batas waktu simpan 30 hari. Dilelang resmi oleh BK Sekolah.',
+    isPublished: true,
+    isAuction: true,
+    auctionPrice: 35000,
+    reporter: {
+      name: 'Guru BK Sekolah',
+      role: 'Admin BK',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200'
+    },
+    image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=600',
+    specialNotes: 'Harga Lelang: Rp 35.000'
+  },
+  {
+    id: 'item-4',
     title: 'Kacamata Frame Hitam Titanium',
     category: 'aksesori',
     status: 'hilang',
     location: 'Lab Komputer 2',
     date: '17 Agu 2026, 11:00 WIB',
     description: 'Kotak kacamata warna biru navy merk Owndays. Ketinggalan di samping PC 15.',
+    isPublished: true,
     reporter: {
       name: 'Siti Rahma',
       role: 'Siswa (XI AKL)',
@@ -93,52 +115,23 @@ export const INITIAL_ITEMS = [
     specialNotes: 'Minus 2.5 silinder 0.5.'
   },
   {
-    id: 'item-4',
-    title: 'Buku Cetak Matematika Wajib K13',
-    category: 'buku',
-    status: 'ditemukan',
-    location: 'Ruang Kelas XII RPL 1',
-    date: '18 Agu 2026, 16:00 WIB',
-    description: 'Ada nama tertulis di sampul belakang tapi agak samar. Buku sampul plastik bening.',
-    reporter: {
-      name: 'Pak Andi',
-      role: 'Guru Matematika',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200'
-    },
-    image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=600',
-    specialNotes: 'Dapat diambil di loker guru.'
-  },
-  {
     id: 'item-5',
-    title: 'Botol Minum Tupperware Neon 1 Liter',
+    title: 'Botol Minum Tupperware Neon 1L (Lelang BK)',
     category: 'botol',
-    status: 'ditemukan',
-    location: 'Lapangan Basket Outdoor',
-    date: '19 Agu 2026, 08:00 WIB',
-    description: 'Botol warna hijau neon terang dengan gantungan tali warna hitam.',
+    status: 'lelang',
+    location: 'Ruang BK Lt. 1',
+    date: '12 Jul 2026, 14:00 WIB',
+    description: 'Barang temuan unclaimed >30 hari. Hasil lelang dialokasikan untuk dana sosial siswa.',
+    isPublished: true,
+    isAuction: true,
+    auctionPrice: 15000,
     reporter: {
-      name: 'Ahmad Supri',
-      role: 'Siswa (X TKR 2)',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200'
+      name: 'Guru BK Sekolah',
+      role: 'Admin BK',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200'
     },
     image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&q=80&w=600',
-    specialNotes: 'Ditemukan setelah kegiatan senam pagi.'
-  },
-  {
-    id: 'item-6',
-    title: 'Kunci Motor Honda Vario (Gantungan Batman)',
-    category: 'kunci',
-    status: 'selesai',
-    location: 'Parkiran Depan Pos Satpam',
-    date: '16 Agu 2026, 07:30 WIB',
-    description: 'Kunci motor dengan remote alarm dan gantungan kunci gusi karet Batman.',
-    reporter: {
-      name: 'Pak Budi (Satpam)',
-      role: 'Petugas Keamanan',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200'
-    },
-    image: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&q=80&w=600',
-    specialNotes: 'Sudah diserahterimakan kepada pemiliknya (Vino S.) pada 16 Agu 2026.'
+    specialNotes: 'Harga Lelang: Rp 15.000'
   }
 ];
 

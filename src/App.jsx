@@ -58,7 +58,7 @@ export default function App() {
         }
       }
     } catch (e) {}
-    return [];
+    return INITIAL_ITEMS;
   });
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -114,6 +114,7 @@ export default function App() {
 
       if (error) {
         console.warn('Supabase fetch status:', error.message || error);
+        setItems(prev => prev.length > 0 ? prev : INITIAL_ITEMS);
       } else if (data && data.length > 0) {
         const mappedItems = data.map(dbItem => {
           let price = null;
@@ -134,7 +135,8 @@ export default function App() {
           }
 
           const isAuctionItem = dbItem.status === 'lelang' || isLelangNotes;
-          const isPublished = dbItem.is_published !== false;
+          // Items in auction or without explicit is_published=false are published!
+          const isPublished = isAuctionItem || dbItem.is_published !== false;
 
           return {
             id: dbItem.id,
@@ -163,9 +165,13 @@ export default function App() {
         try {
           localStorage.setItem('sitemu_items_cache', JSON.stringify(mappedItems));
         } catch (e) {}
+      } else {
+        // If Supabase table has 0 items, fallback to INITIAL_ITEMS so users see sample items
+        setItems(INITIAL_ITEMS);
       }
     } catch (err) {
       console.warn('Supabase integration offline fallback:', err);
+      setItems(prev => prev.length > 0 ? prev : INITIAL_ITEMS);
     } finally {
       setIsSyncing(false);
     }
