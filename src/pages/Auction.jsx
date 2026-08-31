@@ -14,7 +14,8 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
   const auctionItems = items.filter(item => 
     item.status === 'lelang' || 
     item.isAuction || 
-    (item.specialNotes && item.specialNotes.includes('Harga Lelang:'))
+    (item.specialNotes && item.specialNotes.toLowerCase().includes('harga lelang:')) ||
+    (item.title && item.title.toLowerCase().includes('lelang'))
   );
 
   const filteredAuctionItems = auctionItems.filter(item => {
