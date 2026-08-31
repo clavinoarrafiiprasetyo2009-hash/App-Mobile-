@@ -46,19 +46,16 @@ export default function App() {
     return 'home';
   });
 
-  // Initialize items from localStorage cache first; return [] if empty (never fallback to dummy INITIAL_ITEMS to avoid mock data flash)
+  // Initialize items from localStorage cache first; return [] if empty so real Supabase data is never overwritten by mock dummy data
   const [items, setItems] = useState(() => {
     try {
       const cached = localStorage.getItem('sitemu_items_cache');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          const clean = parsed.filter(i => !['item-1', 'item-2', 'item-3', 'item-4'].includes(i.id));
-          if (clean.length > 0) return clean;
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
-    return INITIAL_ITEMS;
+    return [];
   });
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -114,8 +111,7 @@ export default function App() {
 
       if (error) {
         console.warn('Supabase fetch status:', error.message || error);
-        setItems(prev => prev.length > 0 ? prev : INITIAL_ITEMS);
-      } else if (data && data.length > 0) {
+      } else if (data) {
         const mappedItems = data.map(dbItem => {
           let price = null;
           const isLelangNotes = dbItem.special_notes && dbItem.special_notes.toLowerCase().includes('harga lelang:');
@@ -160,18 +156,14 @@ export default function App() {
           };
         });
 
+        // Always prioritize real mapped items from Supabase database
         setItems(mappedItems);
-        // Cache data Supabase real terbaru ke localStorage
         try {
           localStorage.setItem('sitemu_items_cache', JSON.stringify(mappedItems));
         } catch (e) {}
-      } else {
-        // If Supabase table has 0 items, fallback to INITIAL_ITEMS so users see sample items
-        setItems(INITIAL_ITEMS);
       }
     } catch (err) {
-      console.warn('Supabase integration offline fallback:', err);
-      setItems(prev => prev.length > 0 ? prev : INITIAL_ITEMS);
+      console.warn('Supabase integration error:', err);
     } finally {
       setIsSyncing(false);
     }
