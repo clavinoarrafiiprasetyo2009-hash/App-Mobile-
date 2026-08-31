@@ -8,6 +8,7 @@ import VerificationForm from './pages/VerificationForm';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Auction from './pages/Auction';
+import Forum from './pages/Forum';
 import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import ContactSelectorModal from './components/ContactSelectorModal';
 import { supabase } from './supabaseClient';
@@ -508,6 +509,16 @@ export default function App() {
                 onSelectItem={handleSelectItem}
                 onUpdateProfile={handleUpdateProfile}
                 onNavigateAdmin={() => setActiveTab('admin')}
+              />
+            )}
+
+            {/* Forum Page View */}
+            {activeTab === 'forum' && (
+              <Forum
+                items={items}
+                currentUser={currentUser}
+                onSelectItem={handleSelectItem}
+                onOpenContactModal={handleOpenContactModal}
               />
             )}
 

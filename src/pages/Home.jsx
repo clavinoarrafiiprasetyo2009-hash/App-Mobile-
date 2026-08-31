@@ -381,8 +381,8 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <span className={`badge badge-${item.status}`} style={{ flexShrink: 0 }}>
-                      {item.status === 'hilang' ? '🔴 HILANG' : item.status === 'ditemukan' ? '🟢 DITEMUKAN' : '🔵 SELESAI'}
+                    <span className={`badge badge-${item.status}`} style={{ flexShrink: 0, background: item.status === 'lelang' ? '#fef3c7' : undefined, color: item.status === 'lelang' ? '#b45309' : undefined, border: item.status === 'lelang' ? '1px solid #fde68a' : undefined }}>
+                      {item.status === 'hilang' ? '🔴 HILANG' : item.status === 'ditemukan' ? '🟢 DITEMUKAN' : item.status === 'lelang' ? '🏷️ LELANG' : '🔵 SELESAI'}
                     </span>
                     <span style={{ fontSize: '11px', color: '#94a3b8', flexShrink: 0, whiteSpace: 'nowrap' }}>
                       {item.date.split(',')[0]}

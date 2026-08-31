@@ -155,8 +155,12 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
                         }}>
                           <Gavel size={11} /> LELANG RESMI
                         </span>
-                        <span style={{ fontSize: '10px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '2px' }}>
-                          <Clock size={11} /> &gt;30 Hari
+                        <span style={{
+                          background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca',
+                          padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 800,
+                          display: 'inline-flex', alignItems: 'center', gap: '4px'
+                        }}>
+                          <Clock size={11} /> ⏱️ Sisa 5 Hari
                         </span>
                       </div>
                       <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

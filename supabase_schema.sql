@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   category TEXT NOT NULL,
-  status TEXT NOT NULL CHECK (status IN ('hilang', 'ditemukan', 'lelang', 'selesai')),
+  status TEXT NOT NULL CHECK (status IN ('hilang', 'ditemukan', 'lelang', 'forum', 'selesai')),
   location TEXT NOT NULL,
   date_reported TEXT NOT NULL,
   description TEXT NOT NULL,
