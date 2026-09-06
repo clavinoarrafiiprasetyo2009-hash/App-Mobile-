@@ -61,6 +61,22 @@ ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.auctions DISABLE ROW LEVEL SECURITY;
 
+-- 5. TAMBAH KOLOM POIN PADA TABEL PROFILES & TABEL REDEMPTIONS
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS points INT DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS public.point_redemptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  claim_code TEXT UNIQUE NOT NULL,
+  student_name TEXT NOT NULL,
+  student_class TEXT,
+  reward_title TEXT NOT NULL,
+  points_cost INT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.point_redemptions DISABLE ROW LEVEL SECURITY;
+
 -- SAMPLE DUMMY DATA LELANG (TERMASUK 2 BARANG RAYA)
 INSERT INTO public.auctions (title, category, description, starting_price, current_bid, highest_bidder, image_url, status)
 VALUES 
