@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, User, ShieldCheck, Gavel, Camera, ArrowLeft, MessageSquare } from 'lucide-react';
+import { Home, User, ShieldCheck, Gavel, Camera, ArrowLeft, Gift } from 'lucide-react';
 
 export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
   const isGuru = currentUser?.role === 'guru';
@@ -79,14 +79,14 @@ export default function BottomNav({ activeTab, setActiveTab, currentUser }) {
             <span>Lelang</span>
           </button>
 
-          {/* 4. Forum (Baru) */}
+          {/* 4. Poin & Hadiah */}
           <button 
-            className={`nav-item ${activeTab === 'forum' ? 'active' : ''}`}
-            onClick={() => setActiveTab('forum')}
+            className={`nav-item ${activeTab === 'points' ? 'active' : ''}`}
+            onClick={() => setActiveTab('points')}
             style={{ flex: 1 }}
           >
-            <MessageSquare size={20} />
-            <span>Forum</span>
+            <Gift size={20} />
+            <span>Poin</span>
           </button>
 
           {/* 5. Profil */}

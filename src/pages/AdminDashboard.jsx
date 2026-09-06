@@ -6,6 +6,7 @@ import { supabase } from '../supabaseClient';
 export default function AdminDashboard({ 
   items, 
   contacts = [], 
+  pointRedemptions = [],
   onSelectItem, 
   onUpdateItemStatus, 
   onUpdateItemDetails, 
@@ -262,14 +263,14 @@ export default function AdminDashboard({
         </button>
 
         <button
-          onClick={() => setAdminTab('forum-manage')}
+          onClick={() => setAdminTab('points-manage')}
           style={{
             flex: 1,
             padding: '7px 4px',
             borderRadius: '10px',
             border: 'none',
-            background: adminTab === 'forum-manage' ? '#4f46e5' : 'transparent',
-            color: adminTab === 'forum-manage' ? 'white' : '#475569',
+            background: adminTab === 'points-manage' ? '#4f46e5' : 'transparent',
+            color: adminTab === 'points-manage' ? 'white' : '#475569',
             fontWeight: 800,
             fontSize: '10.5px',
             cursor: 'pointer',
@@ -278,48 +279,47 @@ export default function AdminDashboard({
             transition: 'all 0.2s ease'
           }}
         >
-          💬 Forum
+          🎁 Klaim Poin
         </button>
       </div>
 
-      {/* FORUM MANAGEMENT TAB */}
-      {adminTab === 'forum-manage' && (
+      {/* POINTS & REWARDS MANAGEMENT TAB */}
+      {adminTab === 'points-manage' && (
         <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ background: '#e0e7ff', border: '1px solid #c7d2fe', padding: '14px', borderRadius: '16px' }}>
             <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#3730a3', marginBottom: '4px' }}>
-              💬 Kelola Forum & Donasi Sekolah 🎁
+              🎁 Kelola Penukaran Poin & Hadiah Siswa ⭐
             </h4>
             <p style={{ fontSize: '12px', color: '#4338ca', lineHeight: 1.4 }}>
-              Atur status barang lelang kedaluwarsa (&gt;7 Hari) yang siap dialokasikan untuk hibah/donasi kegiatan sekolah atau permohonan siswa.
+              Setiap kali laporan foto siswa disetujui (ACC) oleh Admin BK, pelapor otomatis menerima <strong>+1 Poin</strong>. Siswa dapat menukarkan poin dengan merchandise/hadiah di Ruang BK.
             </p>
           </div>
 
           <div className="glass-card" style={{ padding: '14px', borderRadius: '16px', background: 'white' }}>
             <h5 style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-              🎁 Status Barang Expired Lelang (Donasi Active):
+              📋 Daftar Pengajuan Klaim Hadiah Siswa:
             </h5>
-            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
-              Semua barang lelang yang melewati batas waktu 7 hari otomatis dikategorikan sebagai Barang Hibah/Donasi Sekolah. Siswa/Guru dapat mengajukan permohonan pengambilan melalui ruang BK.
-            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {items.filter(i => i.status === 'forum' || (i.specialNotes && i.specialNotes.toLowerCase().includes('donasi'))).length === 0 ? (
-                <div style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic', padding: '10px 0' }}>
-                  Belum ada barang lelang yang kedaluwarsa &gt;7 hari.
+              {pointRedemptions.length === 0 ? (
+                <div style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic', padding: '16px 0', textAlign: 'center' }}>
+                  Belum ada klaim hadiah yang ditukarkan siswa.
                 </div>
               ) : (
-                items.filter(i => i.status === 'forum' || (i.specialNotes && i.specialNotes.toLowerCase().includes('donasi'))).map(donasiItem => (
-                  <div key={donasiItem.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                pointRedemptions.map((item, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{donasiItem.title}</div>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>Lokasi: {donasiItem.location}</div>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{item.rewardTitle}</div>
+                      <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>
+                        Siswa: <strong>{item.studentName}</strong> ({item.studentClass})
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#4f46e5', fontWeight: 800, marginTop: '2px' }}>
+                        Kode Klaim: <span style={{ background: '#e0e7ff', padding: '2px 6px', borderRadius: '4px' }}>{item.claimCode}</span> ({item.pointsCost} Poin)
+                      </div>
                     </div>
-                    <button
-                      onClick={() => onUpdateItemStatus && onUpdateItemStatus(donasiItem.id, 'selesai')}
-                      style={{ background: '#10b981', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
-                    >
-                      ✅ Tandai Terhibahkan
-                    </button>
+                    <span style={{ fontSize: '10px', background: '#d1fae5', color: '#059669', padding: '4px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                      Klaim Aktif
+                    </span>
                   </div>
                 ))
               )}
@@ -427,7 +427,7 @@ export default function AdminDashboard({
                     <button
                       onClick={() => {
                         if (onApprovePublication) onApprovePublication(item.id);
-                        setToastMessage(`✅ Laporan "${item.title}" disetujui & tayang di Beranda!`);
+                        setToastMessage(`✅ Laporan "${item.title}" disetujui, dipublikasikan & +1 Poin diberikan ke pelapor! 🎉`);
                         setTimeout(() => setToastMessage(''), 3500);
                       }}
                       style={{

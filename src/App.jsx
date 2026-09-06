@@ -8,7 +8,7 @@ import VerificationForm from './pages/VerificationForm';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Auction from './pages/Auction';
-import Forum from './pages/Forum';
+import Points from './pages/Points';
 import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import ContactSelectorModal from './components/ContactSelectorModal';
 import { supabase } from './supabaseClient';
@@ -76,6 +76,34 @@ export default function App() {
 
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [selectedContactItem, setSelectedContactItem] = useState(null);
+
+  // User Points & Rewards Redemption State
+  const [userPoints, setUserPoints] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sitemu_user_points');
+      return saved ? parseInt(saved, 10) || 0 : 3; // Default 3 points for starter bonus
+    } catch (e) {
+      return 3;
+    }
+  });
+
+  const [pointHistory, setPointHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sitemu_point_history');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [
+      { id: 'pt-init', type: 'earn', amount: 3, description: 'Bonus Selamat Datang Pahlawan SiTemu 🎉', date: 'Hari Ini' }
+    ];
+  });
+
+  const [pointRedemptions, setPointRedemptions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sitemu_point_redemptions');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
 
   const handleOpenContactModal = (item) => {
     setSelectedContactItem(item || null);
@@ -400,13 +428,49 @@ export default function App() {
   };
 
   const handleApprovePublication = async (itemId) => {
+    let approvedTitle = '';
+
     setItems(prevItems => {
-      const nextItems = prevItems.map(item => item.id === itemId ? { ...item, isPublished: true } : item);
+      const nextItems = prevItems.map(item => {
+        if (item.id === itemId) {
+          approvedTitle = item.title;
+          return { ...item, isPublished: true };
+        }
+        return item;
+      });
       try {
         localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
       } catch (e) {}
       return nextItems;
     });
+
+    // Add +1 Point to user point balance & record in history log
+    const dateNow = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const pointEntry = {
+      id: `pt-${Date.now()}`,
+      type: 'earn',
+      amount: 1,
+      description: `Laporan Disetujui (ACC): "${approvedTitle || 'Barang'}"`,
+      date: dateNow
+    };
+
+    setUserPoints(prevPts => {
+      const newPts = prevPts + 1;
+      try {
+        localStorage.setItem('sitemu_user_points', newPts.toString());
+      } catch (e) {}
+      return newPts;
+    });
+
+    setPointHistory(prevHist => {
+      const newHist = [pointEntry, ...prevHist];
+      try {
+        localStorage.setItem('sitemu_point_history', JSON.stringify(newHist));
+      } catch (e) {}
+      return newHist;
+    });
+
+    setCurrentUser(prev => prev ? { ...prev, points: (prev.points || 0) + 1 } : prev);
 
     try {
       await supabase
@@ -416,6 +480,54 @@ export default function App() {
     } catch (err) {
       console.warn('Approve publication sync error:', err);
     }
+  };
+
+  const handleRedeemReward = (reward, claimCode) => {
+    const cost = reward.pointsCost;
+    const dateNow = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    setUserPoints(prevPts => {
+      const newPts = Math.max(0, prevPts - cost);
+      try {
+        localStorage.setItem('sitemu_user_points', newPts.toString());
+      } catch (e) {}
+      return newPts;
+    });
+
+    const redeemEntry = {
+      id: `pt-red-${Date.now()}`,
+      type: 'spend',
+      amount: cost,
+      description: `Tukar Hadiah: "${reward.title}" (Kode: ${claimCode})`,
+      date: dateNow
+    };
+
+    setPointHistory(prevHist => {
+      const newHist = [redeemEntry, ...prevHist];
+      try {
+        localStorage.setItem('sitemu_point_history', JSON.stringify(newHist));
+      } catch (e) {}
+      return newHist;
+    });
+
+    setPointRedemptions(prev => {
+      const newRedemptions = [{
+        id: claimCode,
+        studentName: currentUser?.name || 'Siswa',
+        studentClass: currentUser?.class || 'Siswa',
+        rewardTitle: reward.title,
+        pointsCost: cost,
+        claimCode: claimCode,
+        date: dateNow,
+        status: 'pending'
+      }, ...prev];
+      try {
+        localStorage.setItem('sitemu_point_redemptions', JSON.stringify(newRedemptions));
+      } catch (e) {}
+      return newRedemptions;
+    });
+
+    setCurrentUser(prev => prev ? { ...prev, points: Math.max(0, (prev.points || 0) - cost) } : prev);
   };
 
   const handleRejectPublication = async (itemId) => {
@@ -504,21 +616,23 @@ export default function App() {
             {activeTab === 'profile' && (
               <Profile
                 currentUser={currentUser}
+                userPoints={userPoints}
                 items={items.filter(i => i.reporter.name.includes(currentUser.name.split(' ')[0]))}
                 onLogout={handleLogout}
                 onSelectItem={handleSelectItem}
                 onUpdateProfile={handleUpdateProfile}
                 onNavigateAdmin={() => setActiveTab('admin')}
+                onNavigatePoints={() => setActiveTab('points')}
               />
             )}
 
-            {/* Forum Page View */}
-            {activeTab === 'forum' && (
-              <Forum
-                items={items}
+            {/* Points & Rewards Page View */}
+            {activeTab === 'points' && (
+              <Points
                 currentUser={currentUser}
-                onSelectItem={handleSelectItem}
-                onOpenContactModal={handleOpenContactModal}
+                userPoints={userPoints}
+                pointHistory={pointHistory}
+                onRedeemReward={handleRedeemReward}
               />
             )}
 
@@ -528,6 +642,7 @@ export default function App() {
                 <AdminDashboard
                   items={items}
                   contacts={contacts}
+                  pointRedemptions={pointRedemptions}
                   onSelectItem={handleSelectItem}
                   onUpdateItemStatus={handleUpdateItemStatus}
                   onUpdateItemDetails={handleUpdateItemDetails}

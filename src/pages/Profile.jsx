@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import { User, LogOut, History, ChevronRight, Edit3, Check, X, Camera, Phone, Upload, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { User, LogOut, History, ChevronRight, Edit3, Check, X, Camera, Phone, Upload, CheckCircle2, AlertTriangle, Gift, Coins, Sparkles } from 'lucide-react';
 
-export default function Profile({ currentUser, items, onLogout, onSelectItem, onUpdateProfile, onNavigateAdmin }) {
+export default function Profile({ currentUser, userPoints = 0, items, onLogout, onSelectItem, onUpdateProfile, onNavigateAdmin, onNavigatePoints }) {
   const [activeHistoryTab, setActiveHistoryTab] = useState('hilang'); // 'hilang' | 'ditemukan' | 'selesai'
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -227,6 +227,43 @@ export default function Profile({ currentUser, items, onLogout, onSelectItem, on
             </button>
           )}
         </div>
+
+        {/* Poin Saya Quick Card */}
+        {onNavigatePoints && (
+          <div
+            onClick={onNavigatePoints}
+            style={{
+              background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+              borderRadius: '16px',
+              padding: '14px 16px',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: '14px',
+              cursor: 'pointer',
+              boxShadow: '0 6px 18px rgba(79, 70, 229, 0.25)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '42px', height: '42px', borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <Gift size={24} color="#facc15" />
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: '11px', opacity: 0.9, fontWeight: 600 }}>Poin Kejujuran Saya</div>
+                <div style={{ fontSize: '18px', fontWeight: 900 }}>{userPoints} Poin ⭐️</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 800, background: 'rgba(255,255,255,0.2)', padding: '6px 12px', borderRadius: '20px' }}>
+              <span>Tukar Hadiah</span>
+              <ChevronRight size={14} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* History Tabs Section */}
