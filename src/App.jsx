@@ -256,6 +256,11 @@ export default function App() {
       notifyStatusChange(targetItem.title, newStatus);
     }
 
+    const nowIso = new Date().toISOString();
+    try {
+      localStorage.setItem(`sitemu_auction_start_${itemId}`, Date.now().toString());
+    } catch (e) {}
+
     setItems(prevItems => {
       const nextItems = prevItems.map(item => {
         if (item.id === itemId) {
@@ -263,6 +268,7 @@ export default function App() {
             ...item,
             status: newStatus,
             auctionPrice: price || item.auctionPrice || 15000,
+            auctionStartDate: item.auctionStartDate || nowIso,
             isAuction: newStatus === 'lelang'
           };
         }

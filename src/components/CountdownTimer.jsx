@@ -1,20 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 
-export default function CountdownTimer({ dateReported, created_at, durationDays = 7, compact = false }) {
+export default function CountdownTimer({ itemId, auctionStartDate, dateReported, created_at, durationDays = 7, compact = false }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: false });
 
   useEffect(() => {
     let baseTime;
-    if (created_at) {
-      baseTime = new Date(created_at).getTime();
-    } else if (dateReported) {
-      baseTime = new Date(dateReported).getTime();
+
+    // 1. Check explicit auction start date prop
+    if (auctionStartDate) {
+      const parsed = new Date(auctionStartDate).getTime();
+      if (!isNaN(parsed)) baseTime = parsed;
     }
-    
-    // If date is invalid or mock string like "2026-08-22", set default baseTime as 2 days ago (5 days remaining)
+
+    // 2. Check created_at timestamp
+    if (!baseTime && created_at) {
+      const parsed = new Date(created_at).getTime();
+      if (!isNaN(parsed)) baseTime = parsed;
+    }
+
+    // 3. Check dateReported timestamp (if valid ISO date)
+    if (!baseTime && dateReported) {
+      const parsed = new Date(dateReported).getTime();
+      if (!isNaN(parsed)) baseTime = parsed;
+    }
+
+    // 4. Persistent LocalStorage Fallback per Item ID (so timer NEVER resets on refresh!)
+    const storageKey = `sitemu_auction_start_${itemId || 'default'}`;
     if (!baseTime || isNaN(baseTime)) {
-      baseTime = Date.now() - (2 * 24 * 60 * 60 * 1000); 
+      try {
+        const savedTime = localStorage.getItem(storageKey);
+        if (savedTime) {
+          baseTime = parseInt(savedTime, 10);
+        } else {
+          // Set start time ONCE (2 days ago so 5 days remaining for demo) and persist to localStorage
+          baseTime = Date.now() - (2 * 24 * 60 * 60 * 1000);
+          localStorage.setItem(storageKey, baseTime.toString());
+        }
+      } catch (e) {
+        baseTime = Date.now() - (2 * 24 * 60 * 60 * 1000);
+      }
     }
 
     const targetTime = baseTime + (durationDays * 24 * 60 * 60 * 1000);
@@ -39,7 +64,7 @@ export default function CountdownTimer({ dateReported, created_at, durationDays 
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [dateReported, created_at, durationDays]);
+  }, [itemId, auctionStartDate, dateReported, created_at, durationDays]);
 
   if (timeLeft.isExpired) {
     return (

@@ -388,6 +388,8 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
                     {item.status === 'lelang' ? (
                       <CountdownTimer 
                         compact={true} 
+                        itemId={item.id}
+                        auctionStartDate={item.auctionStartDate || item.auction_start_date}
                         dateReported={item.date_reported || item.dateReported || item.date} 
                         created_at={item.created_at} 
                         durationDays={7} 

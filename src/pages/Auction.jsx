@@ -157,6 +157,8 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
                           <Gavel size={11} /> LELANG RESMI
                         </span>
                         <CountdownTimer 
+                          itemId={item.id}
+                          auctionStartDate={item.auctionStartDate || item.auction_start_date}
                           dateReported={item.date_reported || item.dateReported || item.date} 
                           created_at={item.created_at} 
                           durationDays={7} 
