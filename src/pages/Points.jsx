@@ -50,11 +50,14 @@ const INITIAL_REWARDS = [
   }
 ];
 
-export default function Points({ currentUser, userPoints = 0, pointHistory = [], items = [], onRedeemReward }) {
+export default function Points({ currentUser, userPoints = 0, pointHistory = [], items = [], rewardsCatalog = [], onRedeemReward }) {
   const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' | 'history'
   const [selectedReward, setSelectedReward] = useState(null);
   const [claimSuccess, setClaimSuccess] = useState(null);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [toastMsg, setToastMsg] = useState('');
+
+  const catalogSource = rewardsCatalog.length > 0 ? rewardsCatalog : INITIAL_REWARDS;
 
   // Dynamically map expired auction items (>7 days) or status='points'/'lelang' items to reward catalog
   const expiredAuctionRewards = items
@@ -69,7 +72,7 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
       description: `Barang temuan unclaimed yang telah melewati 7 hari lelang (${item.location}). Kini dapat ditukarkan dengan poin.`
     }));
 
-  const allRewards = [...INITIAL_REWARDS, ...expiredAuctionRewards];
+  const allRewards = [...catalogSource, ...expiredAuctionRewards];
 
   const showToast = (msg) => {
     setToastMsg(msg);
@@ -79,24 +82,32 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
   const handleConfirmRedeem = () => {
     if (!selectedReward) return;
 
+    if (selectedReward.stock <= 0) {
+      showToast('❌ Stok hadiah ini sudah habis!');
+      return;
+    }
+
     if (userPoints < selectedReward.pointsCost) {
       showToast('❌ Poin kamu belum mencukupi untuk menukar hadiah ini.');
       return;
     }
 
+    const finalAddress = deliveryAddress.trim() || `Ruang BK / Kelas ${currentUser?.class || 'Siswa'}`;
     const claimCode = `ST-POIN-${Math.floor(100000 + Math.random() * 900000)}`;
 
     if (onRedeemReward) {
-      onRedeemReward(selectedReward, claimCode);
+      onRedeemReward(selectedReward, claimCode, finalAddress);
     }
 
     setClaimSuccess({
       reward: selectedReward,
       code: claimCode,
+      address: finalAddress,
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     });
 
     setSelectedReward(null);
+    setDeliveryAddress('');
     showToast(`🎉 Berhasil menukar "${selectedReward.title}"! Kode: ${claimCode}`);
   };
 
@@ -289,7 +300,8 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '14px' }}>
               {allRewards.map((rew) => {
-                const isEnoughPoints = userPoints >= rew.pointsCost;
+                const isOutOfStock = rew.stock <= 0;
+                const isEnoughPoints = userPoints >= rew.pointsCost && !isOutOfStock;
                 return (
                   <div
                     key={rew.id}
@@ -302,6 +314,7 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
                       display: 'flex',
                       gap: '14px',
                       alignItems: 'center',
+                      opacity: isOutOfStock ? 0.65 : 1,
                       transition: 'transform 0.2s ease, boxShadow 0.2s ease'
                     }}
                   >
@@ -330,8 +343,8 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
                         }}>
                           {rew.category}
                         </span>
-                        <span style={{ fontSize: '10px', color: '#059669', fontWeight: 600 }}>
-                          Stok: {rew.stock} pcs
+                        <span style={{ fontSize: '10px', color: isOutOfStock ? '#dc2626' : '#059669', fontWeight: 700 }}>
+                          {isOutOfStock ? '⚠️ Stok Habis' : `Stok: ${rew.stock} pcs`}
                         </span>
                       </div>
 
@@ -351,8 +364,9 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
 
                         <button
                           onClick={() => setSelectedReward(rew)}
+                          disabled={!isEnoughPoints}
                           style={{
-                            background: isEnoughPoints ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : '#e2e8f0',
+                            background: isOutOfStock ? '#cbd5e1' : (isEnoughPoints ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : '#e2e8f0'),
                             color: isEnoughPoints ? '#ffffff' : '#94a3b8',
                             border: 'none',
                             borderRadius: '10px',
@@ -364,7 +378,7 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
                             transition: 'all 0.2s ease'
                           }}
                         >
-                          {isEnoughPoints ? 'Tukar Now ➔' : 'Poin Kurang'}
+                          {isOutOfStock ? 'Stok Habis' : (isEnoughPoints ? 'Tukar Now ➔' : 'Poin Kurang')}
                         </button>
                       </div>
                     </div>
@@ -522,6 +536,29 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
               </div>
             </div>
 
+            {/* Input Alamat Pengiriman / Lokasi Pengambilan */}
+            <div style={{ textAlign: 'left', marginBottom: '18px' }}>
+              <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
+                📍 Alamat Pengiriman / Lokasi Pengambilan:
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  fontSize: '12px',
+                  borderRadius: '10px',
+                  border: '1px solid #cbd5e1',
+                  boxSizing: 'border-box',
+                  background: '#f8fafc'
+                }}
+                placeholder={`Misal: Kelas ${currentUser?.class || 'XII RPL 1'} / Ruang BK`}
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+              />
+            </div>
+
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={() => setSelectedReward(null)}
@@ -621,6 +658,9 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
               </div>
               <div style={{ fontSize: '11px', fontWeight: 700, color: '#1e293b' }}>
                 {claimSuccess.reward.title}
+              </div>
+              <div style={{ fontSize: '10px', color: '#475569', marginTop: '4px' }}>
+                📍 <strong>Alamat / Lokasi:</strong> {claimSuccess.address}
               </div>
             </div>
 

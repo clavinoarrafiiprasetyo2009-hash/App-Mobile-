@@ -7,6 +7,10 @@ export default function AdminDashboard({
   items, 
   contacts = [], 
   pointRedemptions = [],
+  rewardsCatalog = [],
+  onAddRewardItem,
+  onUpdateRewardStock,
+  onCompleteClaim,
   onSelectItem, 
   onUpdateItemStatus, 
   onUpdateItemDetails, 
@@ -14,9 +18,18 @@ export default function AdminDashboard({
   onApprovePublication,
   onRejectPublication 
 }) {
-  const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'moderation' | 'reports' | 'pending' | 'auction-manage' | 'contacts'
+  const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'moderation' | 'reports' | 'pending' | 'auction-manage' | 'contacts' | 'points-manage'
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Add Reward Modal State
+  const [isAddRewardModalOpen, setIsAddRewardModalOpen] = useState(false);
+  const [newRewTitle, setNewRewTitle] = useState('');
+  const [newRewPoints, setNewRewPoints] = useState('5');
+  const [newRewCategory, setNewRewCategory] = useState('Alat Tulis');
+  const [newRewStock, setNewRewStock] = useState('10');
+  const [newRewImage, setNewRewImage] = useState('https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400');
+  const [newRewDesc, setNewRewDesc] = useState('');
 
   // Price state for each item being set for auction
   const [auctionPrices, setAuctionPrices] = useState({});
@@ -285,44 +298,157 @@ export default function AdminDashboard({
 
       {/* POINTS & REWARDS MANAGEMENT TAB */}
       {adminTab === 'points-manage' && (
-        <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ background: '#e0e7ff', border: '1px solid #c7d2fe', padding: '14px', borderRadius: '16px' }}>
             <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#3730a3', marginBottom: '4px' }}>
-              🎁 Kelola Penukaran Poin & Hadiah Siswa ⭐
+              🎁 Kelola Penukaran Poin, Stok Hadiah & Klaim Siswa ⭐
             </h4>
             <p style={{ fontSize: '12px', color: '#4338ca', lineHeight: 1.4 }}>
-              Setiap kali laporan foto siswa disetujui (ACC) oleh Admin BK, pelapor otomatis menerima <strong>+1 Poin</strong>. Siswa dapat menukarkan poin dengan merchandise/hadiah di Ruang BK.
+              Setiap kali laporan foto siswa disetujui (ACC) oleh Admin BK, pelapor menerima <strong>+1 Poin</strong>. Admin dapat mengelola stok pcs barang hadiah dan memverifikasi alamat pengiriman klaim siswa di bawah ini.
             </p>
           </div>
 
+          {/* 1. Pengajuan Klaim Hadiah Siswa */}
           <div className="glass-card" style={{ padding: '14px', borderRadius: '16px', background: 'white' }}>
-            <h5 style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-              📋 Daftar Pengajuan Klaim Hadiah Siswa:
+            <h5 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', marginBottom: '10px' }}>
+              📋 Daftar Pengajuan Klaim Hadiah Siswa ({pointRedemptions.length})
             </h5>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {pointRedemptions.length === 0 ? (
                 <div style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic', padding: '16px 0', textAlign: 'center' }}>
-                  Belum ada klaim hadiah yang ditukarkan siswa.
+                  Belum ada pengajuan klaim hadiah dari siswa.
                 </div>
               ) : (
                 pointRedemptions.map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{item.rewardTitle}</div>
-                      <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>
-                        Siswa: <strong>{item.studentName}</strong> ({item.studentClass})
+                  <div key={idx} style={{
+                    padding: '12px',
+                    background: item.status === 'claimed' ? '#f1f5f9' : '#fffdf5',
+                    borderRadius: '12px',
+                    border: item.status === 'claimed' ? '1px solid #cbd5e1' : '1px solid #fde68a',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{item.rewardTitle}</span>
+                        <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 800, marginLeft: '8px' }}>
+                          ({item.pointsCost} Poin)
+                        </span>
                       </div>
-                      <div style={{ fontSize: '10px', color: '#4f46e5', fontWeight: 800, marginTop: '2px' }}>
-                        Kode Klaim: <span style={{ background: '#e0e7ff', padding: '2px 6px', borderRadius: '4px' }}>{item.claimCode}</span> ({item.pointsCost} Poin)
-                      </div>
+                      <span style={{
+                        fontSize: '10px',
+                        background: item.status === 'claimed' ? '#e2e8f0' : '#d1fae5',
+                        color: item.status === 'claimed' ? '#64748b' : '#059669',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        fontWeight: 800
+                      }}>
+                        {item.status === 'claimed' ? '✅ Selesai' : '⏳ Pending Klaim'}
+                      </span>
                     </div>
-                    <span style={{ fontSize: '10px', background: '#d1fae5', color: '#059669', padding: '4px 8px', borderRadius: '6px', fontWeight: 700 }}>
-                      Klaim Aktif
-                    </span>
+
+                    <div style={{ fontSize: '11px', color: '#334155' }}>
+                      <strong>Siswa:</strong> {item.studentName} ({item.studentClass || 'Siswa'}) • <strong>No. Telp:</strong> {item.studentPhone || '081234567890'}
+                    </div>
+
+                    <div style={{ fontSize: '11px', color: '#4f46e5', background: '#eff6ff', padding: '6px 10px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                      📍 <strong>Alamat Pengiriman / Lokasi:</strong> {item.deliveryAddress || 'Ruang BK Sekolah'}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 800, color: '#1e293b' }}>
+                        Kode Klaim: <span style={{ background: '#e0e7ff', padding: '2px 8px', borderRadius: '6px', letterSpacing: '1px' }}>{item.claimCode}</span>
+                      </div>
+
+                      {item.status !== 'claimed' && onCompleteClaim && (
+                        <button
+                          onClick={() => {
+                            onCompleteClaim(item.claimCode);
+                            setToastMessage(`✅ Klaim ${item.rewardTitle} untuk ${item.studentName} ditandai selesai!`);
+                            setTimeout(() => setToastMessage(''), 3500);
+                          }}
+                          style={{
+                            background: '#059669',
+                            color: 'white',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Tandai Selesai / Diserahkan
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))
               )}
+            </div>
+          </div>
+
+          {/* 2. Kelola Stok Katalog Hadiah Admin */}
+          <div className="glass-card" style={{ padding: '14px', borderRadius: '16px', background: 'white' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h5 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                🎁 Kelola Katalog Hadiah & Stok Pcs ({rewardsCatalog.length})
+              </h5>
+
+              <button
+                onClick={() => setIsAddRewardModalOpen(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Plus size={14} /> Tambah Hadiah Baru
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {rewardsCatalog.map((rew) => (
+                <div key={rew.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <img src={rew.image} alt={rew.title} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a' }}>{rew.title}</div>
+                      <div style={{ fontSize: '10px', color: '#4f46e5', fontWeight: 700 }}>
+                        Biaya: {rew.pointsCost} Poin • Stok Saat Ini: <strong style={{ color: rew.stock > 0 ? '#059669' : '#dc2626' }}>{rew.stock} pcs</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      onClick={() => onUpdateRewardStock && onUpdateRewardStock(rew.id, Math.max(0, rew.stock - 1))}
+                      style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', fontWeight: 800, cursor: 'pointer' }}
+                      title="Kurangi Stok 1"
+                    >
+                      -
+                    </button>
+                    <span style={{ fontSize: '12px', fontWeight: 800, width: '24px', textAlign: 'center' }}>{rew.stock}</span>
+                    <button
+                      onClick={() => onUpdateRewardStock && onUpdateRewardStock(rew.id, rew.stock + 1)}
+                      style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', fontWeight: 800, cursor: 'pointer' }}
+                      title="Tambah Stok 1"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1231,6 +1357,158 @@ export default function AdminDashboard({
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {/* MODAL TAMBAH HADIAH BARU (ADMIN) */}
+      {isAddRewardModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '16px'
+        }}>
+          <div className="animate-slide-up" style={{
+            background: '#ffffff',
+            borderRadius: '24px',
+            width: '100%',
+            maxWidth: '400px',
+            padding: '24px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                🎁 Tambah Hadiah Poin Baru
+              </h3>
+              <button
+                onClick={() => setIsAddRewardModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newRewTitle.trim()) return;
+
+              const newItem = {
+                id: `rew-${Date.now()}`,
+                title: newRewTitle,
+                pointsCost: parseInt(newRewPoints, 10) || 5,
+                category: newRewCategory,
+                stock: parseInt(newRewStock, 10) || 10,
+                image: newRewImage || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
+                description: newRewDesc || 'Barang hadiah resmi SiTemu Sekolah.'
+              };
+
+              if (onAddRewardItem) onAddRewardItem(newItem);
+              setIsAddRewardModalOpen(false);
+              setNewRewTitle('');
+              setNewRewDesc('');
+              setToastMessage(`✅ Hadiah "${newItem.title}" berhasil ditambahkan ke Katalog Poin!`);
+              setTimeout(() => setToastMessage(''), 3500);
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Nama Hadiah / Merchandise:</label>
+                <input
+                  type="text"
+                  required
+                  className="form-input"
+                  placeholder="Misal: Gantungan Kunci SiTemu"
+                  value={newRewTitle}
+                  onChange={(e) => setNewRewTitle(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Biaya Poin:</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    className="form-input"
+                    value={newRewPoints}
+                    onChange={(e) => setNewRewPoints(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Stok Pcs:</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    className="form-input"
+                    value={newRewStock}
+                    onChange={(e) => setNewRewStock(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Kategori:</label>
+                <select
+                  className="form-input"
+                  value={newRewCategory}
+                  onChange={(e) => setNewRewCategory(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                >
+                  <option value="Alat Tulis">Alat Tulis</option>
+                  <option value="Aksesoris">Aksesoris</option>
+                  <option value="Merchandise">Merchandise</option>
+                  <option value="Voucher">Voucher</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>URL Gambar Hadiah:</label>
+                <input
+                  type="url"
+                  className="form-input"
+                  value={newRewImage}
+                  onChange={(e) => setNewRewImage(e.target.value)}
+                  placeholder="https://..."
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Deskripsi:</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  value={newRewDesc}
+                  onChange={(e) => setNewRewDesc(e.target.value)}
+                  placeholder="Deskripsi singkat..."
+                  style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsAddRewardModalOpen(false)}
+                  style={{ flex: 1, padding: '10px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', color: '#64748b', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  style={{ flex: 1, padding: '10px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#fff', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                >
+                  Simpan Hadiah
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

@@ -235,3 +235,51 @@ export const INITIAL_CONTACTS = [
     location: 'Pos SP2K / Ruang BK'
   }
 ];
+
+export const INITIAL_REWARDS = [
+  {
+    id: 'rew-1',
+    title: 'Pin Badge "Pahlawan Kejujuran"',
+    pointsCost: 3,
+    category: 'Aksesoris',
+    stock: 25,
+    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
+    description: 'Pin enamel eksklusif SiTemu yang bisa dipasang di dasi atau tas sekolah sebagai apresiasi kejujuran.'
+  },
+  {
+    id: 'rew-2',
+    title: 'Notebook & Pulpen Eksklusif SiTemu',
+    pointsCost: 5,
+    category: 'Alat Tulis',
+    stock: 18,
+    image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
+    description: 'Buku catatan hardcover A5 dan pulpen gel dengan logo resmi SiTemu Sekolah.'
+  },
+  {
+    id: 'rew-3',
+    title: 'Lanyard & ID Card Holder SiTemu',
+    pointsCost: 8,
+    category: 'Aksesoris',
+    stock: 12,
+    image: 'https://images.unsplash.com/photo-1589384267710-7a2559663722?auto=format&fit=crop&q=80&w=400',
+    description: 'Tali gantungan kartu pelajar bahan premium anti-air lengkap dengan pouch transparannya.'
+  },
+  {
+    id: 'rew-4',
+    title: 'Voucher Kantin Sekolah Rp 10.000',
+    pointsCost: 10,
+    category: 'Voucher',
+    stock: 30,
+    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=400',
+    description: 'Voucher makan/minum Rp 10.000 berlaku di seluruh stan kantin sekolah.'
+  },
+  {
+    id: 'rew-5',
+    title: 'Tumbler Stainless SiTemu 500ml',
+    pointsCost: 15,
+    category: 'Merchandise',
+    stock: 8,
+    image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&q=80&w=400',
+    description: 'Botol minum stainless tahan panas dan dingin 12 jam dengan desain edisi terbatas.'
+  }
+];

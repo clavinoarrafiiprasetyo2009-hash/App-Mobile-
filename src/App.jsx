@@ -12,7 +12,7 @@ import Points from './pages/Points';
 import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import ContactSelectorModal from './components/ContactSelectorModal';
 import { supabase } from './supabaseClient';
-import { INITIAL_ITEMS, INITIAL_CONTACTS } from './mockData';
+import { INITIAL_ITEMS, INITIAL_CONTACTS, INITIAL_REWARDS } from './mockData';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import { notifyNewReport, notifyStatusChange } from './utils/notificationHelper';
 
@@ -104,6 +104,48 @@ export default function App() {
     } catch (e) {}
     return [];
   });
+
+  // Rewards Catalog State (Shared between Points page and Admin Dashboard)
+  const [rewardsCatalog, setRewardsCatalog] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sitemu_rewards_catalog');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return INITIAL_REWARDS;
+  });
+
+  const handleAddRewardItem = (newReward) => {
+    setRewardsCatalog(prev => {
+      const nextCatalog = [newReward, ...prev];
+      try {
+        localStorage.setItem('sitemu_rewards_catalog', JSON.stringify(nextCatalog));
+      } catch (e) {}
+      return nextCatalog;
+    });
+  };
+
+  const handleUpdateRewardStock = (rewardId, newStock) => {
+    setRewardsCatalog(prev => {
+      const nextCatalog = prev.map(r => r.id === rewardId ? { ...r, stock: Math.max(0, parseInt(newStock, 10) || 0) } : r);
+      try {
+        localStorage.setItem('sitemu_rewards_catalog', JSON.stringify(nextCatalog));
+      } catch (e) {}
+      return nextCatalog;
+    });
+  };
+
+  const handleCompleteClaim = (claimCode) => {
+    setPointRedemptions(prev => {
+      const nextRedemptions = prev.map(item => item.claimCode === claimCode ? { ...item, status: 'claimed' } : item);
+      try {
+        localStorage.setItem('sitemu_point_redemptions', JSON.stringify(nextRedemptions));
+      } catch (e) {}
+      return nextRedemptions;
+    });
+  };
 
   const handleOpenContactModal = (item) => {
     setSelectedContactItem(item || null);
@@ -488,16 +530,31 @@ export default function App() {
     }
   };
 
-  const handleRedeemReward = (reward, claimCode) => {
+  const handleRedeemReward = (reward, claimCode, deliveryAddress) => {
     const cost = reward.pointsCost;
     const dateNow = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+    // 1. Deduct points from user balance
     setUserPoints(prevPts => {
       const newPts = Math.max(0, prevPts - cost);
       try {
         localStorage.setItem('sitemu_user_points', newPts.toString());
       } catch (e) {}
       return newPts;
+    });
+
+    // 2. Reduce stock pcs in rewardsCatalog
+    setRewardsCatalog(prevList => {
+      const nextList = prevList.map(item => {
+        if (item.id === reward.id) {
+          return { ...item, stock: Math.max(0, item.stock - 1) };
+        }
+        return item;
+      });
+      try {
+        localStorage.setItem('sitemu_rewards_catalog', JSON.stringify(nextList));
+      } catch (e) {}
+      return nextList;
     });
 
     const redeemEntry = {
@@ -516,11 +573,14 @@ export default function App() {
       return newHist;
     });
 
+    // 3. Store redemption record with delivery address for Admin
     setPointRedemptions(prev => {
       const newRedemptions = [{
         id: claimCode,
         studentName: currentUser?.name || 'Siswa',
-        studentClass: currentUser?.class || 'Siswa',
+        studentClass: currentUser?.class || 'XII RPL 1',
+        studentPhone: currentUser?.phone || '-',
+        deliveryAddress: deliveryAddress || 'Ruang BK Sekolah',
         rewardTitle: reward.title,
         pointsCost: cost,
         claimCode: claimCode,
@@ -639,6 +699,7 @@ export default function App() {
                 userPoints={userPoints}
                 pointHistory={pointHistory}
                 items={items}
+                rewardsCatalog={rewardsCatalog}
                 onRedeemReward={handleRedeemReward}
               />
             )}
@@ -650,6 +711,10 @@ export default function App() {
                   items={items}
                   contacts={contacts}
                   pointRedemptions={pointRedemptions}
+                  rewardsCatalog={rewardsCatalog}
+                  onAddRewardItem={handleAddRewardItem}
+                  onUpdateRewardStock={handleUpdateRewardStock}
+                  onCompleteClaim={handleCompleteClaim}
                   onSelectItem={handleSelectItem}
                   onUpdateItemStatus={handleUpdateItemStatus}
                   onUpdateItemDetails={handleUpdateItemDetails}
