@@ -50,11 +50,26 @@ const INITIAL_REWARDS = [
   }
 ];
 
-export default function Points({ currentUser, userPoints = 0, pointHistory = [], onRedeemReward }) {
+export default function Points({ currentUser, userPoints = 0, pointHistory = [], items = [], onRedeemReward }) {
   const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' | 'history'
   const [selectedReward, setSelectedReward] = useState(null);
   const [claimSuccess, setClaimSuccess] = useState(null);
   const [toastMsg, setToastMsg] = useState('');
+
+  // Dynamically map expired auction items (>7 days) or status='points'/'lelang' items to reward catalog
+  const expiredAuctionRewards = items
+    .filter(i => i.status === 'lelang' || i.status === 'points' || i.isAuction)
+    .map((item, idx) => ({
+      id: `rew-auc-${item.id || idx}`,
+      title: `[Lelang Excluded] ${item.title}`,
+      pointsCost: item.auctionPrice ? Math.max(5, Math.floor(item.auctionPrice / 5000)) : 8,
+      category: 'Barang Lelang Expired (>7 Hari)',
+      stock: 1,
+      image: item.image || item.image_url || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=400',
+      description: `Barang temuan unclaimed yang telah melewati 7 hari lelang (${item.location}). Kini dapat ditukarkan dengan poin.`
+    }));
+
+  const allRewards = [...INITIAL_REWARDS, ...expiredAuctionRewards];
 
   const showToast = (msg) => {
     setToastMsg(msg);
@@ -234,7 +249,7 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
             }}
           >
             <Gift size={15} />
-            <span>Tukar Hadiah ({INITIAL_REWARDS.length})</span>
+            <span>Tukar Hadiah ({allRewards.length})</span>
           </button>
 
           <button
@@ -267,13 +282,13 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
           <div className="animate-fade">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#1e293b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>🎁 Pilihan Hadiah & Merchandise</span>
+                <span>🎁 Pilihan Hadiah & Barang Lelang Expired</span>
               </h3>
               <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Tukar dengan poin kamu</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '14px' }}>
-              {INITIAL_REWARDS.map((rew) => {
+              {allRewards.map((rew) => {
                 const isEnoughPoints = userPoints >= rew.pointsCost;
                 return (
                   <div

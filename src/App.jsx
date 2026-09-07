@@ -632,6 +632,7 @@ export default function App() {
                 currentUser={currentUser}
                 userPoints={userPoints}
                 pointHistory={pointHistory}
+                items={items}
                 onRedeemReward={handleRedeemReward}
               />
             )}

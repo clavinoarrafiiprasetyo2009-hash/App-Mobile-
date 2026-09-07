@@ -103,10 +103,10 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
           <Gavel size={22} color="#b45309" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div>
             <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#92400e', marginBottom: '2px' }}>
-              Program Lelang Barang Unclaimed (&gt; 30 Hari)
+              Program Lelang (30 Hari) & Transfer Hadiah Poin (7 Hari)
             </h4>
             <p style={{ fontSize: '11px', color: '#78350f', lineHeight: '1.4' }}>
-              Barang temuan di lingkungan sekolah yang tidak diambil pemiliknya selama lebih dari 30 hari dilelang secara resmi oleh Guru BK. Hasil lelang disalurkan 100% untuk kas sosial siswa.
+              Barang temuan unclaimed &gt;30 hari akan masuk ke Fitur Lelang selama <strong>7 Hari</strong>. Jika tidak ada yang menawar/membeli dalam 7 hari, barang otomatis dipindahkan ke <strong>Katalog Hadiah Poin</strong> untuk ditukarkan oleh siswa!
             </p>
           </div>
         </div>
