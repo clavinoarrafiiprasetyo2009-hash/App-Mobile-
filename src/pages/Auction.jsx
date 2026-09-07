@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
+import CountdownTimer from '../components/CountdownTimer';
 import { Gavel, Tag, Clock, MessageCircle, AlertCircle, ShieldCheck, Edit3, Save, X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
@@ -155,13 +156,11 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
                         }}>
                           <Gavel size={11} /> LELANG RESMI
                         </span>
-                        <span style={{
-                          background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca',
-                          padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 800,
-                          display: 'inline-flex', alignItems: 'center', gap: '4px'
-                        }}>
-                          <Clock size={11} /> ⏱️ Sisa 5 Hari
-                        </span>
+                        <CountdownTimer 
+                          dateReported={item.date_reported || item.dateReported || item.date} 
+                          created_at={item.created_at} 
+                          durationDays={7} 
+                        />
                       </div>
                       <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {item.title}

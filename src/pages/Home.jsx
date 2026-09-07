@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Sparkles, Smartphone, BookOpen, Coffee, Briefcase, Glasses, Key, MapPin, ChevronRight, Shirt, CreditCard, Package, Loader2, Bell, BellRing, CheckCircle2 } from 'lucide-react';
+import CountdownTimer from '../components/CountdownTimer';
 import { CATEGORIES } from '../mockData';
 import { requestNotificationPermission, getNotificationPermissionState, sendLocalNotification } from '../utils/notificationHelper';
 
@@ -384,9 +385,18 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
                     <span className={`badge badge-${item.status}`} style={{ flexShrink: 0, background: item.status === 'lelang' ? '#fef3c7' : undefined, color: item.status === 'lelang' ? '#b45309' : undefined, border: item.status === 'lelang' ? '1px solid #fde68a' : undefined }}>
                       {item.status === 'hilang' ? '🔴 HILANG' : item.status === 'ditemukan' ? '🟢 DITEMUKAN' : item.status === 'lelang' ? '🏷️ LELANG' : '🔵 SELESAI'}
                     </span>
-                    <span style={{ fontSize: '11px', color: '#94a3b8', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                      {item.date.split(',')[0]}
-                    </span>
+                    {item.status === 'lelang' ? (
+                      <CountdownTimer 
+                        compact={true} 
+                        dateReported={item.date_reported || item.dateReported || item.date} 
+                        created_at={item.created_at} 
+                        durationDays={7} 
+                      />
+                    ) : (
+                      <span style={{ fontSize: '11px', color: '#94a3b8', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                        {item.date?.split(',')[0]}
+                      </span>
+                    )}
                   </div>
                   <h4 style={{
                     fontSize: '14px',
