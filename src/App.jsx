@@ -137,6 +137,26 @@ export default function App() {
     });
   };
 
+  const handleUpdateRewardDetails = (rewardId, updatedData) => {
+    setRewardsCatalog(prev => {
+      const nextCatalog = prev.map(r => {
+        if (r.id === rewardId) {
+          return {
+            ...r,
+            ...updatedData,
+            pointsCost: parseInt(updatedData.pointsCost, 10) || r.pointsCost,
+            stock: updatedData.stock !== undefined ? parseInt(updatedData.stock, 10) : r.stock
+          };
+        }
+        return r;
+      });
+      try {
+        localStorage.setItem('sitemu_rewards_catalog', JSON.stringify(nextCatalog));
+      } catch (e) {}
+      return nextCatalog;
+    });
+  };
+
   const handleCompleteClaim = (claimCode) => {
     setPointRedemptions(prev => {
       const nextRedemptions = prev.map(item => item.claimCode === claimCode ? { ...item, status: 'claimed' } : item);
@@ -714,6 +734,7 @@ export default function App() {
                   rewardsCatalog={rewardsCatalog}
                   onAddRewardItem={handleAddRewardItem}
                   onUpdateRewardStock={handleUpdateRewardStock}
+                  onUpdateRewardDetails={handleUpdateRewardDetails}
                   onCompleteClaim={handleCompleteClaim}
                   onSelectItem={handleSelectItem}
                   onUpdateItemStatus={handleUpdateItemStatus}

@@ -10,6 +10,7 @@ export default function AdminDashboard({
   rewardsCatalog = [],
   onAddRewardItem,
   onUpdateRewardStock,
+  onUpdateRewardDetails,
   onCompleteClaim,
   onSelectItem, 
   onUpdateItemStatus, 
@@ -21,6 +22,9 @@ export default function AdminDashboard({
   const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'moderation' | 'reports' | 'pending' | 'auction-manage' | 'contacts' | 'points-manage'
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Edit Reward Item Modal State (Admin edit harga poin, nama, stok, dll)
+  const [editingReward, setEditingReward] = useState(null);
 
   // Add Reward Modal State
   const [isAddRewardModalOpen, setIsAddRewardModalOpen] = useState(false);
@@ -430,22 +434,45 @@ export default function AdminDashboard({
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* Tombol Edit Biaya Poin & Hadiah */}
                     <button
-                      onClick={() => onUpdateRewardStock && onUpdateRewardStock(rew.id, Math.max(0, rew.stock - 1))}
-                      style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', fontWeight: 800, cursor: 'pointer' }}
-                      title="Kurangi Stok 1"
+                      onClick={() => setEditingReward(rew)}
+                      style={{
+                        background: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        color: '#2563eb',
+                        padding: '5px 10px',
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                      title="Edit Biaya Poin & Stok Hadiah"
                     >
-                      -
+                      <Edit3 size={13} /> Edit
                     </button>
-                    <span style={{ fontSize: '12px', fontWeight: 800, width: '24px', textAlign: 'center' }}>{rew.stock}</span>
-                    <button
-                      onClick={() => onUpdateRewardStock && onUpdateRewardStock(rew.id, rew.stock + 1)}
-                      style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', fontWeight: 800, cursor: 'pointer' }}
-                      title="Tambah Stok 1"
-                    >
-                      +
-                    </button>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <button
+                        onClick={() => onUpdateRewardStock && onUpdateRewardStock(rew.id, Math.max(0, rew.stock - 1))}
+                        style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', fontWeight: 800, cursor: 'pointer' }}
+                        title="Kurangi Stok 1"
+                      >
+                        -
+                      </button>
+                      <span style={{ fontSize: '12px', fontWeight: 800, width: '22px', textAlign: 'center' }}>{rew.stock}</span>
+                      <button
+                        onClick={() => onUpdateRewardStock && onUpdateRewardStock(rew.id, rew.stock + 1)}
+                        style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', fontWeight: 800, cursor: 'pointer' }}
+                        title="Tambah Stok 1"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1505,6 +1532,153 @@ export default function AdminDashboard({
                   style={{ flex: 1, padding: '10px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#fff', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
                 >
                   Simpan Hadiah
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EDIT BIAYA POIN & DETAILS HADIAH (ADMIN) */}
+      {editingReward && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '16px'
+        }}>
+          <div className="animate-slide-up" style={{
+            background: '#ffffff',
+            borderRadius: '24px',
+            width: '100%',
+            maxWidth: '400px',
+            padding: '24px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                ✏️ Edit Harga Poin & Details Hadiah
+              </h3>
+              <button
+                onClick={() => setEditingReward(null)}
+                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (onUpdateRewardDetails) {
+                onUpdateRewardDetails(editingReward.id, {
+                  title: editingReward.title,
+                  pointsCost: editingReward.pointsCost,
+                  stock: editingReward.stock,
+                  category: editingReward.category,
+                  description: editingReward.description,
+                  image: editingReward.image
+                });
+              }
+              setEditingReward(null);
+              setToastMessage(`✅ Hadiah "${editingReward.title}" berhasil diperbarui! Harga Poin: ${editingReward.pointsCost} Poin`);
+              setTimeout(() => setToastMessage(''), 3500);
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Nama Hadiah:</label>
+                <input
+                  type="text"
+                  required
+                  className="form-input"
+                  value={editingReward.title || ''}
+                  onChange={(e) => setEditingReward({ ...editingReward, title: e.target.value })}
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#4f46e5', display: 'block', marginBottom: '4px' }}>
+                    ⭐️ Harga / Biaya Poin:
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    className="form-input"
+                    value={editingReward.pointsCost || ''}
+                    onChange={(e) => setEditingReward({ ...editingReward, pointsCost: e.target.value })}
+                    style={{ width: '100%', boxSizing: 'border-box', border: '2px solid #6366f1', background: '#e0e7ff', fontWeight: 800 }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Stok Pcs:</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    className="form-input"
+                    value={editingReward.stock !== undefined ? editingReward.stock : ''}
+                    onChange={(e) => setEditingReward({ ...editingReward, stock: e.target.value })}
+                    style={{ width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Kategori:</label>
+                <select
+                  className="form-input"
+                  value={editingReward.category || 'Alat Tulis'}
+                  onChange={(e) => setEditingReward({ ...editingReward, category: e.target.value })}
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                >
+                  <option value="Alat Tulis">Alat Tulis</option>
+                  <option value="Aksesoris">Aksesoris</option>
+                  <option value="Merchandise">Merchandise</option>
+                  <option value="Voucher">Voucher</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>URL Gambar:</label>
+                <input
+                  type="url"
+                  className="form-input"
+                  value={editingReward.image || ''}
+                  onChange={(e) => setEditingReward({ ...editingReward, image: e.target.value })}
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>Deskripsi:</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  value={editingReward.description || ''}
+                  onChange={(e) => setEditingReward({ ...editingReward, description: e.target.value })}
+                  style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingReward(null)}
+                  style={{ flex: 1, padding: '10px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', color: '#64748b', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  style={{ flex: 1, padding: '10px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#fff', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                >
+                  Simpan Perubahan
                 </button>
               </div>
             </form>
