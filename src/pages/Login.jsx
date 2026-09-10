@@ -89,6 +89,7 @@ export default function Login({ onLogin }) {
         }
 
         // Login sukses dengan data profil resmi yang sudah terdaftar
+        const dbPoints = existingProfile.points !== undefined && existingProfile.points !== null ? existingProfile.points : 3;
         const loggedInSiswa = {
           id: existingProfile.id || ('siswa-' + (inputNisn || Date.now())),
           name: existingProfile.name || inputEmail.split('@')[0],
@@ -97,7 +98,8 @@ export default function Login({ onLogin }) {
           class: existingProfile.class_name || 'XII RPL 1',
           phone: existingProfile.phone || '081234567890',
           email: inputEmail,
-          avatar: existingProfile.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
+          avatar: existingProfile.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+          points: dbPoints
         };
 
         onLogin(loggedInSiswa);
@@ -127,7 +129,8 @@ export default function Login({ onLogin }) {
         class: finalClass,
         phone: finalPhone,
         email: inputEmail,
-        avatar: defaultAvatar
+        avatar: defaultAvatar,
+        points: 3
       };
 
       // Save/Sync student registration data to Supabase profiles table
@@ -139,7 +142,8 @@ export default function Login({ onLogin }) {
           class_name: finalClass,
           phone: finalPhone,
           email: inputEmail,
-          avatar_url: defaultAvatar
+          avatar_url: defaultAvatar,
+          points: 3
         }]).select();
 
         if (profileErr) {

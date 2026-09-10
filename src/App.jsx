@@ -157,7 +157,7 @@ export default function App() {
     });
   };
 
-  const handleCompleteClaim = (claimCode) => {
+  const handleCompleteClaim = async (claimCode) => {
     setPointRedemptions(prev => {
       const nextRedemptions = prev.map(item => item.claimCode === claimCode ? { ...item, status: 'claimed' } : item);
       try {
@@ -165,6 +165,10 @@ export default function App() {
       } catch (e) {}
       return nextRedemptions;
     });
+
+    try {
+      await supabase.from('point_redemptions').update({ status: 'claimed' }).eq('claim_code', claimCode);
+    } catch (e) {}
   };
 
   const handleOpenContactModal = (item) => {
@@ -179,7 +183,28 @@ export default function App() {
     } catch (e) {}
   };
 
-  // Load items real-time from Supabase on mount + keep-alive heartbeat
+  // Sync logged in user points from Supabase profiles table
+  useEffect(() => {
+    if (currentUser?.email) {
+      supabase
+        .from('profiles')
+        .select('points')
+        .eq('email', currentUser.email)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data && data.points !== undefined && data.points !== null) {
+            setUserPoints(data.points);
+            setCurrentUser(prev => prev ? { ...prev, points: data.points } : prev);
+            try {
+              localStorage.setItem('sitemu_user_points', data.points.toString());
+            } catch (e) {}
+          }
+        })
+        .catch(() => {});
+    }
+  }, [currentUser?.email]);
+
+  // Load items & redemptions real-time from Supabase on mount + keep-alive heartbeat
   useEffect(() => {
     loadItemsFromSupabase();
 
@@ -195,10 +220,30 @@ export default function App() {
     try {
       setIsSyncing(true);
 
-      const [{ data, error }, { data: profilesData }] = await Promise.all([
+      const [{ data, error }, { data: profilesData }, { data: redemptionsData }] = await Promise.all([
         supabase.from('items').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*')
+        supabase.from('profiles').select('*'),
+        supabase.from('point_redemptions').select('*').order('created_at', { ascending: false }).catch(() => ({ data: null }))
       ]);
+
+      if (redemptionsData && Array.isArray(redemptionsData) && redemptionsData.length > 0) {
+        const mappedRedemptions = redemptionsData.map(r => ({
+          id: r.claim_code || r.id,
+          studentName: r.student_name,
+          studentClass: r.student_class || '-',
+          studentPhone: r.student_phone || '-',
+          deliveryAddress: r.delivery_address || 'Ruang BK Sekolah',
+          rewardTitle: r.reward_title,
+          pointsCost: r.points_cost,
+          claimCode: r.claim_code,
+          date: r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Baru saja',
+          status: r.status || 'pending'
+        }));
+        setPointRedemptions(mappedRedemptions);
+        try {
+          localStorage.setItem('sitemu_point_redemptions', JSON.stringify(mappedRedemptions));
+        } catch (e) {}
+      }
 
       if (error) {
         console.warn('Supabase fetch status:', error.message || error);
@@ -263,8 +308,11 @@ export default function App() {
   // Handlers with LocalStorage Persistence
   const handleLogin = (user) => {
     setCurrentUser(user);
+    const pts = user.points !== undefined && user.points !== null ? user.points : userPoints;
+    setUserPoints(pts);
     try {
-      localStorage.setItem('sitemu_user', JSON.stringify(user));
+      localStorage.setItem('sitemu_user', JSON.stringify({ ...user, points: pts }));
+      localStorage.setItem('sitemu_user_points', pts.toString());
     } catch (e) {}
     setActiveTab(user.role === 'guru' ? 'admin' : 'home');
   };
@@ -299,7 +347,8 @@ export default function App() {
         class_name: cleanUser.class || '',
         phone: cleanUser.phone || null,
         email: cleanUser.email || '',
-        avatar_url: avatarToSave
+        avatar_url: avatarToSave,
+        points: cleanUser.points !== undefined ? cleanUser.points : userPoints
       }], { onConflict: 'email' }).select();
 
       if (profileErr) {
@@ -497,11 +546,13 @@ export default function App() {
 
   const handleApprovePublication = async (itemId) => {
     let approvedTitle = '';
+    let reporterName = '';
 
     setItems(prevItems => {
       const nextItems = prevItems.map(item => {
         if (item.id === itemId) {
           approvedTitle = item.title;
+          reporterName = item.reporter?.name || '';
           return { ...item, isPublished: true };
         }
         return item;
@@ -545,23 +596,42 @@ export default function App() {
         .from('items')
         .update({ is_published: true })
         .eq('id', itemId);
+
+      // Find reporter in profiles table and increment points (+1) in Supabase DB
+      const cleanReporterName = reporterName.split(' (')[0].trim().toLowerCase();
+      const { data: allProfiles } = await supabase.from('profiles').select('*');
+      
+      if (allProfiles && cleanReporterName) {
+        const matchedProfile = allProfiles.find(p => p.name && (p.name.trim().toLowerCase() === cleanReporterName || cleanReporterName.includes(p.name.trim().toLowerCase())));
+        if (matchedProfile) {
+          const updatedPts = (matchedProfile.points || 0) + 1;
+          await supabase.from('profiles').update({ points: updatedPts }).eq('id', matchedProfile.id);
+        } else if (currentUser?.email) {
+          const { data: myProfile } = await supabase.from('profiles').select('points').eq('email', currentUser.email).maybeSingle();
+          const curPts = (myProfile?.points !== undefined && myProfile?.points !== null ? myProfile.points : userPoints) + 1;
+          await supabase.from('profiles').update({ points: curPts }).eq('email', currentUser.email);
+        }
+      } else if (currentUser?.email) {
+        const { data: myProfile } = await supabase.from('profiles').select('points').eq('email', currentUser.email).maybeSingle();
+        const curPts = (myProfile?.points !== undefined && myProfile?.points !== null ? myProfile.points : userPoints) + 1;
+        await supabase.from('profiles').update({ points: curPts }).eq('email', currentUser.email);
+      }
     } catch (err) {
       console.warn('Approve publication sync error:', err);
     }
   };
 
-  const handleRedeemReward = (reward, claimCode, deliveryAddress) => {
+  const handleRedeemReward = async (reward, claimCode, deliveryAddress) => {
     const cost = reward.pointsCost;
     const dateNow = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     // 1. Deduct points from user balance
-    setUserPoints(prevPts => {
-      const newPts = Math.max(0, prevPts - cost);
-      try {
-        localStorage.setItem('sitemu_user_points', newPts.toString());
-      } catch (e) {}
-      return newPts;
-    });
+    const newPts = Math.max(0, userPoints - cost);
+    setUserPoints(newPts);
+    setCurrentUser(prev => prev ? { ...prev, points: newPts } : prev);
+    try {
+      localStorage.setItem('sitemu_user_points', newPts.toString());
+    } catch (e) {}
 
     // 2. Reduce stock pcs in rewardsCatalog
     setRewardsCatalog(prevList => {
@@ -594,26 +664,52 @@ export default function App() {
     });
 
     // 3. Store redemption record with delivery address for Admin
+    const newRedemptionItem = {
+      id: claimCode,
+      studentName: currentUser?.name || 'Siswa',
+      studentClass: currentUser?.class || 'XII RPL 1',
+      studentPhone: currentUser?.phone || '-',
+      deliveryAddress: deliveryAddress || 'Ruang BK Sekolah',
+      rewardTitle: reward.title,
+      pointsCost: cost,
+      claimCode: claimCode,
+      date: dateNow,
+      status: 'pending'
+    };
+
     setPointRedemptions(prev => {
-      const newRedemptions = [{
-        id: claimCode,
-        studentName: currentUser?.name || 'Siswa',
-        studentClass: currentUser?.class || 'XII RPL 1',
-        studentPhone: currentUser?.phone || '-',
-        deliveryAddress: deliveryAddress || 'Ruang BK Sekolah',
-        rewardTitle: reward.title,
-        pointsCost: cost,
-        claimCode: claimCode,
-        date: dateNow,
-        status: 'pending'
-      }, ...prev];
+      const newRedemptions = [newRedemptionItem, ...prev];
       try {
         localStorage.setItem('sitemu_point_redemptions', JSON.stringify(newRedemptions));
       } catch (e) {}
       return newRedemptions;
     });
 
-    setCurrentUser(prev => prev ? { ...prev, points: Math.max(0, (prev.points || 0) - cost) } : prev);
+    // 4. Sync deducted points to Supabase profiles table
+    if (currentUser?.email) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ points: newPts })
+          .eq('email', currentUser.email);
+      } catch (err) {
+        console.warn('Sync points to Supabase profiles error:', err);
+      }
+    }
+
+    // 5. Save redemption record to Supabase point_redemptions table
+    try {
+      await supabase.from('point_redemptions').insert([{
+        claim_code: claimCode,
+        student_name: currentUser?.name || 'Siswa',
+        student_class: currentUser?.class || 'XII RPL 1',
+        reward_title: reward.title,
+        points_cost: cost,
+        status: 'pending'
+      }]);
+    } catch (err) {
+      console.warn('Sync point redemption to Supabase error:', err);
+    }
   };
 
   const handleRejectPublication = async (itemId) => {
