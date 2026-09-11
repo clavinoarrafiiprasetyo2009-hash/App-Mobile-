@@ -19,12 +19,6 @@ import { notifyNewReport, notifyStatusChange } from './utils/notificationHelper'
 export default function App() {
   const mainContentRef = useRef(null);
 
-  // Auto-scroll main content container to top whenever activeTab changes
-  useEffect(() => {
-    if (mainContentRef.current) {
-      mainContentRef.current.scrollTop = 0;
-    }
-  }, [activeTab]);
   // First-time Onboarding state
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(() => {
     try {
@@ -54,6 +48,13 @@ export default function App() {
     } catch (e) {}
     return 'home';
   });
+
+  // Auto-scroll main content container to top whenever activeTab changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
 
   // Initialize items from localStorage cache first; default to INITIAL_ITEMS if empty so feeds are never blank
   const [items, setItems] = useState(() => {
