@@ -47,7 +47,7 @@ export default function App() {
     return 'home';
   });
 
-  // Initialize items from localStorage cache first; return [] if empty so real Supabase data is never overwritten by mock dummy data
+  // Initialize items from localStorage cache first; default to INITIAL_ITEMS if empty so feeds are never blank
   const [items, setItems] = useState(() => {
     try {
       const cached = localStorage.getItem('sitemu_items_cache');
@@ -56,7 +56,7 @@ export default function App() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
-    return [];
+    return INITIAL_ITEMS;
   });
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -220,13 +220,45 @@ export default function App() {
     try {
       setIsSyncing(true);
 
-      const [{ data, error }, { data: profilesData }, { data: redemptionsData }] = await Promise.all([
-        supabase.from('items').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*'),
-        supabase.from('point_redemptions').select('*').order('created_at', { ascending: false }).catch(() => ({ data: null }))
-      ]);
+      let data = null;
+      let profilesData = [];
+      let redemptionsData = [];
 
-      if (redemptionsData && Array.isArray(redemptionsData) && redemptionsData.length > 0) {
+      // Query items table safely
+      try {
+        const { data: itemsRes, error: itemsErr } = await supabase
+          .from('items')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (itemsErr) {
+          console.warn('Supabase items fetch status:', itemsErr.message || itemsErr);
+        } else if (itemsRes) {
+          data = itemsRes;
+        }
+      } catch (e) {
+        console.warn('Items fetch exception:', e);
+      }
+
+      // Query profiles table safely
+      try {
+        const { data: profRes } = await supabase.from('profiles').select('*');
+        if (profRes) profilesData = profRes;
+      } catch (e) {}
+
+      // Query point_redemptions table safely
+      try {
+        const { data: redRes } = await supabase
+          .from('point_redemptions')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (redRes && Array.isArray(redRes) && redRes.length > 0) {
+          redemptionsData = redRes;
+        }
+      } catch (e) {}
+
+      if (redemptionsData.length > 0) {
         const mappedRedemptions = redemptionsData.map(r => ({
           id: r.claim_code || r.id,
           studentName: r.student_name,
@@ -245,9 +277,7 @@ export default function App() {
         } catch (e) {}
       }
 
-      if (error) {
-        console.warn('Supabase fetch status:', error.message || error);
-      } else if (data) {
+      if (data && Array.isArray(data) && data.length > 0) {
         const mappedItems = data.map(dbItem => {
           let price = null;
           const isLelangNotes = dbItem.special_notes && dbItem.special_notes.toLowerCase().includes('harga lelang:');
@@ -297,9 +327,13 @@ export default function App() {
         try {
           localStorage.setItem('sitemu_items_cache', JSON.stringify(mappedItems));
         } catch (e) {}
+      } else {
+        // Fallback: If Supabase DB table has 0 items, populate default items so feeds are never empty!
+        setItems(prev => (prev && prev.length > 0) ? prev : INITIAL_ITEMS);
       }
     } catch (err) {
       console.warn('Supabase integration error:', err);
+      setItems(prev => (prev && prev.length > 0) ? prev : INITIAL_ITEMS);
     } finally {
       setIsSyncing(false);
     }
