@@ -342,7 +342,7 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
 
       {/* Feed Items List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {isSyncing && filteredItems.length === 0 ? (
+        {isSyncing ? (
           /* Shimmer Skeleton Placeholder Cards during loading / sync */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{

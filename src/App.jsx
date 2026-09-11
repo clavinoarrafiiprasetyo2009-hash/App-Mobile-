@@ -363,7 +363,9 @@ export default function App() {
       console.warn('Supabase integration error:', err);
       setItems([]);
     } finally {
-      setIsSyncing(false);
+      setTimeout(() => {
+        setIsSyncing(false);
+      }, 150);
     }
   };
 
