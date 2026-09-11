@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight, Edit3, Save, X, Tag, Plus, UserPlus, Phone, BookOpen, MessageCircle } from 'lucide-react';
+import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight, Edit3, Save, X, Tag, Plus, UserPlus, Phone, BookOpen, MessageCircle, BarChart3, ShieldAlert, Gift, PhoneCall, Sparkles, TrendingUp, Layers, Package } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 export default function AdminDashboard({ 
@@ -143,160 +143,210 @@ export default function AdminDashboard({
         </div>
       )}
 
-      {/* Admin Sub-Navigation Tabs - Clean & No Scrollbar */}
+      {/* Admin Sub-Navigation Tabs - Glassmorphism & Smooth Touch Scroll */}
       <div 
         className="no-scrollbar"
         style={{
           display: 'flex',
-          gap: '4px',
-          background: '#f1f5f9',
-          borderRadius: '14px',
-          padding: '4px',
-          marginBottom: '16px',
-          border: '1px solid #e2e8f0',
+          gap: '6px',
+          background: 'rgba(241, 245, 249, 0.95)',
+          backdropFilter: 'blur(12px)',
+          borderRadius: '16px',
+          padding: '6px',
+          marginBottom: '18px',
+          border: '1px solid rgba(226, 232, 240, 0.8)',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.03)',
           width: '100%',
-          overflowX: 'auto'
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch'
         }}
       >
         <button
           onClick={() => setAdminTab('overview')}
           style={{
-            flex: 1,
-            padding: '7px 4px',
-            borderRadius: '10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '12px',
             border: 'none',
-            background: adminTab === 'overview' ? '#2563eb' : 'transparent',
-            color: adminTab === 'overview' ? 'white' : '#475569',
-            fontWeight: 800,
-            fontSize: '10.5px',
+            background: adminTab === 'overview' ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'transparent',
+            color: adminTab === 'overview' ? '#ffffff' : '#64748b',
+            fontWeight: adminTab === 'overview' ? 700 : 600,
+            fontSize: '12px',
             cursor: 'pointer',
-            textAlign: 'center',
             whiteSpace: 'nowrap',
-            transition: 'all 0.2s ease'
+            boxShadow: adminTab === 'overview' ? '0 4px 12px rgba(37, 99, 235, 0.25)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            flexShrink: 0
           }}
         >
-          📊 Stats
+          <BarChart3 size={15} color={adminTab === 'overview' ? '#ffffff' : '#64748b'} />
+          <span>Stats</span>
         </button>
 
         <button
           onClick={() => setAdminTab('moderation')}
           style={{
-            flex: 1.2,
-            padding: '7px 4px',
-            borderRadius: '10px',
-            background: adminTab === 'moderation' ? '#dc2626' : (pendingApprovalItems.length > 0 ? '#fef2f2' : 'transparent'),
-            color: adminTab === 'moderation' ? 'white' : (pendingApprovalItems.length > 0 ? '#dc2626' : '#475569'),
-            fontWeight: 800,
-            fontSize: '10.5px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '12px',
+            background: adminTab === 'moderation' ? 'linear-gradient(135deg, #dc2626, #b91c1c)' : (pendingApprovalItems.length > 0 ? '#fef2f2' : 'transparent'),
+            color: adminTab === 'moderation' ? '#ffffff' : (pendingApprovalItems.length > 0 ? '#dc2626' : '#64748b'),
+            fontWeight: adminTab === 'moderation' ? 700 : 600,
+            fontSize: '12px',
             cursor: 'pointer',
-            textAlign: 'center',
             whiteSpace: 'nowrap',
-            position: 'relative',
             border: pendingApprovalItems.length > 0 && adminTab !== 'moderation' ? '1px solid #fecaca' : 'none',
-            transition: 'all 0.2s ease'
+            boxShadow: adminTab === 'moderation' ? '0 4px 12px rgba(220, 38, 38, 0.25)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            flexShrink: 0
           }}
         >
-          🛡️ Moderasi ({pendingApprovalItems.length})
+          <ShieldAlert size={15} color={adminTab === 'moderation' ? '#ffffff' : (pendingApprovalItems.length > 0 ? '#dc2626' : '#64748b')} />
+          <span>Moderasi</span>
+          {pendingApprovalItems.length > 0 && (
+            <span style={{
+              background: adminTab === 'moderation' ? '#ffffff' : '#dc2626',
+              color: adminTab === 'moderation' ? '#dc2626' : '#ffffff',
+              fontSize: '10px',
+              fontWeight: 800,
+              padding: '1px 6px',
+              borderRadius: '99px',
+              marginLeft: '2px'
+            }}>
+              {pendingApprovalItems.length}
+            </span>
+          )}
         </button>
 
         <button
           onClick={() => setAdminTab('reports')}
           style={{
-            flex: 1,
-            padding: '7px 4px',
-            borderRadius: '10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '12px',
             border: 'none',
-            background: adminTab === 'reports' ? '#2563eb' : 'transparent',
-            color: adminTab === 'reports' ? 'white' : '#475569',
-            fontWeight: 800,
-            fontSize: '10.5px',
+            background: adminTab === 'reports' ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'transparent',
+            color: adminTab === 'reports' ? '#ffffff' : '#64748b',
+            fontWeight: adminTab === 'reports' ? 700 : 600,
+            fontSize: '12px',
             cursor: 'pointer',
-            textAlign: 'center',
             whiteSpace: 'nowrap',
-            transition: 'all 0.2s ease'
+            boxShadow: adminTab === 'reports' ? '0 4px 12px rgba(37, 99, 235, 0.25)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            flexShrink: 0
           }}
         >
-          📋 Kelola
+          <FileText size={15} color={adminTab === 'reports' ? '#ffffff' : '#64748b'} />
+          <span>Kelola</span>
         </button>
 
         <button
           onClick={() => setAdminTab('pending')}
           style={{
-            flex: 1,
-            padding: '7px 4px',
-            borderRadius: '10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '12px',
             border: 'none',
-            background: adminTab === 'pending' ? '#2563eb' : 'transparent',
-            color: adminTab === 'pending' ? 'white' : '#475569',
-            fontWeight: 800,
-            fontSize: '10.5px',
+            background: adminTab === 'pending' ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'transparent',
+            color: adminTab === 'pending' ? '#ffffff' : '#64748b',
+            fontWeight: adminTab === 'pending' ? 700 : 600,
+            fontSize: '12px',
             cursor: 'pointer',
-            textAlign: 'center',
             whiteSpace: 'nowrap',
-            transition: 'all 0.2s ease'
+            boxShadow: adminTab === 'pending' ? '0 4px 12px rgba(37, 99, 235, 0.25)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            flexShrink: 0
           }}
         >
-          ⏳ Pending
+          <Clock size={15} color={adminTab === 'pending' ? '#ffffff' : '#64748b'} />
+          <span>Pending</span>
         </button>
 
         <button
           onClick={() => setAdminTab('auction-manage')}
           style={{
-            flex: 1,
-            padding: '7px 4px',
-            borderRadius: '10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '12px',
             border: 'none',
-            background: adminTab === 'auction-manage' ? '#d97706' : 'transparent',
-            color: adminTab === 'auction-manage' ? 'white' : '#475569',
-            fontWeight: 800,
-            fontSize: '10.5px',
+            background: adminTab === 'auction-manage' ? 'linear-gradient(135deg, #d97706, #b45309)' : 'transparent',
+            color: adminTab === 'auction-manage' ? '#ffffff' : '#64748b',
+            fontWeight: adminTab === 'auction-manage' ? 700 : 600,
+            fontSize: '12px',
             cursor: 'pointer',
-            textAlign: 'center',
             whiteSpace: 'nowrap',
-            transition: 'all 0.2s ease'
+            boxShadow: adminTab === 'auction-manage' ? '0 4px 12px rgba(217, 119, 6, 0.25)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            flexShrink: 0
           }}
         >
-          🔨 Lelang
+          <Gavel size={15} color={adminTab === 'auction-manage' ? '#ffffff' : '#64748b'} />
+          <span>Lelang</span>
         </button>
 
         <button
           onClick={() => setAdminTab('contacts')}
           style={{
-            flex: 1,
-            padding: '7px 4px',
-            borderRadius: '10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '12px',
             border: 'none',
-            background: adminTab === 'contacts' ? '#7c3aed' : 'transparent',
-            color: adminTab === 'contacts' ? 'white' : '#475569',
-            fontWeight: 800,
-            fontSize: '10.5px',
+            background: adminTab === 'contacts' ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : 'transparent',
+            color: adminTab === 'contacts' ? '#ffffff' : '#64748b',
+            fontWeight: adminTab === 'contacts' ? 700 : 600,
+            fontSize: '12px',
             cursor: 'pointer',
-            textAlign: 'center',
             whiteSpace: 'nowrap',
-            transition: 'all 0.2s ease'
+            boxShadow: adminTab === 'contacts' ? '0 4px 12px rgba(124, 58, 237, 0.25)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            flexShrink: 0
           }}
         >
-          💬 Kontak
+          <PhoneCall size={15} color={adminTab === 'contacts' ? '#ffffff' : '#64748b'} />
+          <span>Kontak</span>
         </button>
 
         <button
           onClick={() => setAdminTab('points-manage')}
           style={{
-            flex: 1,
-            padding: '7px 4px',
-            borderRadius: '10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '12px',
             border: 'none',
-            background: adminTab === 'points-manage' ? '#4f46e5' : 'transparent',
-            color: adminTab === 'points-manage' ? 'white' : '#475569',
-            fontWeight: 800,
-            fontSize: '10.5px',
+            background: adminTab === 'points-manage' ? 'linear-gradient(135deg, #4f46e5, #4338ca)' : 'transparent',
+            color: adminTab === 'points-manage' ? '#ffffff' : '#64748b',
+            fontWeight: adminTab === 'points-manage' ? 700 : 600,
+            fontSize: '12px',
             cursor: 'pointer',
-            textAlign: 'center',
             whiteSpace: 'nowrap',
-            transition: 'all 0.2s ease'
+            boxShadow: adminTab === 'points-manage' ? '0 4px 12px rgba(79, 70, 229, 0.25)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            flexShrink: 0
           }}
         >
-          🎁 Klaim Poin
+          <Gift size={15} color={adminTab === 'points-manage' ? '#ffffff' : '#64748b'} />
+          <span>Klaim Poin</span>
         </button>
       </div>
 
@@ -639,26 +689,66 @@ export default function AdminDashboard({
       {/* OVERVIEW TAB */}
       {adminTab === 'overview' && (
         <>
-          {/* Stat Cards Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
-            <div className="glass-card" style={{ padding: '10px 4px', textAlign: 'center', background: '#fef2f2', borderColor: '#fecaca' }}>
-              <span style={{ fontSize: '18px', fontWeight: 800, color: '#dc2626' }}>{totalHilang}</span>
-              <span style={{ fontSize: '10px', color: '#991b1b', display: 'block', marginTop: '2px', fontWeight: 700 }}>Hilang</span>
+          {/* Stat Cards Grid - Executive Gradient Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '18px' }}>
+            <div 
+              className="glass-card" 
+              style={{ 
+                padding: '12px 8px', 
+                textAlign: 'center', 
+                background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', 
+                borderColor: '#fecaca',
+                borderRadius: '16px',
+                boxShadow: '0 4px 12px rgba(220, 38, 38, 0.06)'
+              }}
+            >
+              <div style={{ fontSize: '20px', fontWeight: 900, color: '#dc2626', lineHeight: 1 }}>{totalHilang}</div>
+              <span style={{ fontSize: '11px', color: '#991b1b', display: 'block', marginTop: '4px', fontWeight: 700 }}>🔴 Hilang</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '10px 4px', textAlign: 'center', background: '#ecfdf5', borderColor: '#a7f3d0' }}>
-              <span style={{ fontSize: '18px', fontWeight: 800, color: '#059669' }}>{totalDitemukan}</span>
-              <span style={{ fontSize: '10px', color: '#065f46', display: 'block', marginTop: '2px', fontWeight: 700 }}>Ditemukan</span>
+            <div 
+              className="glass-card" 
+              style={{ 
+                padding: '12px 8px', 
+                textAlign: 'center', 
+                background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', 
+                borderColor: '#a7f3d0',
+                borderRadius: '16px',
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.06)'
+              }}
+            >
+              <div style={{ fontSize: '20px', fontWeight: 900, color: '#059669', lineHeight: 1 }}>{totalDitemukan}</div>
+              <span style={{ fontSize: '11px', color: '#065f46', display: 'block', marginTop: '4px', fontWeight: 700 }}>🟢 Ditemukan</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '10px 4px', textAlign: 'center', background: '#eff6ff', borderColor: '#bfdbfe' }}>
-              <span style={{ fontSize: '18px', fontWeight: 800, color: '#2563eb' }}>{totalSelesai}</span>
-              <span style={{ fontSize: '10px', color: '#1e40af', display: 'block', marginTop: '2px', fontWeight: 700 }}>Selesai</span>
+            <div 
+              className="glass-card" 
+              style={{ 
+                padding: '12px 8px', 
+                textAlign: 'center', 
+                background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', 
+                borderColor: '#bfdbfe',
+                borderRadius: '16px',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.06)'
+              }}
+            >
+              <div style={{ fontSize: '20px', fontWeight: 900, color: '#2563eb', lineHeight: 1 }}>{totalSelesai}</div>
+              <span style={{ fontSize: '11px', color: '#1e40af', display: 'block', marginTop: '4px', fontWeight: 700 }}>🔵 Selesai</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '10px 4px', textAlign: 'center', background: '#fffbeb', borderColor: '#fde68a' }}>
-              <span style={{ fontSize: '18px', fontWeight: 800, color: '#b45309' }}>{totalLelang}</span>
-              <span style={{ fontSize: '10px', color: '#92400e', display: 'block', marginTop: '2px', fontWeight: 700 }}>Lelang</span>
+            <div 
+              className="glass-card" 
+              style={{ 
+                padding: '12px 8px', 
+                textAlign: 'center', 
+                background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', 
+                borderColor: '#fde68a',
+                borderRadius: '16px',
+                boxShadow: '0 4px 12px rgba(217, 119, 6, 0.06)'
+              }}
+            >
+              <div style={{ fontSize: '20px', fontWeight: 900, color: '#b45309', lineHeight: 1 }}>{totalLelang}</div>
+              <span style={{ fontSize: '11px', color: '#92400e', display: 'block', marginTop: '4px', fontWeight: 700 }}>🔨 Lelang</span>
             </div>
           </div>
 
