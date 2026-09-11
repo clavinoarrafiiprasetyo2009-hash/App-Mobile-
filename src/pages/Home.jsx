@@ -185,7 +185,7 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
           }}>
             SiTemu Sekolah 🏫
           </div>
-          {isSyncing && (
+          {isSyncing ? (
             <div style={{
               background: 'rgba(255, 255, 255, 0.2)',
               color: '#93c5fd',
@@ -198,7 +198,21 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
               gap: '5px'
             }}>
               <Loader2 size={11} className="spin" />
-              <span>Memuat Supabase...</span>
+              <span>Sinkronisasi...</span>
+            </div>
+          ) : (
+            <div style={{
+              background: 'rgba(34, 197, 94, 0.25)',
+              color: '#86efac',
+              padding: '3px 10px',
+              borderRadius: '20px',
+              fontSize: '10px',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <span>🟢 Online</span>
             </div>
           )}
         </div>

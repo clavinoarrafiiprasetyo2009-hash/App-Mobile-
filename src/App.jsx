@@ -220,43 +220,33 @@ export default function App() {
     try {
       setIsSyncing(true);
 
+      // Mobile network safety timeout: Force isSyncing = false after max 3.5s so loading badge never hangs
+      const syncTimeout = setTimeout(() => {
+        setIsSyncing(false);
+      }, 3500);
+
+      // Fetch all tables concurrently in a single parallel roundtrip
+      const [itemsRes, profRes, redRes] = await Promise.allSettled([
+        supabase.from('items').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*'),
+        supabase.from('point_redemptions').select('*').order('created_at', { ascending: false })
+      ]);
+
+      clearTimeout(syncTimeout);
+
       let data = null;
       let profilesData = [];
       let redemptionsData = [];
 
-      // Query items table safely
-      try {
-        const { data: itemsRes, error: itemsErr } = await supabase
-          .from('items')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (itemsErr) {
-          console.warn('Supabase items fetch status:', itemsErr.message || itemsErr);
-        } else if (itemsRes) {
-          data = itemsRes;
-        }
-      } catch (e) {
-        console.warn('Items fetch exception:', e);
+      if (itemsRes.status === 'fulfilled' && itemsRes.value?.data) {
+        data = itemsRes.value.data;
       }
-
-      // Query profiles table safely
-      try {
-        const { data: profRes } = await supabase.from('profiles').select('*');
-        if (profRes) profilesData = profRes;
-      } catch (e) {}
-
-      // Query point_redemptions table safely
-      try {
-        const { data: redRes } = await supabase
-          .from('point_redemptions')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (redRes && Array.isArray(redRes) && redRes.length > 0) {
-          redemptionsData = redRes;
-        }
-      } catch (e) {}
+      if (profRes.status === 'fulfilled' && profRes.value?.data) {
+        profilesData = profRes.value.data;
+      }
+      if (redRes.status === 'fulfilled' && redRes.value?.data && Array.isArray(redRes.value.data)) {
+        redemptionsData = redRes.value.data;
+      }
 
       if (redemptionsData.length > 0) {
         const mappedRedemptions = redemptionsData.map(r => ({
@@ -288,7 +278,7 @@ export default function App() {
 
           // Smart match reporter real phone from profiles table if missing
           let matchedPhone = dbItem.reporter_phone;
-          if (!matchedPhone && profilesData && dbItem.reporter_name) {
+          if (!matchedPhone && profilesData.length > 0 && dbItem.reporter_name) {
             const cleanName = dbItem.reporter_name.split(' (')[0].trim().toLowerCase();
             const matchedProfile = profilesData.find(p => p.name && (p.name.trim().toLowerCase() === cleanName || cleanName.includes(p.name.trim().toLowerCase())));
             if (matchedProfile && matchedProfile.phone) {
