@@ -96,7 +96,7 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
       </div>
 
       {/* Top Welcome Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', position: 'relative', zIndex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingTop: '6px', position: 'relative', zIndex: 1 }}>
         <div>
           <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Selamat Datang ☀️</span>
           <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>
