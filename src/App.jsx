@@ -797,35 +797,6 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Permanent Fixed Top Header Bar for Home View */}
-      {currentUser && activeTab === 'home' && (
-        <div style={{
-          padding: 'max(14px, calc(10px + env(safe-area-inset-top, 0px))) 16px 12px 16px',
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          zIndex: 30,
-          boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
-          flexShrink: 0
-        }}>
-          <div>
-            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Selamat Datang ☀️</span>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
-              Halo, {currentUser?.name?.split(' ')[0] || 'Siswa'}! 👋
-            </h2>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img
-              src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'}
-              alt="Avatar"
-              style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2.5px solid #2563eb', objectFit: 'cover' }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Main App Content View */}
       <div className="main-content" ref={mainContentRef}>
         {!hasSeenOnboarding ? (

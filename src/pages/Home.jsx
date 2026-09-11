@@ -95,7 +95,44 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
         <BookOpen size={48} color="#7c3aed" />
       </div>
 
+      {/* Top Welcome Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div>
+          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Selamat Datang ☀️</span>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>
+            Halo, {currentUser?.name?.split(' ')[0] || 'Siswa'}! 👋
+          </h2>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Interactive Bell Notification Toggle */}
+          <button
+            onClick={handleToggleNotification}
+            title={notifState === 'granted' ? 'Notifikasi PWA Aktif (Klik untuk Tes)' : 'Aktifkan Notifikasi HP'}
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              border: notifState === 'granted' ? '1.5px solid #2563eb' : '1.5px solid #cbd5e1',
+              background: notifState === 'granted' ? '#eff6ff' : '#ffffff',
+              color: notifState === 'granted' ? '#2563eb' : '#64748b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: notifState === 'granted' ? '0 4px 12px rgba(37, 99, 235, 0.2)' : '0 2px 6px rgba(0, 0, 0, 0.05)',
+              transition: 'all 0.25s ease'
+            }}
+          >
+            {notifState === 'granted' ? <BellRing size={20} className="animate-pulse" /> : <Bell size={20} />}
+          </button>
 
+          <img
+            src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'}
+            alt="Avatar"
+            style={{ width: '44px', height: '44px', borderRadius: '50%', border: '2.5px solid #2563eb', objectFit: 'cover' }}
+          />
+        </div>
+      </div>
 
       {/* Notification Toast Alert */}
       {showNotifToast && (
