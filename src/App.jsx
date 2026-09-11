@@ -51,7 +51,7 @@ export default function App() {
 
   // Version-based Cache Purge: Wipe legacy dummy cache & unregister old SW on mobile
   useEffect(() => {
-    const CURRENT_APP_VERSION = 'v4.0_live_clean';
+    const CURRENT_APP_VERSION = 'v5.0_nodummy_live';
     try {
       const savedVer = localStorage.getItem('sitemu_cache_ver');
       if (savedVer !== CURRENT_APP_VERSION) {
@@ -85,7 +85,7 @@ export default function App() {
     }
   }, [activeTab]);
 
-  // Initialize items from localStorage cache first; default to INITIAL_ITEMS if empty so feeds are never blank
+  // Initialize items from localStorage cache if available, else start with empty array []
   const [items, setItems] = useState(() => {
     try {
       const cached = localStorage.getItem('sitemu_items_cache');
@@ -94,7 +94,7 @@ export default function App() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
-    return INITIAL_ITEMS;
+    return [];
   });
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -356,12 +356,12 @@ export default function App() {
           localStorage.setItem('sitemu_items_cache', JSON.stringify(mappedItems));
         } catch (e) {}
       } else {
-        // Fallback: If Supabase DB table has 0 items, populate default items so feeds are never empty!
-        setItems(prev => (prev && prev.length > 0) ? prev : INITIAL_ITEMS);
+        // Fallback: If Supabase DB table has 0 items, keep items as empty array []
+        setItems([]);
       }
     } catch (err) {
       console.warn('Supabase integration error:', err);
-      setItems(prev => (prev && prev.length > 0) ? prev : INITIAL_ITEMS);
+      setItems([]);
     } finally {
       setIsSyncing(false);
     }
