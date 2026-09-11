@@ -8,6 +8,8 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
       console.log('ServiceWorker registered successfully with scope:', reg.scope);
+      // Force update check on every page load to guarantee fresh assets on mobile
+      reg.update();
     }).catch(err => {
       console.warn('ServiceWorker registration failed:', err);
     });

@@ -1,12 +1,18 @@
 // Service Worker SiTemu Sekolah (PWA & Web Push Notifications)
-const CACHE_NAME = 'sitemu-cache-v1';
+const CACHE_NAME = 'sitemu-cache-v3-auto-purge';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
 // Handle Background Push Notifications
