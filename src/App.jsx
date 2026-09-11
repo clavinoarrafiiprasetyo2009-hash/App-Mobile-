@@ -49,6 +49,35 @@ export default function App() {
     return 'home';
   });
 
+  // Version-based Cache Purge: Wipe legacy dummy cache & unregister old SW on mobile
+  useEffect(() => {
+    const CURRENT_APP_VERSION = 'v4.0_live_clean';
+    try {
+      const savedVer = localStorage.getItem('sitemu_cache_ver');
+      if (savedVer !== CURRENT_APP_VERSION) {
+        localStorage.removeItem('sitemu_items_cache');
+        localStorage.removeItem('sitemu_point_redemptions');
+        localStorage.setItem('sitemu_cache_ver', CURRENT_APP_VERSION);
+      }
+    } catch (e) {}
+
+    // Unregister any active ServiceWorker on mobile to prevent SW asset caching
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      }).catch(() => {});
+      if (window.caches) {
+        caches.keys().then(names => {
+          for (let name of names) {
+            caches.delete(name);
+          }
+        }).catch(() => {});
+      }
+    }
+  }, []);
+
   // Auto-scroll main content container to top whenever activeTab changes
   useEffect(() => {
     if (mainContentRef.current) {

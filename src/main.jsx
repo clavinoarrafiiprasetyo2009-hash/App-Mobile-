@@ -3,16 +3,14 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
-// Register Service Worker for PWA & Web Push Notifications
+// Unregister Service Workers to guarantee mobile browsers always fetch fresh live code
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
-      console.log('ServiceWorker registered successfully with scope:', reg.scope);
-      // Force update check on every page load to guarantee fresh assets on mobile
-      reg.update();
-    }).catch(err => {
-      console.warn('ServiceWorker registration failed:', err);
-    });
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (let registration of registrations) {
+      registration.unregister();
+    }
+  }).catch(err => {
+    console.warn('ServiceWorker unregister warning:', err);
   });
 }
 
