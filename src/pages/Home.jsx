@@ -4,7 +4,7 @@ import CountdownTimer from '../components/CountdownTimer';
 import { CATEGORIES } from '../mockData';
 import { requestNotificationPermission, getNotificationPermissionState, sendLocalNotification } from '../utils/notificationHelper';
 
-export default function Home({ items, currentUser, isSyncing, onSelectItem, onNavigateReport }) {
+export default function Home({ items, currentUser, isSyncing, initialLoadDone = true, onSelectItem, onNavigateReport }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'hilang' | 'ditemukan'
@@ -342,7 +342,7 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
 
       {/* Feed Items List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {isSyncing ? (
+        {!initialLoadDone || isSyncing ? (
           /* Shimmer Skeleton Placeholder Cards during loading / sync */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{

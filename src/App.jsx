@@ -99,6 +99,7 @@ export default function App() {
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSyncing, setIsSyncing] = useState(true);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   // Contacts state for 3 Guru BK & 2 SP2K
   const [contacts, setContacts] = useState(() => {
@@ -363,6 +364,7 @@ export default function App() {
       console.warn('Supabase integration error:', err);
       setItems([]);
     } finally {
+      setInitialLoadDone(true);
       setTimeout(() => {
         setIsSyncing(false);
       }, 150);
@@ -817,6 +819,7 @@ export default function App() {
                 items={items}
                 currentUser={currentUser}
                 isSyncing={isSyncing}
+                initialLoadDone={initialLoadDone}
                 onSelectItem={handleSelectItem}
                 onNavigateReport={() => setActiveTab('report-form')}
               />
