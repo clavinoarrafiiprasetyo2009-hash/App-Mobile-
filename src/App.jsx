@@ -852,6 +852,7 @@ export default function App() {
                   contacts={contacts}
                   pointRedemptions={pointRedemptions}
                   rewardsCatalog={rewardsCatalog}
+                  isSyncing={isSyncing}
                   onAddRewardItem={handleAddRewardItem}
                   onUpdateRewardStock={handleUpdateRewardStock}
                   onUpdateRewardDetails={handleUpdateRewardDetails}
