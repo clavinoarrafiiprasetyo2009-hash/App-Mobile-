@@ -342,11 +342,24 @@ export default function Home({ items, currentUser, isSyncing, onSelectItem, onNa
 
       {/* Feed Items List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {isSyncing && items.length === 0 ? (
-          /* Shimmer Skeleton Placeholder Cards during first-time loading */
+        {isSyncing && filteredItems.length === 0 ? (
+          /* Shimmer Skeleton Placeholder Cards during loading / sync */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '14px',
+              padding: '12px',
+              textAlign: 'center',
+              color: '#1e40af'
+            }}>
+              <p style={{ fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '2px' }}>
+                <Loader2 size={16} className="spin" color="#2563eb" /> Menyinkronkan Laporan Real-time...
+              </p>
+              <p style={{ fontSize: '11px', color: '#3b82f6' }}>Memuat barang hilang & ditemukan terbaru dari Supabase</p>
+            </div>
             {[1, 2, 3].map((n) => (
-              <div key={n} className="glass-card animate-pulse" style={{ display: 'flex', gap: '12px', padding: '12px', background: '#ffffff', borderColor: '#e2e8f0' }}>
+              <div key={n} className="glass-card animate-pulse" style={{ display: 'flex', gap: '12px', padding: '12px', background: '#ffffff', borderColor: '#cbd5e1' }}>
                 <div style={{ width: '84px', height: '84px', borderRadius: '12px', background: '#e2e8f0' }}></div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
