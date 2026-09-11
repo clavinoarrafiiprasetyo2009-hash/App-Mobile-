@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import BottomNav from './components/BottomNav';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -17,6 +17,14 @@ import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import { notifyNewReport, notifyStatusChange } from './utils/notificationHelper';
 
 export default function App() {
+  const mainContentRef = useRef(null);
+
+  // Auto-scroll main content container to top whenever activeTab changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
   // First-time Onboarding state
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(() => {
     try {
@@ -760,7 +768,7 @@ export default function App() {
   return (
     <div className="app-container">
       {/* Main App Content View */}
-      <div className="main-content">
+      <div className="main-content" ref={mainContentRef}>
         {!hasSeenOnboarding ? (
           <WelcomeOnboarding onGetStarted={() => {
             setHasSeenOnboarding(true);
