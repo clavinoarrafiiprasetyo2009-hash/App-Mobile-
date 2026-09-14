@@ -32,7 +32,7 @@ export default function Home({ items, currentUser, isSyncing, initialLoadDone = 
     // Public Home feed ONLY shows published reports approved by Admin BK!
     const isPublished = item.isPublished !== false;
     // Items moved to Auction belong in the Lelang page, not mixed in Home main feed!
-    const isNotAuction = item.status !== 'lelang' && !item.isAuction && (!item.specialNotes || !item.specialNotes.toLowerCase().includes('harga lelang:'));
+    const isNotAuction = item.status !== 'lelang' && !item.isAuction;
 
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||

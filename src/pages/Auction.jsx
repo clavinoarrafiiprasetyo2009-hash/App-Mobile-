@@ -14,10 +14,10 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
 
   // Filter items in auction status ONLY if NOT expired yet (Active Auctions)
   const auctionItems = items.filter(item => {
-    const isAuction = item.status === 'lelang' || 
-                      item.isAuction || 
-                      (item.specialNotes && item.specialNotes.toLowerCase().includes('harga lelang:')) ||
-                      (item.title && item.title.toLowerCase().includes('lelang'));
+    if (item.status === 'selesai' || item.status === 'hilang' || item.status === 'ditemukan' || item.status === 'points') {
+      return false;
+    }
+    const isAuction = item.status === 'lelang' || item.isAuction;
     return isAuction && !isAuctionExpired(item);
   });
 

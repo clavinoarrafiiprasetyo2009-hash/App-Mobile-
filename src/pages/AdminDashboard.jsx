@@ -111,7 +111,7 @@ export default function AdminDashboard({
             status: editingItem.status,
             location: editingItem.location,
             description: editingItem.description,
-            special_notes: editingItem.auctionPrice ? `Harga Lelang: Rp ${Number(editingItem.auctionPrice).toLocaleString('id-ID')}` : undefined
+            special_notes: editingItem.status === 'lelang' && editingItem.auctionPrice ? `Harga Lelang: Rp ${Number(editingItem.auctionPrice).toLocaleString('id-ID')}` : ''
           })
           .eq('id', editingItem.id);
       } catch (err) {

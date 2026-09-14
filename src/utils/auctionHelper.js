@@ -1,7 +1,7 @@
 // Helper utility for managing Auction Expiration & Transfer to Points catalog
 
 export function isAuctionExpired(item, durationDays = 7) {
-  if (!item) return false;
+  if (!item || item.status === 'selesai' || item.status === 'hilang' || item.status === 'ditemukan') return false;
 
   // Explicit status check: if marked as points or expired
   if (item.status === 'points' || item.status === 'expired_lelang' || item.isAuctionExpired === true) {
@@ -9,10 +9,7 @@ export function isAuctionExpired(item, durationDays = 7) {
   }
 
   // Check if item belongs to auction
-  const isAuctionItem = item.status === 'lelang' || 
-                        item.isAuction || 
-                        (item.specialNotes && item.specialNotes.toLowerCase().includes('harga lelang:')) ||
-                        (item.title && item.title.toLowerCase().includes('lelang'));
+  const isAuctionItem = item.status === 'lelang' || item.isAuction;
 
   if (!isAuctionItem) return false;
 

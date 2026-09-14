@@ -63,6 +63,7 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
   // Dynamically map ONLY truly EXPIRED auction items (>7 days) or status='points'/'expired_lelang' items to reward catalog
   const expiredAuctionRewards = items
     .filter(i => {
+      if (i.status === 'selesai' || i.status === 'hilang' || i.status === 'ditemukan') return false;
       const isAuctionItem = i.status === 'lelang' || 
                             i.status === 'points' || 
                             i.status === 'expired_lelang' || 

@@ -325,7 +325,8 @@ export default function App() {
             }
           }
 
-          const isAuctionItem = dbItem.status === 'lelang' || isLelangNotes;
+          const isExplicitNonAuction = dbItem.status === 'selesai' || dbItem.status === 'hilang' || dbItem.status === 'ditemukan' || dbItem.status === 'points';
+          const isAuctionItem = !isExplicitNonAuction && (dbItem.status === 'lelang' || isLelangNotes);
           // Items in auction or without explicit is_published=false are published!
           const isPublished = isAuctionItem || dbItem.is_published !== false;
 
@@ -333,11 +334,11 @@ export default function App() {
             id: dbItem.id,
             title: dbItem.title,
             category: dbItem.category,
-            status: isAuctionItem ? 'lelang' : dbItem.status,
+            status: isExplicitNonAuction ? dbItem.status : (isAuctionItem ? 'lelang' : dbItem.status),
             location: dbItem.location,
             date: dbItem.date_reported || 'Baru saja',
             description: dbItem.description,
-            specialNotes: dbItem.special_notes || '',
+            specialNotes: isExplicitNonAuction ? '' : (dbItem.special_notes || ''),
             auctionPrice: price || 15000,
             isAuction: isAuctionItem,
             isPublished: isPublished,
@@ -438,6 +439,8 @@ export default function App() {
       localStorage.setItem(`sitemu_auction_start_${itemId}`, Date.now().toString());
     } catch (e) {}
 
+    const isNowAuction = newStatus === 'lelang';
+
     setItems(prevItems => {
       const nextItems = prevItems.map(item => {
         if (item.id === itemId) {
@@ -446,7 +449,8 @@ export default function App() {
             status: newStatus,
             auctionPrice: price || item.auctionPrice || 15000,
             auctionStartDate: item.auctionStartDate || nowIso,
-            isAuction: newStatus === 'lelang'
+            isAuction: isNowAuction,
+            specialNotes: isNowAuction ? `Harga Lelang: Rp ${Number(price || item.auctionPrice || 15000).toLocaleString('id-ID')}` : ''
           };
         }
         return item;
@@ -459,9 +463,9 @@ export default function App() {
 
     try {
       const formattedPrice = price ? Number(price).toLocaleString('id-ID') : '15.000';
-      const notes = newStatus === 'lelang' 
+      const notes = isNowAuction 
         ? `Harga Lelang: Rp ${formattedPrice}`
-        : (targetItem?.specialNotes || '');
+        : '';
 
       // First try updating status & special_notes directly
       const { error } = await supabase
@@ -474,10 +478,9 @@ export default function App() {
 
       if (error) {
         console.warn('Status update warning, attempting fallback update:', error.message || error);
-        // Fallback: If DB constraint rejects status='lelang', update special_notes so item remains in Lelang on refresh
         await supabase
           .from('items')
-          .update({ special_notes: notes })
+          .update({ status: newStatus, special_notes: notes })
           .eq('id', itemId);
       }
     } catch (err) {
@@ -486,6 +489,7 @@ export default function App() {
   };
 
   const handleUpdateItemDetails = async (itemId, updatedData) => {
+    const isNowAuction = updatedData.status === 'lelang';
     setItems(prevItems => {
       const nextItems = prevItems.map(item => {
         if (item.id === itemId) {
@@ -493,7 +497,8 @@ export default function App() {
             ...item,
             ...updatedData,
             auctionPrice: updatedData.auctionPrice || item.auctionPrice || 15000,
-            isAuction: updatedData.status === 'lelang' || Boolean(updatedData.auctionPrice)
+            isAuction: isNowAuction,
+            specialNotes: isNowAuction ? (updatedData.specialNotes || `Harga Lelang: Rp ${Number(updatedData.auctionPrice || 15000).toLocaleString('id-ID')}`) : ''
           };
         }
         return item;
@@ -510,11 +515,11 @@ export default function App() {
         category: updatedData.category,
         status: updatedData.status,
         location: updatedData.location,
-        description: updatedData.description
+        description: updatedData.description,
+        special_notes: isNowAuction 
+          ? (updatedData.specialNotes || `Harga Lelang: Rp ${Number(updatedData.auctionPrice || 15000).toLocaleString('id-ID')}`)
+          : ''
       };
-      if (updatedData.auctionPrice) {
-        updatePayload.special_notes = `Harga Lelang: Rp ${Number(updatedData.auctionPrice).toLocaleString('id-ID')}`;
-      }
       await supabase
         .from('items')
         .update(updatePayload)
