@@ -41,6 +41,7 @@ export default function AdminDashboard({
   // Price state for each item being set for auction
   const [auctionPrices, setAuctionPrices] = useState({});
   const [toastMessage, setToastMessage] = useState('');
+  const [deleteConfirmState, setDeleteConfirmState] = useState(null);
 
   // Edit Item Modal State (Admin edit nama, harga, jenis/kategori, status, lokasi)
   const [editingItem, setEditingItem] = useState(null);
@@ -445,11 +446,14 @@ export default function AdminDashboard({
                         {onDeleteClaim && (
                           <button
                             onClick={() => {
-                              if (window.confirm(`Hapus pengajuan klaim "${item.rewardTitle}" untuk ${item.studentName}?`)) {
-                                onDeleteClaim(item.claimCode);
-                                setToastMessage(`🗑️ Pengajuan klaim "${item.rewardTitle}" berhasil dihapus!`);
-                                setTimeout(() => setToastMessage(''), 3500);
-                              }
+                              setDeleteConfirmState({
+                                title: `Hapus pengajuan klaim "${item.rewardTitle}" untuk ${item.studentName}?`,
+                                onConfirm: () => {
+                                  onDeleteClaim(item.claimCode);
+                                  setToastMessage(`🗑️ Pengajuan klaim "${item.rewardTitle}" berhasil dihapus!`);
+                                  setTimeout(() => setToastMessage(''), 3500);
+                                }
+                              });
                             }}
                             title="Hapus Pengajuan Klaim Ini"
                             style={{
@@ -543,11 +547,14 @@ export default function AdminDashboard({
                     {onDeleteReward && (
                       <button
                         onClick={() => {
-                          if (window.confirm(`Hapus item hadiah "${rew.title}" dari katalog secara permanen?`)) {
-                            onDeleteReward(rew.id);
-                            setToastMessage(`🗑️ Item hadiah "${rew.title}" berhasil dihapus dari katalog!`);
-                            setTimeout(() => setToastMessage(''), 3500);
-                          }
+                          setDeleteConfirmState({
+                            title: `Hapus item hadiah "${rew.title}" dari katalog secara permanen?`,
+                            onConfirm: () => {
+                              onDeleteReward(rew.id);
+                              setToastMessage(`🗑️ Item hadiah "${rew.title}" berhasil dihapus dari katalog!`);
+                              setTimeout(() => setToastMessage(''), 3500);
+                            }
+                          });
                         }}
                         title="Hapus Item Hadiah Dari Katalog"
                         style={{
@@ -717,11 +724,14 @@ export default function AdminDashboard({
 
                     <button
                       onClick={() => {
-                        if (window.confirm(`Tolak dan hapus laporan "${item.title}"?`)) {
-                          if (onRejectPublication) onRejectPublication(item.id);
-                          setToastMessage(`❌ Laporan "${item.title}" ditolak & dihapus.`);
-                          setTimeout(() => setToastMessage(''), 3500);
-                        }
+                        setDeleteConfirmState({
+                          title: `Tolak dan hapus laporan "${item.title}"?`,
+                          onConfirm: () => {
+                            if (onRejectPublication) onRejectPublication(item.id);
+                            setToastMessage(`❌ Laporan "${item.title}" ditolak & dihapus.`);
+                            setTimeout(() => setToastMessage(''), 3500);
+                          }
+                        });
                       }}
                       style={{
                         background: '#fef2f2',
@@ -847,11 +857,14 @@ export default function AdminDashboard({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (window.confirm(`Hapus laporan "${item.title}" ini secara permanen?`)) {
-                          onDeleteItem(item.id);
-                          setToastMessage(`🗑️ Laporan "${item.title}" berhasil dihapus!`);
-                          setTimeout(() => setToastMessage(''), 3500);
-                        }
+                        setDeleteConfirmState({
+                          title: `Hapus laporan "${item.title}" ini secara permanen?`,
+                          onConfirm: () => {
+                            onDeleteItem(item.id);
+                            setToastMessage(`🗑️ Laporan "${item.title}" berhasil dihapus!`);
+                            setTimeout(() => setToastMessage(''), 3500);
+                          }
+                        });
                       }}
                       title="Hapus Laporan Ini"
                       style={{
@@ -947,11 +960,14 @@ export default function AdminDashboard({
                     {onDeleteItem && (
                       <button
                         onClick={() => {
-                          if (window.confirm(`Hapus barang temuan "${item.title}" ini secara permanen?`)) {
-                            onDeleteItem(item.id);
-                            setToastMessage(`🗑️ Barang "${item.title}" berhasil dihapus!`);
-                            setTimeout(() => setToastMessage(''), 3500);
-                          }
+                          setDeleteConfirmState({
+                            title: `Hapus barang temuan "${item.title}" ini secara permanen?`,
+                            onConfirm: () => {
+                              onDeleteItem(item.id);
+                              setToastMessage(`🗑️ Barang "${item.title}" berhasil dihapus!`);
+                              setTimeout(() => setToastMessage(''), 3500);
+                            }
+                          });
                         }}
                         title="Hapus Barang Ini"
                         style={{
@@ -1081,11 +1097,14 @@ export default function AdminDashboard({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (window.confirm(`Hapus laporan "${item.title}" ini secara permanen?`)) {
-                          onDeleteItem(item.id);
-                          setToastMessage(`🗑️ Laporan "${item.title}" berhasil dihapus!`);
-                          setTimeout(() => setToastMessage(''), 3500);
-                        }
+                        setDeleteConfirmState({
+                          title: `Hapus laporan "${item.title}" ini secara permanen?`,
+                          onConfirm: () => {
+                            onDeleteItem(item.id);
+                            setToastMessage(`🗑️ Laporan "${item.title}" berhasil dihapus!`);
+                            setTimeout(() => setToastMessage(''), 3500);
+                          }
+                        });
                       }}
                       title="Hapus Laporan Ini"
                       style={{
@@ -1555,12 +1574,15 @@ export default function AdminDashboard({
                   <button
                     type="button"
                     onClick={() => {
-                      if (window.confirm(`Hapus laporan "${editingItem.title}" ini secara permanen?`)) {
-                        onDeleteItem(editingItem.id);
-                        setEditingItem(null);
-                        setToastMessage(`🗑️ Laporan "${editingItem.title}" berhasil dihapus!`);
-                        setTimeout(() => setToastMessage(''), 3500);
-                      }
+                      setDeleteConfirmState({
+                        title: `Hapus laporan "${editingItem.title}" ini secara permanen?`,
+                        onConfirm: () => {
+                          onDeleteItem(editingItem.id);
+                          setEditingItem(null);
+                          setToastMessage(`🗑️ Laporan "${editingItem.title}" berhasil dihapus!`);
+                          setTimeout(() => setToastMessage(''), 3500);
+                        }
+                      });
                     }}
                     style={{
                       padding: '10px 12px',
@@ -1953,6 +1975,106 @@ export default function AdminDashboard({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {deleteConfirmState && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '24px',
+            padding: '28px 24px 24px',
+            maxWidth: '360px',
+            width: '100%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            textAlign: 'center',
+            border: '1px solid rgba(226, 232, 240, 0.8)',
+            position: 'relative'
+          }}>
+            {/* Red Trash Icon Badge */}
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #fef2f2, #fee2e2)',
+              border: '1px solid #fecaca',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              boxShadow: '0 4px 12px rgba(220, 38, 38, 0.15)'
+            }}>
+              <Trash2 size={28} color="#dc2626" />
+            </div>
+
+            <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a', marginBottom: '8px', lineHeight: 1.3 }}>
+              Konfirmasi Hapus
+            </h3>
+            <p style={{ fontSize: '13px', color: '#475569', marginBottom: '16px', lineHeight: 1.5 }}>
+              {deleteConfirmState.title}
+            </p>
+            
+            <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '22px', background: '#f8fafc', padding: '8px 12px', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
+              ⚠️ Tindakan ini permanen & tidak dapat dibatalkan.
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmState(null)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '14px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const action = deleteConfirmState.onConfirm;
+                  setDeleteConfirmState(null);
+                  if (action) action();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+                  color: '#ffffff',
+                  fontWeight: 800,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)'
+                }}
+              >
+                Ya, Hapus
+              </button>
+            </div>
           </div>
         </div>
       )}
