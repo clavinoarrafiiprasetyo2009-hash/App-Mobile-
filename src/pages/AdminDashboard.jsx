@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight, Edit3, Save, X, Tag, Plus, UserPlus, Phone, BookOpen, MessageCircle, BarChart3, ShieldAlert, Gift, PhoneCall, Sparkles, TrendingUp, Layers, Package } from 'lucide-react';
+import { Clock, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, FileText, Users, ChevronRight, Gavel, DollarSign, ArrowRight, Edit3, Save, X, Tag, Plus, UserPlus, Phone, BookOpen, MessageCircle, BarChart3, ShieldAlert, Gift, PhoneCall, Sparkles, TrendingUp, Layers, Package, Trash2 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 export default function AdminDashboard({ 
@@ -12,6 +12,9 @@ export default function AdminDashboard({
   onUpdateRewardStock,
   onUpdateRewardDetails,
   onCompleteClaim,
+  onDeleteItem,
+  onDeleteClaim,
+  onDeleteReward,
   onSelectItem, 
   onUpdateItemStatus, 
   onUpdateItemDetails, 
@@ -416,27 +419,58 @@ export default function AdminDashboard({
                         Kode Klaim: <span style={{ background: '#e0e7ff', padding: '2px 8px', borderRadius: '6px', letterSpacing: '1px' }}>{item.claimCode}</span>
                       </div>
 
-                      {item.status !== 'claimed' && onCompleteClaim && (
-                        <button
-                          onClick={() => {
-                            onCompleteClaim(item.claimCode);
-                            setToastMessage(`✅ Klaim ${item.rewardTitle} untuk ${item.studentName} ditandai selesai!`);
-                            setTimeout(() => setToastMessage(''), 3500);
-                          }}
-                          style={{
-                            background: '#059669',
-                            color: 'white',
-                            border: 'none',
-                            padding: '6px 12px',
-                            borderRadius: '8px',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Tandai Selesai / Diserahkan
-                        </button>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {item.status !== 'claimed' && onCompleteClaim && (
+                          <button
+                            onClick={() => {
+                              onCompleteClaim(item.claimCode);
+                              setToastMessage(`✅ Klaim ${item.rewardTitle} untuk ${item.studentName} ditandai selesai!`);
+                              setTimeout(() => setToastMessage(''), 3500);
+                            }}
+                            style={{
+                              background: '#059669',
+                              color: 'white',
+                              border: 'none',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Tandai Selesai
+                          </button>
+                        )}
+
+                        {onDeleteClaim && (
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Hapus pengajuan klaim "${item.rewardTitle}" untuk ${item.studentName}?`)) {
+                                onDeleteClaim(item.claimCode);
+                                setToastMessage(`🗑️ Pengajuan klaim "${item.rewardTitle}" berhasil dihapus!`);
+                                setTimeout(() => setToastMessage(''), 3500);
+                              }
+                            }}
+                            title="Hapus Pengajuan Klaim Ini"
+                            style={{
+                              background: '#fef2f2',
+                              border: '1px solid #fecaca',
+                              color: '#dc2626',
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <Trash2 size={13} />
+                            Hapus
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))
@@ -505,6 +539,34 @@ export default function AdminDashboard({
                     >
                       <Edit3 size={13} /> Edit
                     </button>
+
+                    {onDeleteReward && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Hapus item hadiah "${rew.title}" dari katalog secara permanen?`)) {
+                            onDeleteReward(rew.id);
+                            setToastMessage(`🗑️ Item hadiah "${rew.title}" berhasil dihapus dari katalog!`);
+                            setTimeout(() => setToastMessage(''), 3500);
+                          }
+                        }}
+                        title="Hapus Item Hadiah Dari Katalog"
+                        style={{
+                          background: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          color: '#dc2626',
+                          padding: '5px 8px',
+                          borderRadius: '8px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <button
@@ -780,7 +842,36 @@ export default function AdminDashboard({
                     Pelapor: {item.reporter.name} • {item.location}
                   </span>
                 </div>
-                <ChevronRight size={16} color="#94a3b8" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {onDeleteItem && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Hapus laporan "${item.title}" ini secara permanen?`)) {
+                          onDeleteItem(item.id);
+                          setToastMessage(`🗑️ Laporan "${item.title}" berhasil dihapus!`);
+                          setTimeout(() => setToastMessage(''), 3500);
+                        }
+                      }}
+                      title="Hapus Laporan Ini"
+                      style={{
+                        background: '#fef2f2',
+                        border: '1px solid #fecaca',
+                        color: '#dc2626',
+                        padding: '5px 8px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                  <ChevronRight size={16} color="#94a3b8" />
+                </div>
               </div>
             ))}
           </div>
@@ -852,6 +943,35 @@ export default function AdminDashboard({
                       <Gavel size={14} />
                       Pindah ke Lelang
                     </button>
+
+                    {onDeleteItem && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Hapus barang temuan "${item.title}" ini secara permanen?`)) {
+                            onDeleteItem(item.id);
+                            setToastMessage(`🗑️ Barang "${item.title}" berhasil dihapus!`);
+                            setTimeout(() => setToastMessage(''), 3500);
+                          }
+                        }}
+                        title="Hapus Barang Ini"
+                        style={{
+                          background: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          color: '#dc2626',
+                          padding: '8px 12px',
+                          borderRadius: '10px',
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Trash2 size={14} />
+                        Hapus
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -928,33 +1048,65 @@ export default function AdminDashboard({
                   </span>
                 </div>
 
-                {/* Tombol Edit Barang khusus Admin BK */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditingItem({
-                      ...item,
-                      auctionPrice: item.auctionPrice || 15000
-                    });
-                  }}
-                  style={{
-                    background: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    color: '#2563eb',
-                    padding: '6px 10px',
-                    borderRadius: '8px',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    flexShrink: 0
-                  }}
-                >
-                  <Edit3 size={13} />
-                  Edit
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                  {/* Tombol Edit Barang khusus Admin BK */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingItem({
+                        ...item,
+                        auctionPrice: item.auctionPrice || 15000
+                      });
+                    }}
+                    style={{
+                      background: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      color: '#2563eb',
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Edit3 size={13} />
+                    Edit
+                  </button>
+
+                  {/* Tombol Hapus Barang khusus Admin BK */}
+                  {onDeleteItem && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Hapus laporan "${item.title}" ini secara permanen?`)) {
+                          onDeleteItem(item.id);
+                          setToastMessage(`🗑️ Laporan "${item.title}" berhasil dihapus!`);
+                          setTimeout(() => setToastMessage(''), 3500);
+                        }
+                      }}
+                      title="Hapus Laporan Ini"
+                      style={{
+                        background: '#fef2f2',
+                        border: '1px solid #fecaca',
+                        color: '#dc2626',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <Trash2 size={13} />
+                      Hapus
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -1399,6 +1551,35 @@ export default function AdminDashboard({
 
               {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                {onDeleteItem && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Hapus laporan "${editingItem.title}" ini secara permanen?`)) {
+                        onDeleteItem(editingItem.id);
+                        setEditingItem(null);
+                        setToastMessage(`🗑️ Laporan "${editingItem.title}" berhasil dihapus!`);
+                        setTimeout(() => setToastMessage(''), 3500);
+                      }
+                    }}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: '12px',
+                      border: '1px solid #fecaca',
+                      background: '#fef2f2',
+                      color: '#dc2626',
+                      fontWeight: 800,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Trash2 size={15} />
+                    Hapus
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setEditingItem(null)}
@@ -1432,7 +1613,7 @@ export default function AdminDashboard({
                   }}
                 >
                   <Save size={15} />
-                  Simpan Perubahan
+                  Simpan
                 </button>
               </div>
             </form>

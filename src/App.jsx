@@ -797,6 +797,54 @@ export default function App() {
     }
   };
 
+  const handleDeleteItem = async (itemId) => {
+    setItems(prevItems => {
+      const nextItems = prevItems.filter(item => item.id !== itemId);
+      try {
+        localStorage.setItem('sitemu_items_cache', JSON.stringify(nextItems));
+      } catch (e) {}
+      return nextItems;
+    });
+
+    try {
+      await supabase
+        .from('items')
+        .delete()
+        .eq('id', itemId);
+    } catch (err) {
+      console.warn('Delete item error:', err);
+    }
+  };
+
+  const handleDeleteClaim = async (claimCode) => {
+    setPointRedemptions(prev => {
+      const nextRedemptions = prev.filter(item => item.claimCode !== claimCode && item.id !== claimCode);
+      try {
+        localStorage.setItem('sitemu_point_redemptions', JSON.stringify(nextRedemptions));
+      } catch (e) {}
+      return nextRedemptions;
+    });
+
+    try {
+      await supabase
+        .from('point_redemptions')
+        .delete()
+        .eq('claim_code', claimCode);
+    } catch (err) {
+      console.warn('Delete claim error:', err);
+    }
+  };
+
+  const handleDeleteReward = (rewardId) => {
+    setRewardsCatalog(prev => {
+      const nextCatalog = prev.filter(r => r.id !== rewardId);
+      try {
+        localStorage.setItem('sitemu_rewards_catalog', JSON.stringify(nextCatalog));
+      } catch (e) {}
+      return nextCatalog;
+    });
+  };
+
   const isGuru = currentUser?.role === 'guru';
 
   return (
@@ -900,6 +948,9 @@ export default function App() {
                   onUpdateRewardStock={handleUpdateRewardStock}
                   onUpdateRewardDetails={handleUpdateRewardDetails}
                   onCompleteClaim={handleCompleteClaim}
+                  onDeleteItem={handleDeleteItem}
+                  onDeleteClaim={handleDeleteClaim}
+                  onDeleteReward={handleDeleteReward}
                   onSelectItem={handleSelectItem}
                   onUpdateItemStatus={handleUpdateItemStatus}
                   onUpdateItemDetails={handleUpdateItemDetails}

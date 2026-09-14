@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { Gift, Award, Sparkles, CheckCircle2, Clock, ShieldCheck, ArrowRight, Tag, HelpCircle, Coins, ChevronRight, ShoppingBag } from 'lucide-react';
+import { isAuctionExpired } from '../utils/auctionHelper';
 
 const INITIAL_REWARDS = [
   {
@@ -59,9 +60,15 @@ export default function Points({ currentUser, userPoints = 0, pointHistory = [],
 
   const catalogSource = rewardsCatalog.length > 0 ? rewardsCatalog : INITIAL_REWARDS;
 
-  // Dynamically map expired auction items (>7 days) or status='points'/'lelang' items to reward catalog
+  // Dynamically map ONLY truly EXPIRED auction items (>7 days) or status='points'/'expired_lelang' items to reward catalog
   const expiredAuctionRewards = items
-    .filter(i => i.status === 'lelang' || i.status === 'points' || i.isAuction)
+    .filter(i => {
+      const isAuctionItem = i.status === 'lelang' || 
+                            i.status === 'points' || 
+                            i.status === 'expired_lelang' || 
+                            i.isAuction;
+      return isAuctionItem && isAuctionExpired(i);
+    })
     .map((item, idx) => ({
       id: `rew-auc-${item.id || idx}`,
       title: `[Lelang Excluded] ${item.title}`,

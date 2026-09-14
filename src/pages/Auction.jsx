@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import CountdownTimer from '../components/CountdownTimer';
-import { Gavel, Tag, Clock, MessageCircle, AlertCircle, ShieldCheck, Edit3, Save, X } from 'lucide-react';
+import { Gavel, Tag, Clock, MessageCircle, AlertCircle, ShieldCheck, Edit3, Save, X, ArrowRightLeft } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { isAuctionExpired } from '../utils/auctionHelper';
 
 export default function Auction({ items, currentUser, onSelectItem, onUpdateItemDetails, onOpenContactModal }) {
   const [filterCategory, setFilterCategory] = useState('all');
@@ -11,17 +12,45 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
 
   const isGuru = currentUser?.role === 'guru';
 
-  // Filter items in auction status or having auction price/notes
-  const auctionItems = items.filter(item => 
-    item.status === 'lelang' || 
-    item.isAuction || 
-    (item.specialNotes && item.specialNotes.toLowerCase().includes('harga lelang:')) ||
-    (item.title && item.title.toLowerCase().includes('lelang'))
-  );
+  // Filter items in auction status ONLY if NOT expired yet (Active Auctions)
+  const auctionItems = items.filter(item => {
+    const isAuction = item.status === 'lelang' || 
+                      item.isAuction || 
+                      (item.specialNotes && item.specialNotes.toLowerCase().includes('harga lelang:')) ||
+                      (item.title && item.title.toLowerCase().includes('lelang'));
+    return isAuction && !isAuctionExpired(item);
+  });
 
   const filteredAuctionItems = auctionItems.filter(item => {
     return filterCategory === 'all' || item.category === filterCategory;
   });
+
+  const handleTransferToPoints = async (item) => {
+    const updatedData = {
+      status: 'points',
+      isAuctionExpired: true,
+      specialNotes: 'Barang lelang telah melewati 7 hari (Dipindahkan ke Katalog Hadiah Poin)'
+    };
+
+    if (onUpdateItemDetails) {
+      onUpdateItemDetails(item.id, updatedData);
+    } else {
+      try {
+        await supabase
+          .from('items')
+          .update({
+            status: 'points',
+            special_notes: updatedData.specialNotes
+          })
+          .eq('id', item.id);
+      } catch (err) {
+        console.warn('Transfer to points error:', err);
+      }
+    }
+
+    setToastMessage(`📦 "${item.title}" berhasil dipindahkan dari Lelang ke Katalog Hadiah Poin!`);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
@@ -179,28 +208,50 @@ export default function Auction({ items, currentUser, onSelectItem, onUpdateItem
                       <div style={{ display: 'flex', gap: '6px' }}>
                         {/* Tombol Edit Barang Lelang khusus Admin Guru BK */}
                         {isGuru && (
-                          <button
-                            onClick={() => setEditingItem({
-                              ...item,
-                              auctionPrice: item.auctionPrice || 15000
-                            })}
-                            style={{
-                              background: '#eff6ff',
-                              border: '1px solid #bfdbfe',
-                              color: '#2563eb',
-                              padding: '6px 10px',
-                              borderRadius: '10px',
-                              fontSize: '11px',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            <Edit3 size={13} />
-                            Edit
-                          </button>
+                          <>
+                            <button
+                              onClick={() => setEditingItem({
+                                ...item,
+                                auctionPrice: item.auctionPrice || 15000
+                              })}
+                              style={{
+                                background: '#eff6ff',
+                                border: '1px solid #bfdbfe',
+                                color: '#2563eb',
+                                padding: '6px 10px',
+                                borderRadius: '10px',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Edit3 size={13} />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleTransferToPoints(item)}
+                              title="Pindahkan barang lelang ini ke Katalog Hadiah Poin (Simulasi Waktu Habis)"
+                              style={{
+                                background: '#fef3c7',
+                                border: '1px solid #fde68a',
+                                color: '#b45309',
+                                padding: '6px 10px',
+                                borderRadius: '10px',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <ArrowRightLeft size={13} />
+                              Pindah Poin
+                            </button>
+                          </>
                         )}
                         <button
                           onClick={() => onOpenContactModal && onOpenContactModal(item)}
